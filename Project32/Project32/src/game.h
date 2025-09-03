@@ -41,6 +41,4 @@ namespace Game {
     float GetYaw();
     float GetPitch();
     bool IsOnGround();
-    //const MovementState& GetStats();
-    //void ResetStats();
 }

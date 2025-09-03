@@ -1,3 +1,4 @@
+#include "common.h"
 #include "game.h"
 #include "input.h"
 #include "renderer.h"
@@ -6,9 +7,12 @@
 
 namespace Game {
     MovementState _stats;
-    Camera _camera;
+    CameraManager manager;
 
-    glm::vec3 _position = glm::vec3(4.0f, 2.0f, 4.0f);
+    int cam1;
+	int cam2;
+
+	glm::vec3 _position = glm::vec3(4.0f, 2.0f, 4.0f);
     glm::vec3 _velocity = glm::vec3(0.0f);
     float _yaw = -45.0f;
     float _pitch = -15.0f;
@@ -127,7 +131,12 @@ namespace Game {
     }
 
     void UpdateCamera() {
-        _camera.SetTransform(Transform{ _position, glm::vec3(_pitch, _yaw, 0.0f), glm::vec3(1.0f) });
+        auto& camera = manager.GetCamera(cam1);
+		camera.SetTransform(Transform{
+            .position = _position,
+            .rotation = glm::vec3(_pitch, _yaw, 0.0f),
+            .scale = glm::vec3(1.0f)
+			});
 	}
 
     void UpdateStats(float deltaTime) {
@@ -143,6 +152,7 @@ namespace Game {
 
     void Init() {
         Input::Init();
+
         std::cout << "=== Quake Movement Controls ===" << std::endl;
         std::cout << "WASD: Move" << std::endl;
         std::cout << "Space: Jump" << std::endl;
@@ -153,6 +163,14 @@ namespace Game {
         std::cout << "H: Toggle HUD" << std::endl;
         std::cout << "ESC: Exit" << std::endl;
         std::cout << "===============================" << std::endl;
+
+        cam1 = manager.AddCamera("Main");
+        cam2 = manager.AddCamera("Secondary", Transform{
+            .position = glm::vec3(0.0f, 10.0f, 0.0f),
+            .rotation = glm::vec3(-90.0f, 0.0f, 0.0f),
+            .scale = glm::vec3(1.0f)
+			});
+        manager.SetActiveCamera(cam1); // Find a better place for this
     }
 
     void Update(float deltaTime) {
@@ -183,6 +201,7 @@ namespace Game {
         if (Input::KeyDown(GLFW_KEY_S)) wishdir -= GetFront();
         if (Input::KeyDown(GLFW_KEY_A)) wishdir -= GetRight();
         if (Input::KeyDown(GLFW_KEY_D)) wishdir += GetRight();
+		if (Input::KeyPressed(GLFW_KEY_V)) manager.SetToNextCamera();
 
         // Normalize to XZ plane for movement
         wishdir.y = 0.0f;
@@ -241,7 +260,7 @@ namespace Game {
     }
 
     glm::mat4 GetViewMatrix() {
-		return _camera.GetViewMatrix();
+		return manager.GetActiveCamera().GetViewMatrix();
     }
 
     glm::vec3 GetPosition() { return _position; }
@@ -255,10 +274,4 @@ namespace Game {
     float GetYaw() { return _yaw; }
     float GetPitch() { return _pitch; }
     bool IsOnGround() { return _onGround; }
-
-    //const MovementState& GetStats() { return _stats; }
-
-    //void ResetStats() {
-    //    _stats = MovementState();
-    //}
 }

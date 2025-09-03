@@ -11,9 +11,6 @@ int main() {
         Renderer::Init();
 
         FrameTimer timer;
-
-        std::cout << "Game initialized successfully!" << std::endl;
-
         while (GL::WindowIsOpen()) {
             timer.Update();
             float deltaTime = timer.GetDeltaTime();

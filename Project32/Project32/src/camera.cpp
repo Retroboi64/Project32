@@ -1,13 +1,5 @@
 #include "camera.h"
 
-const Transform& Camera::GetTransform() const {
-	return _transform;
-}
-
-void Camera::SetTransform(const Transform& transform) {
-	_transform = transform;
-}
-
 glm::mat4 Camera::GetViewMatrix() const {
 	glm::vec3 front;
 	front.x = cos(glm::radians(_transform.rotation.y)) * cos(glm::radians(_transform.rotation.x));

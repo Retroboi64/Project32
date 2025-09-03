@@ -12,6 +12,7 @@ namespace Renderer {
     std::unique_ptr<Shader> _skyboxShader;
     std::unique_ptr<Mesh> _quadMesh;
     std::unique_ptr<Mesh> _cubeMesh;
+	std::unique_ptr<Mesh> _cylinderMesh;
 	std::unique_ptr<Skybox> _skybox;
     bool _wireframeMode = false;
     bool _showDebugInfo = true;
@@ -92,6 +93,66 @@ namespace Renderer {
         _cubeMesh->LoadData(cubeVertices, cubeIndices);
     }
 
+    void CreateCylinder(unsigned int segments = 32, float height = 2.0f, float radius = 0.5f) {
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+
+        for (unsigned int i = 0; i <= segments; ++i) {
+            float theta = (float)i / segments * glm::two_pi<float>();
+            float x = cos(theta);
+            float z = sin(theta);
+            glm::vec3 normal = glm::normalize(glm::vec3(x, 0.0f, z));
+
+            glm::vec3 posTop = glm::vec3(x * radius, height * 0.5f, z * radius);
+            glm::vec3 posBottom = glm::vec3(x * radius, -height * 0.5f, z * radius);
+
+            glm::vec2 uvTop = glm::vec2((float)i / segments, 0.0f);
+            glm::vec2 uvBottom = glm::vec2((float)i / segments, 1.0f);
+
+            vertices.push_back({ posTop, normal, uvTop });
+            vertices.push_back({ posBottom, normal, uvBottom });
+        }
+
+        for (unsigned int i = 0; i < segments; ++i) {
+            unsigned int top1 = i * 2;
+            unsigned int bottom1 = top1 + 1;
+            unsigned int top2 = top1 + 2;
+            unsigned int bottom2 = top1 + 3;
+
+            indices.push_back(top1);
+            indices.push_back(bottom1);
+            indices.push_back(top2);
+
+            indices.push_back(top2);
+            indices.push_back(bottom1);
+            indices.push_back(bottom2);
+        }
+
+        unsigned int centerTopIndex = vertices.size();
+        vertices.push_back({ glm::vec3(0, height * 0.5f, 0), glm::vec3(0, 1, 0), glm::vec2(0.5f, 0.5f) });
+
+        unsigned int centerBottomIndex = vertices.size();
+        vertices.push_back({ glm::vec3(0, -height * 0.5f, 0), glm::vec3(0, -1, 0), glm::vec2(0.5f, 0.5f) });
+
+        for (unsigned int i = 0; i < segments; ++i) {
+            unsigned int curr = i * 2;
+            unsigned int next = (i < segments - 1) ? curr + 2 : 0;
+
+            indices.push_back(centerTopIndex);
+            indices.push_back(next);
+            indices.push_back(curr);
+
+            indices.push_back(centerBottomIndex);
+            indices.push_back(curr + 1);
+            indices.push_back(next + 1);
+        }
+
+        _cylinderMesh = std::make_unique<Mesh>();
+        _cylinderMesh->LoadData(vertices, indices);
+    }
+
+
+
     void Init() {
         _solidColorShader = std::make_unique<Shader>();
         _wireframeShader = std::make_unique<Shader>();
@@ -103,6 +164,7 @@ namespace Renderer {
 
         CreateQuad();
         CreateCube();
+		CreateCylinder();
 
         _skybox = std::make_unique<Skybox>();
         std::vector<std::string> faces = {
@@ -159,14 +221,26 @@ namespace Renderer {
             glm::vec3(15, 4, -7)
         };
 
+        const glm::vec3 cubeColor(0.8f, 0.3f, 0.2f);
         for (const auto& pos : cubePositions) {
-            Transform cube;
-            cube.position = pos;
-            cube.scale = glm::vec3(2.0f);
+            Transform cube{
+			    .position = pos,
+			    .scale = glm::vec3(2.0f)
+            };
             _solidColorShader->SetMat4("model", cube.ToMatrix());
-            _solidColorShader->SetVec3("color", glm::vec3(0.8f, 0.3f, 0.2f));
+            _solidColorShader->SetVec3("color", cubeColor);
             _cubeMesh->Draw();
         }
+
+		// Soon To Be Playermodel For Testing
+		const glm::vec3 cylinderColor(0.2f, 0.3f, 0.8f);
+        Transform cylinder{
+            .position = glm::vec3(0.0f, 1.0f, -2.0f),
+            .scale = glm::vec3(1.0f),
+        };
+        _solidColorShader->SetMat4("model", cylinder.ToMatrix());
+        _solidColorShader->SetVec3("color", cylinderColor);
+        _cylinderMesh->Draw();
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -199,9 +273,10 @@ namespace Renderer {
         float speed = Game::GetSpeed();
         float speedBarLength = std::min(speed * 8.0f, 300.0f);
 
-        Transform speedBar;
-        speedBar.position = glm::vec3(50.0f, windowSize.y - 50.0f, 0.0f);
-        speedBar.scale = glm::vec3(speedBarLength, 15.0f, 1.0f);
+        Transform speedBar{
+			.position = glm::vec3(50.0f, windowSize.y - 50.0f, 0.0f),
+            .scale = glm::vec3(speedBarLength, 15.0f, 1.0f),
+        };
         _wireframeShader->SetMat4("model", speedBar.ToMatrix());
 
         glm::vec3 speedColor = speed > 15.0f ? glm::vec3(1.0f, 0.2f, 0.2f) :
