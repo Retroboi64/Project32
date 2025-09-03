@@ -8,7 +8,7 @@ Mesh::~Mesh() {
 }
 
 void Mesh::LoadData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) {
-    _indexCount = indices.size();
+    _indexCount = static_cast<GLuint>(indices.size());
 
     glGenVertexArrays(1, &_VAO);
     glGenBuffers(1, &_VBO);

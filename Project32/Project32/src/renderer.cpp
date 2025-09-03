@@ -1,6 +1,7 @@
 #include "renderer.h"
 #include "common.h"
 #include "shader.h"
+#include "skybox.h"
 #include "mesh.h"
 #include "game.h"
 #include "GL.h"
@@ -8,8 +9,10 @@
 namespace Renderer {
     std::unique_ptr<Shader> _solidColorShader;
     std::unique_ptr<Shader> _wireframeShader;
+    std::unique_ptr<Shader> _skyboxShader;
     std::unique_ptr<Mesh> _quadMesh;
     std::unique_ptr<Mesh> _cubeMesh;
+	std::unique_ptr<Skybox> _skybox;
     bool _wireframeMode = false;
     bool _showDebugInfo = true;
 
@@ -25,7 +28,6 @@ namespace Renderer {
         _quadMesh = std::make_unique<Mesh>();
         _quadMesh->LoadData(vertices, indices);
     }
-
 
     void CreateCube() {
         std::vector<Vertex> vertices;
@@ -93,12 +95,20 @@ namespace Renderer {
     void Init() {
         _solidColorShader = std::make_unique<Shader>();
         _wireframeShader = std::make_unique<Shader>();
+		_skyboxShader = std::make_unique<Shader>();
 
         _solidColorShader->Load("solidcolor.vert", "solidcolor.frag");
         _wireframeShader->Load("solidcolor.vert", "wireframe.frag");
+        _skyboxShader->Load("skybox.vert", "skybox.frag");
 
         CreateQuad();
         CreateCube();
+
+        _skybox = std::make_unique<Skybox>();
+        std::vector<std::string> faces = {
+            "res/skybox/right.jpg", "res/skybox/left.jpg", "res/skybox/top.jpg", "res/skybox/bottom.jpg", "res/skybox/front.jpg", "res/skybox/back.jpg"
+        };
+        _skybox->Load(faces);
     }
 
     void RenderFrame() {
@@ -111,6 +121,8 @@ namespace Renderer {
         glm::mat4 view = Game::GetViewMatrix();
         glm::vec3 playerPos = Game::GetPosition();
         glm::vec3 lightPos = glm::vec3(10.0f, 10.0f, 10.0f);
+
+        DrawSkybox(projection, view);
 
         _solidColorShader->Bind();
         _solidColorShader->SetMat4("projection", projection);
@@ -158,10 +170,20 @@ namespace Renderer {
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        // HUD elements
         if (_showDebugInfo) {
             DrawHUD();
         }
+    }
+
+    void DrawSkybox(const glm::mat4& projection, const glm::mat4& view) {
+        glm::mat4 skyboxView = glm::mat4(glm::mat3(view));
+
+        _skyboxShader->Bind();
+        _skyboxShader->SetMat4("view", skyboxView);
+        _skyboxShader->SetMat4("projection", projection);
+        _skyboxShader->SetInt("skybox", 0);
+
+        _skybox->Draw();
     }
 
     void DrawHUD() {

@@ -6,7 +6,7 @@
 class Mesh {
 private:
     GLuint _VAO = 0, _VBO = 0, _EBO = 0;
-    size_t _indexCount = 0;
+    GLuint _indexCount = 0;
 
 public:
     Mesh() = default;

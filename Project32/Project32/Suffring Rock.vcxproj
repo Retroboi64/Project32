@@ -26,7 +26,9 @@
     <ClCompile Include="src\mesh.cpp" />
     <ClCompile Include="src\renderer.cpp" />
     <ClCompile Include="src\shader.cpp" />
+    <ClCompile Include="src\skybox.cpp" />
     <ClCompile Include="vendor\glad\src\glad.c" />
+    <ClCompile Include="vendor\stb_image\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common.h" />
@@ -36,6 +38,7 @@
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\renderer.h" />
     <ClInclude Include="src\shader.h" />
+    <ClInclude Include="src\skybox.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -137,7 +140,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>vendor\glad\include;vendor\GLFW\include;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>vendor\stb_image;vendor\glad\include;vendor\GLFW\include;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
