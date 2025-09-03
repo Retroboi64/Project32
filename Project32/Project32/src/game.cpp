@@ -1,9 +1,13 @@
 #include "game.h"
 #include "input.h"
 #include "renderer.h"
+#include "camera.h"
 #include "GL.h"
 
 namespace Game {
+    MovementState _stats;
+    Camera _camera;
+
     glm::vec3 _position = glm::vec3(4.0f, 2.0f, 4.0f);
     glm::vec3 _velocity = glm::vec3(0.0f);
     float _yaw = -45.0f;
@@ -27,8 +31,6 @@ namespace Game {
     const float STRAFE_ACCEL = 1.2f;
     const float BUNNY_HOP_SPEED_RETAIN = 0.95f;
     const float COYOTE_TIME = 0.1f;
-
-    MovementState _stats;
 
     glm::vec3 GetFront() {
         glm::vec3 front;
@@ -123,6 +125,10 @@ namespace Game {
             }
         }
     }
+
+    void UpdateCamera() {
+        _camera.SetTransform(Transform{ _position, glm::vec3(_pitch, _yaw, 0.0f), glm::vec3(1.0f) });
+	}
 
     void UpdateStats(float deltaTime) {
         _stats.sessionTime += deltaTime;
@@ -231,11 +237,11 @@ namespace Game {
         }
 
         UpdateStats(deltaTime);
+		UpdateCamera();
     }
 
     glm::mat4 GetViewMatrix() {
-        glm::vec3 target = _position + GetFront();
-        return glm::lookAt(_position, target, glm::vec3(0.0f, 1.0f, 0.0f));
+		return _camera.GetViewMatrix();
     }
 
     glm::vec3 GetPosition() { return _position; }

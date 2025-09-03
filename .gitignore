@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Allow glfw/lib/Debug and Release to be tracked
+!glfw/lib/Debug/
+!glfw/lib/Release/
