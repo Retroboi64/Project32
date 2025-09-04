@@ -69,13 +69,15 @@ public:
     CameraManager() : _activeCameraIndex(0) {}
 
     int AddCamera(const std::string& name) {
+        int s = static_cast<int>(_cameras.size());
         _cameras.push_back(std::make_unique<Camera>(name));
-        return _cameras.size() - 1;
+        return s;
     }
 
     int AddCamera(const std::string& name, const Transform& transform) {
+		int s = static_cast<int>(_cameras.size());
         _cameras.push_back(std::make_unique<Camera>(name, transform));
-        return _cameras.size() - 1;
+        return s;
     }
 
     int CreateCamera(const std::string& name,
@@ -142,19 +144,21 @@ public:
     }
 
     void RemoveCamera(int index) {
-        if (index >= _cameras.size()) {
+        int s = static_cast<int>(_cameras.size());
+        if (index >= s) {
             return;
         }
 
         _cameras.erase(_cameras.begin() + index);
 
-        if (_activeCameraIndex >= _cameras.size() && !_cameras.empty()) {
-            _activeCameraIndex = _cameras.size() - 1;
+        if (_activeCameraIndex >= s && !_cameras.empty()) {
+            _activeCameraIndex = s - 1;
         }
     }
 
     bool RemoveCameraByName(const std::string& name) {
-        for (int i = 0; i < _cameras.size(); ++i) {
+        int s = static_cast<int>(_cameras.size());
+        for (int i = 0; i < s; ++i) {
             if (_cameras[i]->GetName() == name) {
                 RemoveCamera(i);
                 return true;
@@ -163,7 +167,7 @@ public:
         return false;
     }
 
-    int GetCameraCount() const { return _cameras.size(); }
+    int GetCameraCount() const { int s = static_cast<int>(_cameras.size()); return s; }
     bool HasCameras() const { return !_cameras.empty(); }
     int GetActiveCameraIndex() const { return _activeCameraIndex; }
 

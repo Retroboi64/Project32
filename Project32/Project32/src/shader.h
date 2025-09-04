@@ -19,4 +19,5 @@ public:
     void SetFloat(const std::string& name, float value);
     void SetInt(const std::string& name, int value);
     bool IsValid() const;
+	int GetID() const { return _ID; }
 };
