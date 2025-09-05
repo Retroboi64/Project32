@@ -13,7 +13,9 @@ namespace Renderer {
     std::unique_ptr<Mesh> _quadMesh;
     std::unique_ptr<Mesh> _cubeMesh;
 	std::unique_ptr<Mesh> _cylinderMesh;
-	std::unique_ptr<Skybox> _skybox;
+	std::unique_ptr<Mesh> _sphereMesh;
+	std::unique_ptr<Mesh> _capsuleMesh;
+    std::unique_ptr<Skybox> _skybox;
     bool _wireframeMode = false;
     bool _showDebugInfo = true;
 
@@ -128,10 +130,10 @@ namespace Renderer {
             indices.push_back(bottom2);
         }
 
-        unsigned int centerTopIndex = vertices.size();
+        unsigned int centerTopIndex = static_cast<unsigned int>(vertices.size());
         vertices.push_back({ glm::vec3(0, height * 0.5f, 0), glm::vec3(0, 1, 0), glm::vec2(0.5f, 0.5f) });
 
-        unsigned int centerBottomIndex = vertices.size();
+		unsigned int centerBottomIndex = static_cast<unsigned int>(vertices.size());
         vertices.push_back({ glm::vec3(0, -height * 0.5f, 0), glm::vec3(0, -1, 0), glm::vec2(0.5f, 0.5f) });
 
         for (unsigned int i = 0; i < segments; ++i) {
@@ -152,6 +154,200 @@ namespace Renderer {
     }
 
 
+    void CreateSphere(unsigned int latitudeSegments = 32, unsigned int longitudeSegments = 32, float radius = 1.0f) {
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+
+        for (unsigned int lat = 0; lat <= latitudeSegments; ++lat) {
+            float theta = (float)lat / latitudeSegments * glm::pi<float>(); // 0 to PI
+            float sinTheta = sin(theta);
+            float cosTheta = cos(theta);
+
+            for (unsigned int lon = 0; lon <= longitudeSegments; ++lon) {
+                float phi = (float)lon / longitudeSegments * glm::two_pi<float>(); // 0 to 2*PI
+                float sinPhi = sin(phi);
+                float cosPhi = cos(phi);
+
+                // Spherical to Cartesian coordinates
+                float x = sinTheta * cosPhi;
+                float y = cosTheta;
+                float z = sinTheta * sinPhi;
+
+                glm::vec3 position = glm::vec3(x * radius, y * radius, z * radius);
+                glm::vec3 normal = glm::normalize(glm::vec3(x, y, z));
+
+                vertices.push_back({ position, normal });
+            }
+        }
+
+        for (unsigned int lat = 0; lat < latitudeSegments; ++lat) {
+            for (unsigned int lon = 0; lon < longitudeSegments; ++lon) {
+                unsigned int first = lat * (longitudeSegments + 1) + lon;
+                unsigned int second = first + longitudeSegments + 1;
+
+                // First triangle
+                indices.push_back(first);
+                indices.push_back(second);
+                indices.push_back(first + 1);
+
+                // Second triangle
+                indices.push_back(second);
+                indices.push_back(second + 1);
+                indices.push_back(first + 1);
+            }
+        }
+
+        _sphereMesh = std::make_unique<Mesh>();
+        _sphereMesh->LoadData(vertices, indices);
+    }
+
+    void CreateCapsule(unsigned int segments = 16, unsigned int rings = 8, float height = 2.0f, float radius = 0.5f) {
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+
+        float cylinderHeight = height - 2.0f * radius; 
+        float halfCylinderHeight = cylinderHeight * 0.5f;
+
+        for (unsigned int i = 0; i <= segments; ++i) {
+            float theta = (float)i / segments * glm::two_pi<float>();
+            float x = cos(theta);
+            float z = sin(theta);
+
+            glm::vec3 normal = glm::normalize(glm::vec3(x, 0.0f, z));
+            glm::vec3 posTop = glm::vec3(x * radius, halfCylinderHeight, z * radius);
+            glm::vec3 posBottom = glm::vec3(x * radius, -halfCylinderHeight, z * radius);
+
+            vertices.push_back({ posTop, normal });
+            vertices.push_back({ posBottom, normal });
+        }
+
+        for (unsigned int i = 0; i < segments; ++i) {
+            unsigned int top1 = i * 2;
+            unsigned int bottom1 = top1 + 1;
+            unsigned int top2 = top1 + 2;
+            unsigned int bottom2 = top1 + 3;
+
+            // First triangle
+            indices.push_back(top1);
+            indices.push_back(bottom1);
+            indices.push_back(top2);
+
+            // Second triangle
+            indices.push_back(top2);
+            indices.push_back(bottom1);
+            indices.push_back(bottom2);
+        }
+
+		unsigned int topHemisphereStart = static_cast<unsigned int>(vertices.size());
+        for (unsigned int ring = 0; ring <= rings; ++ring) {
+            float phi = (float)ring / rings * (glm::pi<float>() * 0.5f); // 0 to PI/2
+            float sinPhi = sin(phi);
+            float cosPhi = cos(phi);
+            float y = halfCylinderHeight + radius * cosPhi;
+
+            for (unsigned int seg = 0; seg <= segments; ++seg) {
+                float theta = (float)seg / segments * glm::two_pi<float>();
+                float x = sinPhi * cos(theta);
+                float z = sinPhi * sin(theta);
+
+                glm::vec3 position = glm::vec3(x * radius, y, z * radius);
+                glm::vec3 normal = glm::normalize(glm::vec3(x, cosPhi, z));
+
+                vertices.push_back({ position, normal });
+            }
+        }
+
+		unsigned int bottomHemisphereStart = static_cast<unsigned int>(vertices.size());
+        for (unsigned int ring = 0; ring <= rings; ++ring) {
+            float phi = (float)ring / rings * (glm::pi<float>() * 0.5f); // 0 to PI/2
+            float sinPhi = sin(phi);
+            float cosPhi = cos(phi);
+            float y = -halfCylinderHeight - radius * cosPhi;
+
+            for (unsigned int seg = 0; seg <= segments; ++seg) {
+                float theta = (float)seg / segments * glm::two_pi<float>();
+                float x = sinPhi * cos(theta);
+                float z = sinPhi * sin(theta);
+
+                glm::vec3 position = glm::vec3(x * radius, y, z * radius);
+                glm::vec3 normal = glm::normalize(glm::vec3(x, -cosPhi, z));
+
+                vertices.push_back({ position, normal });
+            }
+        }
+
+        for (unsigned int ring = 0; ring < rings; ++ring) {
+            for (unsigned int seg = 0; seg < segments; ++seg) {
+                unsigned int curr = topHemisphereStart + ring * (segments + 1) + seg;
+                unsigned int next = curr + segments + 1;
+
+                // First triangle
+                indices.push_back(curr);
+                indices.push_back(next);
+                indices.push_back(curr + 1);
+
+                // Second triangle
+                indices.push_back(next);
+                indices.push_back(next + 1);
+                indices.push_back(curr + 1);
+            }
+        }
+
+        for (unsigned int ring = 0; ring < rings; ++ring) {
+            for (unsigned int seg = 0; seg < segments; ++seg) {
+                unsigned int curr = bottomHemisphereStart + ring * (segments + 1) + seg;
+                unsigned int next = curr + segments + 1;
+
+                // First triangle (reversed winding for bottom)
+                indices.push_back(curr);
+                indices.push_back(curr + 1);
+                indices.push_back(next);
+
+                // Second triangle (reversed winding for bottom)
+                indices.push_back(next);
+                indices.push_back(curr + 1);
+                indices.push_back(next + 1);
+            }
+        }
+
+        for (unsigned int i = 0; i < segments; ++i) {
+            unsigned int cylinderTop = i * 2;
+            unsigned int cylinderTopNext = cylinderTop + 2;
+            unsigned int hemisphereBase = topHemisphereStart + i;
+            unsigned int hemisphereBaseNext = topHemisphereStart + i + 1;
+
+            // Triangle 1
+            indices.push_back(cylinderTop);
+            indices.push_back(hemisphereBase);
+            indices.push_back(cylinderTopNext);
+
+            // Triangle 2
+            indices.push_back(cylinderTopNext);
+            indices.push_back(hemisphereBase);
+            indices.push_back(hemisphereBaseNext);
+        }
+
+        // Bottom connection
+        for (unsigned int i = 0; i < segments; ++i) {
+            unsigned int cylinderBottom = i * 2 + 1;
+            unsigned int cylinderBottomNext = cylinderBottom + 2;
+            unsigned int hemisphereBase = bottomHemisphereStart + i;
+            unsigned int hemisphereBaseNext = bottomHemisphereStart + i + 1;
+
+            // Triangle 1 (reversed for bottom)
+            indices.push_back(cylinderBottom);
+            indices.push_back(cylinderBottomNext);
+            indices.push_back(hemisphereBase);
+
+            // Triangle 2 (reversed for bottom)
+            indices.push_back(cylinderBottomNext);
+            indices.push_back(hemisphereBaseNext);
+            indices.push_back(hemisphereBase);
+        }
+
+        _capsuleMesh = std::make_unique<Mesh>();
+        _capsuleMesh->LoadData(vertices, indices);
+    }
 
     void Init() {
         _solidColorShader = std::make_unique<Shader>();
@@ -165,6 +361,8 @@ namespace Renderer {
         CreateQuad();
         CreateCube();
 		CreateCylinder();
+		CreateSphere();
+		CreateCapsule();
 
         _skybox = std::make_unique<Skybox>();
         std::vector<std::string> faces = {
@@ -233,14 +431,14 @@ namespace Renderer {
         }
 
 		// Soon To Be Playermodel For Testing
-		const glm::vec3 cylinderColor(0.2f, 0.3f, 0.8f);
-        Transform cylinder{
+		const glm::vec3 capsuleColor(0.2f, 0.3f, 0.8f);
+        Transform capsule{
             .position = glm::vec3(0.0f, 1.0f, -2.0f),
             .scale = glm::vec3(1.0f),
         };
-        _solidColorShader->SetMat4("model", cylinder.ToMatrix());
-        _solidColorShader->SetVec3("color", cylinderColor);
-        _cylinderMesh->Draw();
+        _solidColorShader->SetMat4("model", capsule.ToMatrix());
+        _solidColorShader->SetVec3("color", capsuleColor);
+		_capsuleMesh->Draw();
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
