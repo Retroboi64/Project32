@@ -14,6 +14,7 @@ class Player {
 private:
 	Camera _camera;
     MovementStats _stats;
+	Transform _transform;
 
     glm::vec3 _position = glm::vec3(4.0f, 2.0f, 4.0f);
     glm::vec3 _velocity = glm::vec3(0.0f);
@@ -66,7 +67,10 @@ public:
     glm::vec3 GetRight() const;
     glm::vec3 GetUp() const;
 
+	Transform GetTransform() const { return _transform; }
+
     void Update(float deltaTime);
+    void UpdateTransform();
 	void UpdatePlayerCamera();
 
     std::unique_ptr<Camera> GetCamera() {

@@ -15,11 +15,7 @@ namespace Game {
 
     static void UpdateCamera() {
         auto& camera = manager.GetCamera(cam1);
-		camera.SetTransform(Transform{ 
-            .position = player.GetPosition(),
-            .rotation = glm::vec3(player.GetPitch(), player.GetYaw(), 0.0f),
-            .scale = glm::vec3(1.0f)
-            });
+		camera.SetTransform(player.GetTransform()); 
     }
 
     void Init() {

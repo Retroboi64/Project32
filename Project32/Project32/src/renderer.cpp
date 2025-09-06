@@ -458,7 +458,7 @@ namespace Renderer {
         _skybox->Draw();
     }
 
-    void DrawHUD() {
+	void DrawHUD() { // TODO: Refactor HUD rendering to a separate class/file
         glDisable(GL_DEPTH_TEST);
 
         _wireframeShader->Bind();

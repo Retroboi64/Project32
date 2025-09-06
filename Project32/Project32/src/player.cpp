@@ -105,6 +105,12 @@ void Player::HandleMouseInput() {
     }
 }
 
+void Player::UpdateTransform() {
+    _transform.position = _position;
+    _transform.rotation = glm::vec3(_pitch, _yaw, 0.0f);
+    _transform.scale = glm::vec3(1.0f);
+}
+
 void Player::UpdatePlayerCamera() {
     _camera.SetPosition(_position);
     _camera.SetRotation(glm::vec3(_pitch, _yaw, 0.0f));
@@ -185,5 +191,6 @@ void Player::Update(float deltaTime) {
     }
 
     UpdateStats(deltaTime);
+	UpdateTransform();
 	UpdatePlayerCamera();
 }

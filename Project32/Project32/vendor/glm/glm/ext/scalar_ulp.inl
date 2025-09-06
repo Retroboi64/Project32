@@ -10,9 +10,14 @@
 #include <cmath>
 #include <cfloat>
 
-#if(GLM_COMPILER & GLM_COMPILER_VC)
+#if GLM_COMPILER & GLM_COMPILER_VC
 #	pragma warning(push)
 #	pragma warning(disable : 4127)
+#	pragma warning(disable : 4365) // '=': signed/unsigned mismatch
+#elif GLM_COMPILER & GLM_COMPILER_CLANG
+#	pragma clang diagnostic push
+#	pragma clang diagnostic ignored "-Wsign-conversion"
+#	pragma clang diagnostic ignored "-Wpadded"
 #endif
 
 typedef union
@@ -44,13 +49,13 @@ typedef union
 	do {									\
 		ieee_float_shape_type gf_u;			\
 		gf_u.value = (d);					\
-		(i) = gf_u.word;					\
+		(i) = static_cast<int>(gf_u.word);	\
 	} while (0)
 
 #define GLM_SET_FLOAT_WORD(d,i)				\
 	do {									\
 		ieee_float_shape_type sf_u;			\
-		sf_u.word = (i);					\
+		sf_u.word = static_cast<unsigned int>(i);	\
 		(d) = sf_u.value;					\
 	} while (0)
 
@@ -182,14 +187,16 @@ namespace detail
 }//namespace detail
 }//namespace glm
 
-#if(GLM_COMPILER & GLM_COMPILER_VC)
+#if GLM_COMPILER & GLM_COMPILER_VC
 #	pragma warning(pop)
+#elif GLM_COMPILER & GLM_COMPILER_CLANG
+#	pragma clang diagnostic pop
 #endif
 
 namespace glm
 {
 	template<>
-	GLM_FUNC_QUALIFIER float next_float(float x)
+	GLM_FUNC_QUALIFIER float nextFloat(float x)
 	{
 #		if GLM_HAS_CXX11_STL
 			return std::nextafter(x, std::numeric_limits<float>::max());
@@ -203,7 +210,7 @@ namespace glm
 	}
 
 	template<>
-	GLM_FUNC_QUALIFIER double next_float(double x)
+	GLM_FUNC_QUALIFIER double nextFloat(double x)
 	{
 #		if GLM_HAS_CXX11_STL
 			return std::nextafter(x, std::numeric_limits<double>::max());
@@ -217,18 +224,18 @@ namespace glm
 	}
 
 	template<typename T>
-	GLM_FUNC_QUALIFIER T next_float(T x, int ULPs)
+	GLM_FUNC_QUALIFIER T nextFloat(T x, int ULPs)
 	{
-		GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'next_float' only accept floating-point input");
+		GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559 || GLM_CONFIG_UNRESTRICTED_FLOAT, "'next_float' only accept floating-point input");
 		assert(ULPs >= 0);
 
 		T temp = x;
 		for(int i = 0; i < ULPs; ++i)
-			temp = next_float(temp);
+			temp = nextFloat(temp);
 		return temp;
 	}
 
-	GLM_FUNC_QUALIFIER float prev_float(float x)
+	GLM_FUNC_QUALIFIER float prevFloat(float x)
 	{
 #		if GLM_HAS_CXX11_STL
 			return std::nextafter(x, std::numeric_limits<float>::min());
@@ -241,7 +248,7 @@ namespace glm
 #		endif
 	}
 
-	GLM_FUNC_QUALIFIER double prev_float(double x)
+	GLM_FUNC_QUALIFIER double prevFloat(double x)
 	{
 #		if GLM_HAS_CXX11_STL
 			return std::nextafter(x, std::numeric_limits<double>::min());
@@ -255,18 +262,18 @@ namespace glm
 	}
 
 	template<typename T>
-	GLM_FUNC_QUALIFIER T prev_float(T x, int ULPs)
+	GLM_FUNC_QUALIFIER T prevFloat(T x, int ULPs)
 	{
-		GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'prev_float' only accept floating-point input");
+		GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559 || GLM_CONFIG_UNRESTRICTED_FLOAT, "'prev_float' only accept floating-point input");
 		assert(ULPs >= 0);
 
 		T temp = x;
 		for(int i = 0; i < ULPs; ++i)
-			temp = prev_float(temp);
+			temp = prevFloat(temp);
 		return temp;
 	}
 
-	GLM_FUNC_QUALIFIER int float_distance(float x, float y)
+	GLM_FUNC_QUALIFIER int floatDistance(float x, float y)
 	{
 		detail::float_t<float> const a(x);
 		detail::float_t<float> const b(y);
@@ -274,7 +281,7 @@ namespace glm
 		return abs(a.i - b.i);
 	}
 
-	GLM_FUNC_QUALIFIER int64 float_distance(double x, double y)
+	GLM_FUNC_QUALIFIER int64 floatDistance(double x, double y)
 	{
 		detail::float_t<double> const a(x);
 		detail::float_t<double> const b(y);
