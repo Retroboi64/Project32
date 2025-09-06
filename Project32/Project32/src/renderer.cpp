@@ -5,8 +5,11 @@
 #include "mesh.h"
 #include "game.h"
 #include "GL.h"
+#include "stb_image.h"
 
 namespace Renderer {
+    GLuint textureID;
+
     std::unique_ptr<Shader> _solidColorShader;
     std::unique_ptr<Shader> _wireframeShader;
     std::unique_ptr<Shader> _skyboxShader;
@@ -34,6 +37,27 @@ namespace Renderer {
         _sphereMesh = StaticMeshes::GetSphere(16, 16, 0.5f);
         _capsuleMesh = StaticMeshes::GetCapsule(16, 8, 2.0f, 0.5f);
 
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        int width, height, nrChannels;
+		//stbi_set_flip_vertically_on_load(true); this needs to be false for skybox to work correctly for now
+        unsigned char* data = stbi_load("res/textures/wall.jpg", &width, &height, &nrChannels, 0);
+        if (data) {
+            GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+            glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
+        else {
+            std::cerr << "Failed to load texture!" << std::endl;
+        }
+        stbi_image_free(data);
+
         _skybox = std::make_unique<Skybox>();
         std::vector<std::string> faces = {
             "res/skybox/right.jpg", "res/skybox/left.jpg", "res/skybox/top.jpg", "res/skybox/bottom.jpg", "res/skybox/front.jpg", "res/skybox/back.jpg"
@@ -59,6 +83,12 @@ namespace Renderer {
         _solidColorShader->SetMat4("view", view);
         _solidColorShader->SetVec3("lightPos", lightPos);
         _solidColorShader->SetVec3("viewPos", playerPos);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+
+        _solidColorShader->SetInt("uTexture", 0);
+        _solidColorShader->SetBool("useTexture", false);
 
         if (_wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -95,6 +125,7 @@ namespace Renderer {
 			    .position = pos,
 			    .scale = glm::vec3(2.0f)
             };
+            _solidColorShader->SetBool("useTexture", true);
             _solidColorShader->SetMat4("model", cube.ToMatrix());
             _solidColorShader->SetVec3("color", cubeColor);
             _cubeMesh->Draw();
@@ -106,6 +137,7 @@ namespace Renderer {
             .position = glm::vec3(0.0f, 1.0f, -2.0f),
             .scale = glm::vec3(1.0f),
         };
+        _solidColorShader->SetBool("useTexture", false);
         _solidColorShader->SetMat4("model", capsule.ToMatrix());
         _solidColorShader->SetVec3("color", capsuleColor);
 		_capsuleMesh->Draw();

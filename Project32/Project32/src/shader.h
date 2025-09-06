@@ -18,6 +18,7 @@ public:
     void SetVec3(const std::string& name, const glm::vec3& value);
     void SetFloat(const std::string& name, float value);
     void SetInt(const std::string& name, int value);
+    void SetBool(const std::string& name, bool value);
     bool IsValid() const;
 	int GetID() const { return _ID; }
 };

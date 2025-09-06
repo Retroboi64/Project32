@@ -114,6 +114,13 @@ void Shader::SetInt(const std::string& name, int value) {
     }
 }
 
+void Shader::SetBool(const std::string& name, bool value) {
+    int location = GetUniformLocation(name);
+    if (location != -1) {
+        glUniform1i(location, (int)value);
+    }
+}
+
 bool Shader::IsValid() const {
     return _ID != -1;
 }
