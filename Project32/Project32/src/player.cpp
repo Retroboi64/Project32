@@ -2,11 +2,10 @@
 #include "input.h"
 
 glm::vec3 Player::GetFront() const {
-    glm::vec3 front;
-    front.x = cos(glm::radians(_yaw)) * cos(glm::radians(_pitch));
-    front.y = sin(glm::radians(_pitch));
-    front.z = sin(glm::radians(_yaw)) * cos(glm::radians(_pitch));
-    return glm::normalize(front);
+	float x = cos(glm::radians(_yaw)) * cos(glm::radians(_pitch));
+	float y = sin(glm::radians(_pitch));
+	float z = sin(glm::radians(_yaw)) * cos(glm::radians(_pitch));
+    return glm::normalize(glm::vec3(x,y,z));
 }
 
 glm::vec3 Player::GetRight() const {
@@ -106,6 +105,11 @@ void Player::HandleMouseInput() {
     }
 }
 
+void Player::UpdatePlayerCamera() {
+    _camera.SetPosition(_position);
+    _camera.SetRotation(glm::vec3(_pitch, _yaw, 0.0f));
+}
+
 void Player::UpdateStats(float deltaTime) {
     _stats.sessionTime += deltaTime;
 
@@ -181,4 +185,5 @@ void Player::Update(float deltaTime) {
     }
 
     UpdateStats(deltaTime);
+	UpdatePlayerCamera();
 }

@@ -6,6 +6,8 @@
 #include <memory>
 #include <stdexcept>
 
+// TODO: Port more of the functions from camera.h to camera.cpp for consistency and speed
+
 class Camera {
 private:
     Transform _transform;
@@ -80,6 +82,12 @@ public:
         return s;
     }
 
+    int AddExistingCamera(std::unique_ptr<Camera> camera) {
+        int s = static_cast<int>(_cameras.size());
+        _cameras.push_back(std::move(camera));
+        return s;
+    }
+
     int CreateCamera(const std::string& name,
         const glm::vec3& position = glm::vec3(0.0f, 0.0f, 0.0f),
         const glm::vec3& rotation = glm::vec3(0.0f, 0.0f, 0.0f),
@@ -131,7 +139,8 @@ public:
         if (_cameras.empty()) {
             throw std::runtime_error("No cameras available");
         }
-        _activeCameraIndex = (_activeCameraIndex + 1) % _cameras.size();
+		int s = static_cast<int>(_cameras.size());
+        _activeCameraIndex = (_activeCameraIndex + 1) % s;
 	}
 
     int FindCameraByName(const std::string& name) const {

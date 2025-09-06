@@ -1,11 +1,10 @@
 #include "camera.h"
 
 glm::mat4 Camera::GetViewMatrix() const {
-	glm::vec3 front;
-	front.x = cos(glm::radians(_transform.rotation.y)) * cos(glm::radians(_transform.rotation.x));
-	front.y = sin(glm::radians(_transform.rotation.x));
-	front.z = sin(glm::radians(_transform.rotation.y)) * cos(glm::radians(_transform.rotation.x));
-	front = glm::normalize(front);
+	float x = cos(glm::radians(_transform.rotation.y)) * cos(glm::radians(_transform.rotation.x));
+	float y = sin(glm::radians(_transform.rotation.x));
+	float z = sin(glm::radians(_transform.rotation.y)) * cos(glm::radians(_transform.rotation.x));
+	glm::vec3 front = glm::normalize(glm::vec3(x, y, z));
 	glm::vec3 target = _transform.position + front;
 	return glm::lookAt(_transform.position, target, glm::vec3(0.0f, 1.0f, 0.0f));
 }

@@ -13,9 +13,9 @@ namespace Game {
     int cam1;
     int cam2;
 
-    void UpdateCamera() {
+    static void UpdateCamera() {
         auto& camera = manager.GetCamera(cam1);
-		camera.SetTransform(Transform{ // TODO: add this to Player class? but this will work for now
+		camera.SetTransform(Transform{ 
             .position = player.GetPosition(),
             .rotation = glm::vec3(player.GetPitch(), player.GetYaw(), 0.0f),
             .scale = glm::vec3(1.0f)
@@ -37,7 +37,7 @@ namespace Game {
         std::cout << "ESC: Exit" << std::endl;
         std::cout << "===============================" << std::endl;
 
-        cam1 = manager.AddCamera("Main");
+		cam1 = manager.AddExistingCamera(player.GetCamera());
         cam2 = manager.AddCamera("Secondary", Transform{
             .position = glm::vec3(0.0f, 10.0f, 0.0f),
             .rotation = glm::vec3(-90.0f, 0.0f, 0.0f),
@@ -75,6 +75,5 @@ namespace Game {
     float GetPitch() { return player.GetPitch(); }
     bool IsOnGround() { return player.IsOnGround(); }
 
-    //Player& GetPlayer() { return player; }
     const Player& GetPlayer() { return player; }
 }

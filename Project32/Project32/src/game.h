@@ -2,9 +2,7 @@
 
 #include "common.h"
 
-// Forward declaration
 class Player;
-
 namespace Game {
     void Init();
     void Update(float deltaTime);
