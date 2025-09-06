@@ -29,13 +29,13 @@ struct Wall {
 class WallSystem {
 private:
     std::vector<Wall> _walls;
-
 public:
     WallSystem() = default;
     void AddWall(const glm::vec3& pos, const glm::vec3& scale,
         const glm::vec3& color = glm::vec3(0.4f, 0.4f, 0.5f),
         const glm::vec3& rotation = glm::vec3(0.0f));
     void AddWalls(const std::vector<Wall>& walls);
+	std::vector<Wall>& GetWalls() { return _walls; }
     void Clear();
     const std::vector<Wall>& GetWalls() const { return _walls; }
     bool CheckPointCollision(const glm::vec3& point, float radius = 0.5f) const;
