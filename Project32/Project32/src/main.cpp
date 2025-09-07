@@ -26,6 +26,7 @@ int main() {
         return -1;
     }
 
+	Renderer::Cleanup();
     GL::Cleanup();
     return 0;
 }

@@ -27,6 +27,8 @@
 #include <utility>
 #include <map>
 
+#include "stb_image.h"
+
 #include "util.hpp"
 #include "timer.hpp"
 

@@ -5,64 +5,66 @@
 #include "mesh.h"
 #include "game.h"
 #include "GL.h"
-#include "stb_image.h"
+#include "textures.h"
 
 namespace Renderer {
-    GLuint textureID;
+	std::unique_ptr<Texture> _wallTexture;
+	std::vector<std::unique_ptr<Texture>> _textures;
 
     std::unique_ptr<Shader> _solidColorShader;
     std::unique_ptr<Shader> _wireframeShader;
     std::unique_ptr<Shader> _skyboxShader;
+
     std::unique_ptr<Mesh> _quadMesh;
     std::unique_ptr<Mesh> _cubeMesh;
 	std::unique_ptr<Mesh> _cylinderMesh;
 	std::unique_ptr<Mesh> _sphereMesh;
 	std::unique_ptr<Mesh> _capsuleMesh;
+
     std::unique_ptr<Skybox> _skybox;
+
     bool _wireframeMode = false;
     bool _showDebugInfo = true;
 
     void Init() {
+		LoadShaders();
+        LoadMeshes();
+        LoadTextures();
+		LoadShaders();
+        LoadSkybox();
+    }
+
+    void LoadShaders() {
         _solidColorShader = std::make_unique<Shader>();
         _wireframeShader = std::make_unique<Shader>();
-		_skyboxShader = std::make_unique<Shader>();
+        _skyboxShader = std::make_unique<Shader>();
 
         _solidColorShader->Load("solidcolor.vert", "solidcolor.frag");
         _wireframeShader->Load("solidcolor.vert", "wireframe.frag");
         _skyboxShader->Load("skybox.vert", "skybox.frag");
+	}
 
-        _quadMesh = StaticMeshes::GetQuad();
-        _cubeMesh = StaticMeshes::GetCube();
-        _cylinderMesh = StaticMeshes::GetCylinder(16, 2.0f, 0.5f);
-        _sphereMesh = StaticMeshes::GetSphere(16, 16, 0.5f);
-        _capsuleMesh = StaticMeshes::GetCapsule(16, 8, 2.0f, 0.5f);
-
-        glGenTextures(1, &textureID);
-        glBindTexture(GL_TEXTURE_2D, textureID);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        int width, height, nrChannels;
-		//stbi_set_flip_vertically_on_load(true); this needs to be false for skybox to work correctly for now
-        unsigned char* data = stbi_load("res/textures/wall.jpg", &width, &height, &nrChannels, 0);
-        if (data) {
-            GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-            glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
-        }
-        else {
-            std::cerr << "Failed to load texture!" << std::endl;
-        }
-        stbi_image_free(data);
-
+    void LoadSkybox() {
         _skybox = std::make_unique<Skybox>();
         std::vector<std::string> faces = {
             "res/skybox/right.jpg", "res/skybox/left.jpg", "res/skybox/top.jpg", "res/skybox/bottom.jpg", "res/skybox/front.jpg", "res/skybox/back.jpg"
         };
         _skybox->Load(faces);
+	}
+
+    void LoadMeshes() {
+        _quadMesh = StaticMeshes::GetQuad();
+        _cubeMesh = StaticMeshes::GetCube();
+        _cylinderMesh = StaticMeshes::GetCylinder(16, 2.0f, 0.5f);
+        _sphereMesh = StaticMeshes::GetSphere(16, 16, 0.5f);
+        _capsuleMesh = StaticMeshes::GetCapsule(16, 8, 2.0f, 0.5f);
+    }
+
+    void LoadTextures() {
+		_wallTexture = std::make_unique<Texture>();
+        if (!_wallTexture->LoadFromFile("Wall", "res/textures/wall.jpg", true)) {
+            std::cerr << "Failed to load wall texture." << std::endl;
+		}
     }
 
     void RenderFrame() {
@@ -84,8 +86,7 @@ namespace Renderer {
         _solidColorShader->SetVec3("lightPos", lightPos);
         _solidColorShader->SetVec3("viewPos", playerPos);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textureID);
+		_wallTexture->Bind(GL_TEXTURE0);
 
         _solidColorShader->SetInt("uTexture", 0);
         _solidColorShader->SetBool("useTexture", false);
@@ -190,6 +191,35 @@ namespace Renderer {
 
         glEnable(GL_DEPTH_TEST);
     }
+
+	// Sets all pointers to null and deletes any allocated resources
+	// TODO: Make this more robust and handle errors
+    void Cleanup() {
+        auto textureID = _wallTexture->GetTextureID();
+
+        _solidColorShader.reset();
+        _wireframeShader.reset();
+        _skyboxShader.reset();
+        _quadMesh.reset();
+		_cubeMesh.reset();
+		_cylinderMesh.reset();
+		_sphereMesh.reset();
+        _capsuleMesh.reset();
+        _skybox.reset();
+		_wallTexture.reset();
+
+		// TODO: Automatically handle texture deletions in Texture class destructor
+		// Or just get rid of vaildity checks and assume everything is fine (:
+        if (textureID) {
+            glDeleteTextures(1, &textureID);
+            textureID = 0;
+
+            GLenum error = glGetError();
+            if (error != GL_NO_ERROR) {
+				std::cout << "OpenGL Error during texture deletion: " << error << std::endl;
+            }
+        }
+	}
 
     void ToggleWireframe() { _wireframeMode = !_wireframeMode; }
     void ToggleDebugInfo() { _showDebugInfo = !_showDebugInfo; }
