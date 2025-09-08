@@ -64,7 +64,7 @@ public:
 	// TODO: Organize functions better
     int AddTexture(const std::string& name);
     int AddExistingTexture(std::unique_ptr<Texture> texture);
-    int LoadTexture(const std::string& name, const std::string& filepath, bool flipVertically = true);
+    int LoadTexture(const std::string& name, const std::string& filepath, bool flipVertically);
     Texture& GetTexture(int index);
     const Texture& GetTexture(int index) const;
     Texture* GetTextureByName(const std::string& name);
@@ -80,9 +80,9 @@ public:
     int GetTextureCount() const;
     bool HasTextures() const;
     int GetActiveTextureIndex() const;
-    void BindActiveTexture(GLenum textureUnit = GL_TEXTURE0) const;
-    void BindTexture(int index, GLenum textureUnit = GL_TEXTURE0) const;
-    void BindTextureByName(const std::string& name, GLenum textureUnit = GL_TEXTURE0) const;
+    void BindActiveTexture(GLenum textureUnit) const;
+    void BindTexture(int index, GLenum textureUnit) const;
+    void BindTextureByName(const std::string& name, GLenum textureUnit) const;
     auto begin();
     auto end();
     auto begin() const;
