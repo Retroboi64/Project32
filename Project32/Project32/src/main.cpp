@@ -6,7 +6,7 @@
 
 int main() {
     try {
-        GL::Init(1920, 1080, "Enhanced Quake Movement");
+        GL::Init(1920, 1080, "Project32");
         Game::Init();
         Renderer::Init();
 
@@ -23,6 +23,8 @@ int main() {
     }
     catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
+        Renderer::Cleanup();
+        GL::Cleanup();
         return -1;
     }
 

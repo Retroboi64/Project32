@@ -8,8 +8,7 @@
 #include "textures.h"
 
 namespace Renderer {
-	std::unique_ptr<Texture> _wallTexture;
-	std::vector<std::unique_ptr<Texture>> _textures;
+	TextureManager _textures;
 
     std::unique_ptr<Shader> _solidColorShader;
     std::unique_ptr<Shader> _wireframeShader;
@@ -61,10 +60,7 @@ namespace Renderer {
     }
 
     void LoadTextures() {
-		_wallTexture = std::make_unique<Texture>();
-        if (!_wallTexture->LoadFromFile("Wall", "res/textures/wall.jpg", true)) {
-            std::cerr << "Failed to load wall texture." << std::endl;
-		}
+        _textures.LoadTexture("Wall", "res/textures/wall.jpg", true);
     }
 
     void RenderFrame() {
@@ -86,7 +82,8 @@ namespace Renderer {
         _solidColorShader->SetVec3("lightPos", lightPos);
         _solidColorShader->SetVec3("viewPos", playerPos);
 
-		_wallTexture->Bind(GL_TEXTURE0);
+		// _wallTexture->Bind(GL_TEXTURE0);
+		_textures.BindTexture(_textures.FindTextureByName("Wall"), GL_TEXTURE0);
 
         _solidColorShader->SetInt("uTexture", 0);
         _solidColorShader->SetBool("useTexture", false);
@@ -195,8 +192,6 @@ namespace Renderer {
 	// Sets all pointers to null and deletes any allocated resources
 	// TODO: Make this more robust and handle errors
     void Cleanup() {
-        auto textureID = _wallTexture->GetTextureID();
-
         _solidColorShader.reset();
         _wireframeShader.reset();
         _skyboxShader.reset();
@@ -206,19 +201,8 @@ namespace Renderer {
 		_sphereMesh.reset();
         _capsuleMesh.reset();
         _skybox.reset();
-		_wallTexture.reset();
 
-		// TODO: Automatically handle texture deletions in Texture class destructor
-		// Or just get rid of vaildity checks and assume everything is fine (:
-        if (textureID) {
-            glDeleteTextures(1, &textureID);
-            textureID = 0;
-
-            GLenum error = glGetError();
-            if (error != GL_NO_ERROR) {
-				std::cout << "OpenGL Error during texture deletion: " << error << std::endl;
-            }
-        }
+		_textures.Clear(); // Deletes all textures
 	}
 
     void ToggleWireframe() { _wireframeMode = !_wireframeMode; }
