@@ -6,9 +6,12 @@
 #include "game.h"
 #include "GL.h"
 #include "textures.h"
+#include "wall.h" // Add this include
 
 namespace Renderer {
-	TextureManager _textures;
+    TextureManager _textures;
+
+    std::unique_ptr<WallSystem> _wallSystem;
 
     std::unique_ptr<Shader> _solidColorShader;
     std::unique_ptr<Shader> _wireframeShader;
@@ -16,9 +19,9 @@ namespace Renderer {
 
     std::unique_ptr<Mesh> _quadMesh;
     std::unique_ptr<Mesh> _cubeMesh;
-	std::unique_ptr<Mesh> _cylinderMesh;
-	std::unique_ptr<Mesh> _sphereMesh;
-	std::unique_ptr<Mesh> _capsuleMesh;
+    std::unique_ptr<Mesh> _cylinderMesh;
+    std::unique_ptr<Mesh> _sphereMesh;
+    std::unique_ptr<Mesh> _capsuleMesh;
 
     std::unique_ptr<Skybox> _skybox;
 
@@ -26,11 +29,15 @@ namespace Renderer {
     bool _showDebugInfo = true;
 
     void Init() {
-		LoadShaders();
+        LoadShaders();
         LoadMeshes();
         LoadTextures();
-		LoadShaders();
+        LoadShaders();
         LoadSkybox();
+
+		// TODO: MOVE THIS SOMEWHERE ELSE
+        _wallSystem = std::make_unique<WallSystem>();
+        _wallSystem->CreateMaze();
     }
 
     void LoadShaders() {
@@ -41,7 +48,7 @@ namespace Renderer {
         _solidColorShader->Load("solidcolor.vert", "solidcolor.frag");
         _wireframeShader->Load("solidcolor.vert", "wireframe.frag");
         _skyboxShader->Load("skybox.vert", "skybox.frag");
-	}
+    }
 
     void LoadSkybox() {
         _skybox = std::make_unique<Skybox>();
@@ -49,7 +56,7 @@ namespace Renderer {
             "res/skybox/right.jpg", "res/skybox/left.jpg", "res/skybox/top.jpg", "res/skybox/bottom.jpg", "res/skybox/front.jpg", "res/skybox/back.jpg"
         };
         _skybox->Load(faces);
-	}
+    }
 
     void LoadMeshes() {
         _quadMesh = StaticMeshes::GetQuad();
@@ -61,6 +68,21 @@ namespace Renderer {
 
     void LoadTextures() {
         _textures.LoadTexture("Wall", "res/textures/wall.jpg", true);
+    }
+
+    void DrawWalls() {
+        if (!_wallSystem) return;
+
+        _solidColorShader->SetBool("useTexture", true);
+        _textures.BindTexture(_textures.FindTextureByName("Wall"), GL_TEXTURE0);
+
+        const auto& walls = _wallSystem->GetWalls();
+        for (const auto& wall : walls) {
+            Transform wallTransform = wall.GetTransform();
+            _solidColorShader->SetMat4("model", wallTransform.ToMatrix());
+            _solidColorShader->SetVec3("color", wall.color);
+            _cubeMesh->Draw();
+        }
     }
 
     void RenderFrame() {
@@ -82,15 +104,17 @@ namespace Renderer {
         _solidColorShader->SetVec3("lightPos", lightPos);
         _solidColorShader->SetVec3("viewPos", playerPos);
 
-		// _wallTexture->Bind(GL_TEXTURE0);
-		_textures.BindTexture(_textures.FindTextureByName("Wall"), GL_TEXTURE0);
-
+        _textures.BindTexture(_textures.FindTextureByName("Wall"), GL_TEXTURE0);
         _solidColorShader->SetInt("uTexture", 0);
         _solidColorShader->SetBool("useTexture", false);
 
         if (_wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
+
+        // Draw floor grid
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(1.0f, 1.0f);
 
         constexpr int GRID_SIZE = 40;
         constexpr int HALF_GRID = GRID_SIZE / 2;
@@ -110,6 +134,12 @@ namespace Renderer {
             }
         }
 
+        glDisable(GL_POLYGON_OFFSET_FILL);
+
+        // Draw walls
+        DrawWalls();
+
+		// Various positions for test cubes
         std::vector<glm::vec3> cubePositions = {
             glm::vec3(0, 1, -5),    glm::vec3(3, 1, -8),    glm::vec3(-4, 1, -3),
             glm::vec3(6, 1, 2),     glm::vec3(-2, 1, 7),    glm::vec3(8, 2, -2),
@@ -117,20 +147,22 @@ namespace Renderer {
             glm::vec3(15, 4, -7)
         };
 
+		// Draw test cubes
         const glm::vec3 cubeColor(0.8f, 0.3f, 0.2f);
         for (const auto& pos : cubePositions) {
             Transform cube{
-			    .position = pos,
-			    .scale = glm::vec3(2.0f)
+                .position = pos,
+                .scale = glm::vec3(2.0f)
             };
             _solidColorShader->SetBool("useTexture", true);
             _solidColorShader->SetMat4("model", cube.ToMatrix());
             _solidColorShader->SetVec3("color", cubeColor);
-            _cubeMesh->Draw();
+			// Dont draw cubes for now
+            //_cubeMesh->Draw();
         }
 
-		// Soon To Be Playermodel For Testing
-		const glm::vec3 capsuleColor(0.2f, 0.3f, 0.8f);
+        // Soon To Be Playermodel For Testing
+        const glm::vec3 capsuleColor(0.2f, 0.3f, 0.8f);
         Transform capsule{
             .position = glm::vec3(0.0f, 1.0f, -2.0f),
             .scale = glm::vec3(1.0f),
@@ -138,7 +170,7 @@ namespace Renderer {
         _solidColorShader->SetBool("useTexture", false);
         _solidColorShader->SetMat4("model", capsule.ToMatrix());
         _solidColorShader->SetVec3("color", capsuleColor);
-		_capsuleMesh->Draw();
+        _capsuleMesh->Draw();
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -158,7 +190,7 @@ namespace Renderer {
         _skybox->Draw();
     }
 
-	void DrawHUD() { // TODO: Refactor HUD rendering to a separate class/file
+    void DrawHUD() { // TODO: Refactor HUD rendering to a separate class/file
         glDisable(GL_DEPTH_TEST);
 
         _wireframeShader->Bind();
@@ -172,7 +204,7 @@ namespace Renderer {
         float speedBarLength = std::min(speed * 8.0f, 300.0f);
 
         Transform speedBar{
-			.position = glm::vec3(50.0f, windowSize.y - 50.0f, 0.0f),
+            .position = glm::vec3(50.0f, windowSize.y - 50.0f, 0.0f),
             .scale = glm::vec3(speedBarLength, 15.0f, 1.0f),
         };
         _wireframeShader->SetMat4("model", speedBar.ToMatrix());
@@ -189,21 +221,22 @@ namespace Renderer {
         glEnable(GL_DEPTH_TEST);
     }
 
-	// Sets all pointers to null and deletes any allocated resources
-	// TODO: Make this more robust and handle errors
+    // Sets all pointers to null and deletes any allocated resources
+    // TODO: Make this more robust and handle errors
     void Cleanup() {
         _solidColorShader.reset();
         _wireframeShader.reset();
         _skyboxShader.reset();
         _quadMesh.reset();
-		_cubeMesh.reset();
-		_cylinderMesh.reset();
-		_sphereMesh.reset();
+        _cubeMesh.reset();
+        _cylinderMesh.reset();
+        _sphereMesh.reset();
         _capsuleMesh.reset();
         _skybox.reset();
 
-		_textures.Clear(); // Deletes all textures
-	}
+        _textures.Clear(); 
+        _wallSystem = nullptr; 
+    }
 
     void ToggleWireframe() { _wireframeMode = !_wireframeMode; }
     void ToggleDebugInfo() { _showDebugInfo = !_showDebugInfo; }
