@@ -127,9 +127,9 @@ void WallSystem::CreateRoom(const glm::vec3& center, const glm::vec3& size) {
     glm::vec3 wallColor(0.4f, 0.4f, 0.5f);
 
     // Floor
-    AddWall(center - glm::vec3(0, size.y / 2 + wallThickness / 2, 0),
-        glm::vec3(size.x, wallThickness, size.z),
-        glm::vec3(0.3f, 0.3f, 0.35f));
+    //AddWall(center - glm::vec3(0, size.y / 2 + wallThickness / 2, 0),
+    //    glm::vec3(size.x, wallThickness, size.z),
+    //    glm::vec3(0.3f, 0.3f, 0.35f));
 
     // Ceiling
     AddWall(center + glm::vec3(0, size.y / 2 + wallThickness / 2, 0),
@@ -137,29 +137,30 @@ void WallSystem::CreateRoom(const glm::vec3& center, const glm::vec3& size) {
         glm::vec3(0.25f, 0.25f, 0.3f));
 
     // Back wall (-Z)
-    AddWall(center - glm::vec3(0, 0, size.z / 2 + wallThickness / 2),
-        glm::vec3(size.x, size.y, wallThickness),
-        wallColor);
+    //AddWall(center - glm::vec3(0, 0, size.z / 2 + wallThickness / 2),
+    //    glm::vec3(size.x, size.y, wallThickness),
+    //    wallColor);
 
     // Front wall (+Z)
-    AddWall(center + glm::vec3(0, 0, size.z / 2 + wallThickness / 2),
-        glm::vec3(size.x, size.y, wallThickness),
-        wallColor);
+    //AddWall(center + glm::vec3(0, 0, size.z / 2 + wallThickness / 2),
+    //    glm::vec3(size.x, size.y, wallThickness),
+    //    wallColor);
 
     // Left wall (-X)
-    AddWall(center - glm::vec3(size.x / 2 + wallThickness / 2, 0, 0),
-        glm::vec3(wallThickness, size.y, size.z),
-        wallColor);
+    //AddWall(center - glm::vec3(size.x / 2 + wallThickness / 2, 0, 0),
+    //    glm::vec3(wallThickness, size.y, size.z),
+    //    wallColor);
 
     // Right wall (+X)
-    AddWall(center + glm::vec3(size.x / 2 + wallThickness / 2, 0, 0),
-        glm::vec3(wallThickness, size.y, size.z),
-        wallColor);
+    //AddWall(center + glm::vec3(size.x / 2 + wallThickness / 2, 0, 0),
+    //    glm::vec3(wallThickness, size.y, size.z),
+    //    wallColor);
 }
 
 void WallSystem::CreateMaze() {
     Clear();
     CreateRoom(glm::vec3(0, 2.5f, 0), glm::vec3(40, 5, 40));
+
     glm::vec3 wallColor(0.5f, 0.3f, 0.3f);
     AddWall(glm::vec3(-10, 2.5f, 0), glm::vec3(15, 5, 1), wallColor);
     AddWall(glm::vec3(10, 2.5f, -5), glm::vec3(15, 5, 1), wallColor);
@@ -169,11 +170,13 @@ void WallSystem::CreateMaze() {
     AddWall(glm::vec3(-15, 2.5f, 5), glm::vec3(1, 5, 10), wallColor);
     AddWall(glm::vec3(15, 2.5f, 0), glm::vec3(1, 5, 20), wallColor);
     AddWall(glm::vec3(5, 2.5f, 5), glm::vec3(1, 5, 10), wallColor);
-    glm::vec3 pillarColor(0.6f, 0.6f, 0.4f);
-    AddWall(glm::vec3(-10, 2.5f, -10), glm::vec3(2, 5, 2), pillarColor);
-    AddWall(glm::vec3(10, 2.5f, -10), glm::vec3(2, 5, 2), pillarColor);
-    AddWall(glm::vec3(-10, 2.5f, 10), glm::vec3(2, 5, 2), pillarColor);
-    AddWall(glm::vec3(10, 2.5f, 10), glm::vec3(2, 5, 2), pillarColor);
+
+    // Get rid of pillars for now
+    //glm::vec3 pillarColor(0.6f, 0.6f, 0.4f);
+    //AddWall(glm::vec3(-10, 2.5f, -10), glm::vec3(2, 5, 2), pillarColor);
+    //AddWall(glm::vec3(10, 2.5f, -10), glm::vec3(2, 5, 2), pillarColor);
+    //AddWall(glm::vec3(-10, 2.5f, 10), glm::vec3(2, 5, 2), pillarColor);
+    //AddWall(glm::vec3(10, 2.5f, 10), glm::vec3(2, 5, 2), pillarColor);
 }
 
 void WallSystem::LoadLevel(const std::string& filename) {

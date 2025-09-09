@@ -11,14 +11,4 @@ namespace Util {
         buffer << file.rdbuf();
         return buffer.str();
     }
-
-    // **MOVE THIS**
-    inline float Lerp(float a, float b, float t) {
-        return a + t * (b - a);
-    }
-
-    // **MOVE THIS**
-    inline glm::vec3 Lerp(const glm::vec3& a, const glm::vec3& b, float t) {
-        return a + t * (b - a);
-    }
 }
