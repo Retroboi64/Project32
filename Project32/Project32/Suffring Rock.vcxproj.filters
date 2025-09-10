@@ -13,52 +13,88 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\src">
+      <UniqueIdentifier>{601f8d7a-050f-4503-a64e-a431ecf40d67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vendor">
+      <UniqueIdentifier>{d53b10a4-a941-4a59-8bb7-bbe2fbf03567}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vendor\imgui">
+      <UniqueIdentifier>{c47f5ac1-4740-40b5-a4ae-17bbf158df77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vendor\glad">
+      <UniqueIdentifier>{b2ed1e21-ffa1-4903-a4c3-23aa312e5567}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vendor\stb">
+      <UniqueIdentifier>{894d8d94-3ca1-4d49-b3b4-68c76f13c97a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\glad\src\glad.c">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\camera.cpp">
+      <Filter>Source Files\src</Filter>
     </ClCompile>
     <ClCompile Include="src\game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\input.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\shader.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\src</Filter>
     </ClCompile>
     <ClCompile Include="src\GL.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\src</Filter>
     </ClCompile>
-    <ClCompile Include="src\skybox.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\input.cpp">
+      <Filter>Source Files\src</Filter>
     </ClCompile>
-    <ClCompile Include="vendor\stb_image\stb_image.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files\src</Filter>
     </ClCompile>
-    <ClCompile Include="src\camera.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\mesh.cpp">
+      <Filter>Source Files\src</Filter>
     </ClCompile>
     <ClCompile Include="src\model.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\src</Filter>
     </ClCompile>
     <ClCompile Include="src\player.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\src</Filter>
     </ClCompile>
-    <ClCompile Include="src\wall.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\renderer.cpp">
+      <Filter>Source Files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shader.cpp">
+      <Filter>Source Files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\skybox.cpp">
+      <Filter>Source Files\src</Filter>
     </ClCompile>
     <ClCompile Include="src\textures.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wall.cpp">
+      <Filter>Source Files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\imgui.cpp">
+      <Filter>Source Files\vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\imgui_demo.cpp">
+      <Filter>Source Files\vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\imgui_draw.cpp">
+      <Filter>Source Files\vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\imgui_tables.cpp">
+      <Filter>Source Files\vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\imgui_widgets.cpp">
+      <Filter>Source Files\vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\backends\imgui_impl_glfw.cpp">
+      <Filter>Source Files\vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\backends\imgui_impl_opengl3.cpp">
+      <Filter>Source Files\vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\glad\src\glad.c">
+      <Filter>Source Files\vendor\glad</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\stb_image\stb_image.cpp">
+      <Filter>Source Files\vendor\stb</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
