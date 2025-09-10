@@ -6,7 +6,7 @@
 #include "game.h"
 #include "GL.h"
 #include "textures.h"
-#include "wall.h" // Add this include
+#include "wall.h" 
 
 namespace Renderer {
     TextureManager _textures;
@@ -34,8 +34,11 @@ namespace Renderer {
         LoadTextures();
         LoadShaders();
         LoadSkybox();
+        LoadLevel();
+    }
 
-		// TODO: MOVE THIS SOMEWHERE ELSE
+    // TODO: Improve this
+    void LoadLevel() {
         _wallSystem = std::make_unique<WallSystem>();
         _wallSystem->CreateMaze();
     }
@@ -233,9 +236,9 @@ namespace Renderer {
         _sphereMesh.reset();
         _capsuleMesh.reset();
         _skybox.reset();
+        _wallSystem.reset();
 
         _textures.Clear(); 
-        _wallSystem = nullptr; 
     }
 
     void ToggleWireframe() { _wireframeMode = !_wireframeMode; }
