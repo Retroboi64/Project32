@@ -47,6 +47,7 @@ private:
     void UpdateStats(float deltaTime);
 public:
     glm::vec3 GetPosition() const { return _position; }
+	glm::vec3 GetRotation() const { return glm::vec3(_pitch, _yaw, 0.0f); }
     glm::vec3 GetVelocity() const { return _velocity; }
     float GetSpeed() const { return glm::length(_velocity); }
     float GetHorizontalSpeed() const {

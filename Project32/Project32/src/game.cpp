@@ -35,8 +35,8 @@ namespace Game {
 
 		cam1 = manager.AddExistingCamera(player.GetCamera());
         cam2 = manager.AddCamera("Secondary", Transform{
-            .position = glm::vec3(0.0f, 10.0f, 0.0f),
-            .rotation = glm::vec3(-90.0f, 0.0f, 0.0f),
+            .position = glm::vec3(0.0f, 1.0f, 20.0f),
+            .rotation = glm::vec3(0.0f, -90.0f, 0.0f),
             .scale = glm::vec3(1.0f)
             });
         manager.SetActiveCamera(cam1);
@@ -65,6 +65,7 @@ namespace Game {
     }
 
     glm::vec3 GetPosition() { return player.GetPosition(); }
+	glm::vec3 GetRotation() { return player.GetRotation(); }
     glm::vec3 GetVelocity() { return player.GetVelocity(); }
     float GetSpeed() { return player.GetHorizontalSpeed(); }
     float GetYaw() { return player.GetYaw(); }

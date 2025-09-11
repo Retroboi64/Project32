@@ -10,6 +10,7 @@ namespace Game {
 
     // Player functions
     glm::vec3 GetPosition();
+	glm::vec3 GetRotation();
     glm::vec3 GetVelocity();
     float GetSpeed();
     float GetYaw();
