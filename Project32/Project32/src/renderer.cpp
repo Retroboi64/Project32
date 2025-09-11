@@ -8,6 +8,7 @@
 #include "textures.h"
 #include "wall.h"
 #include "imgui.h"
+#include "model.h"
 
 namespace Renderer {
     TextureManager _textures;
@@ -23,6 +24,8 @@ namespace Renderer {
     std::unique_ptr<Mesh> _cylinderMesh;
     std::unique_ptr<Mesh> _sphereMesh;
     std::unique_ptr<Mesh> _capsuleMesh;
+
+	std::unique_ptr<ModelImporter::LoadedModel> _loadedModel;
 
     std::unique_ptr<Skybox> _skybox;
 
@@ -42,6 +45,15 @@ namespace Renderer {
         LoadShaders();
         LoadSkybox();
         LoadLevel();
+
+		// TODO: Improve model loading system
+        _loadedModel = ModelImporter::LoadFromFile("res/models/Sphere.obj");
+        if (_loadedModel) {
+            std::cout << "Successfully loaded model with " << _loadedModel->meshes.size() << " meshes" << std::endl;
+        }
+        else {
+            std::cout << "Failed to load model" << std::endl;
+        }
     }
 
     // TODO: Improve this
@@ -160,12 +172,23 @@ namespace Renderer {
                 .position = pos,
                 .scale = glm::vec3(2.0f)
             };
+
             _solidColorShader->SetBool("useTexture", true);
             _solidColorShader->SetMat4("model", cube.ToMatrix());
             _solidColorShader->SetVec3("color", cubeColor);
             // Dont draw cubes for now
             //_cubeMesh->Draw();
         }
+
+        Transform Model{
+              .position = glm::vec3(-5.0f, 1.0f, -5.0f),
+              .scale = glm::vec3(1.0f)
+	    };
+
+        _solidColorShader->SetBool("useTexture", true);
+        _solidColorShader->SetMat4("model", Model.ToMatrix());
+        _solidColorShader->SetVec3("color", cubeColor);
+        _loadedModel->meshes[0]->Draw();
 
         // Soon To Be Playermodel For Testing
         const glm::vec3 capsuleColor(0.2f, 0.3f, 0.8f);

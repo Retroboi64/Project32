@@ -9,6 +9,7 @@ void Texture::Bind(GLenum textureUnit) const {
 
 bool Texture::LoadFromFile(const std::string& textureName, const std::string& filepath, bool flipVertically) {
 	_name = textureName;
+	_filepath = filepath;
 
 	if (_textureID != 0) {
 		glDeleteTextures(1, &_textureID);

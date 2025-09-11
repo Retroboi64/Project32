@@ -7,6 +7,7 @@
 #define FAR_PLANE 1000.0f
 #define DARK_SQUARE glm::vec3(0.3984375f, 0.265625f, 0.2265625f)
 #define LIGHT_SQUARE glm::vec3(0.95703125f, 0.8984375f, 0.74609375f)
+#define MAX_BONE_INFLUENCE 4
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -49,5 +50,9 @@ struct Vertex {
     glm::vec3 position = glm::vec3(0.0f);
     glm::vec3 normal = glm::vec3(0.0f);
     glm::vec2 uv = glm::vec2(0.0f);
-    glm::vec2 texCoord = glm::vec3(0.0f);
+    glm::vec2 texCoord = glm::vec2(0.0f);
+    glm::vec3 tangent = glm::vec3(0.0f);
+    glm::vec3 bitangent = glm::vec3(0.0f);
+    int m_BoneIDs[MAX_BONE_INFLUENCE];
+    float m_Weights[MAX_BONE_INFLUENCE];
 };

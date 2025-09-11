@@ -1,11 +1,13 @@
 #pragma once
 
 #include "common.h"
+#include "textures.h"
 
 class Mesh {
 private:
     GLuint _VAO = 0, _VBO = 0, _EBO = 0;
     GLuint _indexCount = 0;
+
 public:
     Mesh() = default;
     ~Mesh();
