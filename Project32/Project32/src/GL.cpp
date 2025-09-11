@@ -1,5 +1,9 @@
 #include "GL.h"
 
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+
 namespace GL {
     GLFWwindow* _window = nullptr;
     int _windowWidth = 1920;
@@ -74,6 +78,24 @@ namespace GL {
 
         SetVSync(true);
 
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
+        ImGui::StyleColorsDark();
+
+        float xscale, yscale;
+        glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
+        float main_scale = (xscale + yscale) * 0.5f;
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.ScaleAllSizes(main_scale);
+        style.FontScaleDpi = main_scale;
+
+		ImGui_ImplGlfw_InitForOpenGL(_window, true);
+		ImGui_ImplOpenGL3_Init("#version 460");
+
         std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
         std::cout << "GPU: " << glGetString(GL_RENDERER) << std::endl;
     }
@@ -91,7 +113,21 @@ namespace GL {
         if (_window) {
             glfwDestroyWindow(_window);
         }
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
         glfwTerminate();
+    }
+
+    void BeginImGuiFrame() {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+    }
+
+    void EndImGuiFrame() {
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
     glm::ivec2 GetWindowSize() { return glm::ivec2(_windowWidth, _windowHeight); }

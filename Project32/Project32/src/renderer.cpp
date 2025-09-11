@@ -6,7 +6,8 @@
 #include "game.h"
 #include "GL.h"
 #include "textures.h"
-#include "wall.h" 
+#include "wall.h"
+#include "imgui.h"
 
 namespace Renderer {
     TextureManager _textures;
@@ -27,6 +28,12 @@ namespace Renderer {
 
     bool _wireframeMode = false;
     bool _showDebugInfo = true;
+    bool _showImGuiDemo = false;
+    bool _showSettingsWindow = true;
+
+    float _lightPosition[3] = { 10.0f, 10.0f, 10.0f };
+    float _backgroundColor[3] = { 0.05f, 0.05f, 0.1f };
+    float _fov = 90.0f;
 
     void Init() {
         LoadShaders();
@@ -89,15 +96,15 @@ namespace Renderer {
     }
 
     void RenderFrame() {
-        glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
+        glClearColor(_backgroundColor[0], _backgroundColor[1], _backgroundColor[2], 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::ivec2 windowSize = GL::GetWindowSize();
-        glm::mat4 projection = glm::perspective(glm::radians(90.0f),
+        glm::mat4 projection = glm::perspective(glm::radians(_fov),
             static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y), NEAR_PLANE, FAR_PLANE);
         glm::mat4 view = Game::GetViewMatrix();
         glm::vec3 playerPos = Game::GetPosition();
-        glm::vec3 lightPos = glm::vec3(10.0f, 10.0f, 10.0f);
+        glm::vec3 lightPos = glm::vec3(_lightPosition[0], _lightPosition[1], _lightPosition[2]);
 
         DrawSkybox(projection, view);
 
@@ -115,7 +122,6 @@ namespace Renderer {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
 
-        // Draw floor grid
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(1.0f, 1.0f);
 
@@ -139,10 +145,8 @@ namespace Renderer {
 
         glDisable(GL_POLYGON_OFFSET_FILL);
 
-        // Draw walls
         DrawWalls();
 
-		// Various positions for test cubes
         std::vector<glm::vec3> cubePositions = {
             glm::vec3(0, 1, -5),    glm::vec3(3, 1, -8),    glm::vec3(-4, 1, -3),
             glm::vec3(6, 1, 2),     glm::vec3(-2, 1, 7),    glm::vec3(8, 2, -2),
@@ -150,7 +154,6 @@ namespace Renderer {
             glm::vec3(15, 4, -7)
         };
 
-		// Draw test cubes
         const glm::vec3 cubeColor(0.8f, 0.3f, 0.2f);
         for (const auto& pos : cubePositions) {
             Transform cube{
@@ -160,7 +163,7 @@ namespace Renderer {
             _solidColorShader->SetBool("useTexture", true);
             _solidColorShader->SetMat4("model", cube.ToMatrix());
             _solidColorShader->SetVec3("color", cubeColor);
-			// Dont draw cubes for now
+            // Dont draw cubes for now
             //_cubeMesh->Draw();
         }
 
@@ -177,9 +180,22 @@ namespace Renderer {
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+        // Render ImGui
+        GL::BeginImGuiFrame();
+
         if (_showDebugInfo) {
-            DrawHUD();
+            DrawImGuiHUD();
         }
+
+        if (_showSettingsWindow) {
+            DrawSettingsWindow();
+        }
+
+        if (_showImGuiDemo) {
+            ImGui::ShowDemoWindow(&_showImGuiDemo);
+        }
+
+        GL::EndImGuiFrame();
     }
 
     void DrawSkybox(const glm::mat4& projection, const glm::mat4& view) {
@@ -193,35 +209,82 @@ namespace Renderer {
         _skybox->Draw();
     }
 
-    void DrawHUD() { // TODO: Refactor HUD rendering to a separate class/file
-        glDisable(GL_DEPTH_TEST);
+    void DrawImGuiHUD() {
+        ImGui::Begin("Debug Info", &_showDebugInfo, ImGuiWindowFlags_AlwaysAutoResize);
 
-        _wireframeShader->Bind();
-        glm::ivec2 windowSize = GL::GetWindowSize();
-        glm::mat4 hudProjection = glm::ortho(0.0f, static_cast<float>(windowSize.x),
-            0.0f, static_cast<float>(windowSize.y));
-        _wireframeShader->SetMat4("projection", hudProjection);
-        _wireframeShader->SetMat4("view", glm::mat4(1.0f));
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
+        // Player info
+        glm::vec3 playerPos = Game::GetPosition();
         float speed = Game::GetSpeed();
-        float speedBarLength = std::min(speed * 8.0f, 300.0f);
+        ImGui::Separator();
+        ImGui::Text("Player Position: (%.2f, %.2f, %.2f)", playerPos.x, playerPos.y, playerPos.z);
+        ImGui::Text("Player Speed: %.2f", speed);
 
-        Transform speedBar{
-            .position = glm::vec3(50.0f, windowSize.y - 50.0f, 0.0f),
-            .scale = glm::vec3(speedBarLength, 15.0f, 1.0f),
-        };
-        _wireframeShader->SetMat4("model", speedBar.ToMatrix());
+        // Speed bar visualization
+        float speedNormalized = std::min(speed / 20.0f, 1.0f);
+        ImVec4 speedColor = speed > 15.0f ? ImVec4(1.0f, 0.2f, 0.2f, 1.0f) :
+            speed > 10.0f ? ImVec4(1.0f, 1.0f, 0.2f, 1.0f) :
+            ImVec4(0.2f, 1.0f, 0.2f, 1.0f);
+        ImGui::PushStyleColor(ImGuiCol_PlotHistogram, speedColor);
+        ImGui::ProgressBar(speedNormalized, ImVec2(200, 20), "");
+        ImGui::PopStyleColor();
 
-        glm::vec3 speedColor = speed > 15.0f ? glm::vec3(1.0f, 0.2f, 0.2f) :
-            speed > 10.0f ? glm::vec3(1.0f, 1.0f, 0.2f) :
-            glm::vec3(0.2f, 1.0f, 0.2f);
-        _wireframeShader->SetVec3("color", speedColor);
+        ImGui::Separator();
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        _quadMesh->Draw();
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        // Render settings
+        if (ImGui::CollapsingHeader("Render Settings")) {
+            if (ImGui::Button(_wireframeMode ? "Disable Wireframe" : "Enable Wireframe")) {
+                ToggleWireframe();
+            }
 
-        glEnable(GL_DEPTH_TEST);
+            ImGui::SameLine();
+            if (ImGui::Button("Toggle Settings")) {
+                _showSettingsWindow = !_showSettingsWindow;
+            }
+
+            if (ImGui::Button("Show ImGui Demo")) {
+                _showImGuiDemo = true;
+            }
+        }
+
+        // System info
+        if (ImGui::CollapsingHeader("System Info")) {
+            ImGui::Text("OpenGL Version: %s", glGetString(GL_VERSION));
+            ImGui::Text("GPU: %s", glGetString(GL_RENDERER));
+            ImGui::Text("GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+            glm::ivec2 windowSize = GL::GetWindowSize();
+            ImGui::Text("Window Size: %dx%d", windowSize.x, windowSize.y);
+        }
+
+        ImGui::End();
+    }
+
+    void DrawSettingsWindow() {
+        ImGui::Begin("Settings", &_showSettingsWindow);
+
+        if (ImGui::CollapsingHeader("Graphics", ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::ColorEdit3("Background Color", _backgroundColor);
+            ImGui::SliderFloat("FOV", &_fov, 45.0f, 120.0f);
+
+            bool vsync = GL::_vsync;
+            if (ImGui::Checkbox("V-Sync", &vsync)) {
+                GL::SetVSync(vsync);
+            }
+        }
+
+        if (ImGui::CollapsingHeader("Lighting")) {
+            ImGui::SliderFloat3("Light Position", _lightPosition, -20.0f, 20.0f);
+        }
+
+        if (ImGui::CollapsingHeader("Game")) {
+            if (ImGui::Button("Regenerate Maze")) {
+                ImGui::Text("Maze regeneration not implemented yet");
+            }
+        }
+
+        ImGui::End();
     }
 
     // Sets all pointers to null and deletes any allocated resources
@@ -238,7 +301,7 @@ namespace Renderer {
         _skybox.reset();
         _wallSystem.reset();
 
-        _textures.Clear(); 
+        _textures.Clear();
     }
 
     void ToggleWireframe() { _wireframeMode = !_wireframeMode; }

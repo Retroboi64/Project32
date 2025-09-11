@@ -2,6 +2,9 @@
 #include "input.h"
 #include "GL.h"
 
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+
 namespace Input {
     constexpr int MAX_KEYS = 512;
     bool _keyPressed[MAX_KEYS] = { false };
@@ -13,8 +16,11 @@ namespace Input {
     bool _mouseLocked = true;
 
     void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
-        _mouseX = xpos;
-        _mouseY = ypos;
+        ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+        {
+            _mouseX = xpos;
+            _mouseY = ypos;
+        }
     }
 
     void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {

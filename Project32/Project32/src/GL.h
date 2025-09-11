@@ -18,4 +18,6 @@ namespace GL {
     void SwapBuffersPollEvents();
     void Cleanup();
     glm::ivec2 GetWindowSize();
+	void BeginImGuiFrame();
+	void EndImGuiFrame();
 }
