@@ -365,3 +365,7 @@ FodyWeavers.xsd
 # Allow glfw/lib/Debug and Release to be tracked
 !glfw/lib/Debug/
 !glfw/lib/Release/
+!dlls/Release/
+!dlls/Debug/
+
+./TODO.md
