@@ -17,7 +17,9 @@ public:
 
     void LoadData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
     void Draw() const;
+
     bool IsValid() const;
+    int GetIndexCount() const { return _indexCount; }
 };
 
 namespace StaticMeshes {

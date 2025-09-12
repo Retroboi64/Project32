@@ -14,7 +14,6 @@ public:
         bool hasNormals = false;
         bool hasTexCoords = false;
 
-        // Bounding box info
         glm::vec3 minBounds = glm::vec3(FLT_MAX);
         glm::vec3 maxBounds = glm::vec3(-FLT_MAX);
         glm::vec3 center = glm::vec3(0.0f);

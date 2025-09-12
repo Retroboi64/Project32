@@ -25,7 +25,7 @@ namespace Renderer {
     std::unique_ptr<Mesh> _sphereMesh;
     std::unique_ptr<Mesh> _capsuleMesh;
 
-	std::unique_ptr<ModelImporter::LoadedModel> _loadedModel;
+	std::vector<std::unique_ptr<ModelImporter::LoadedModel>> _loadedModels;
 
     std::unique_ptr<Skybox> _skybox;
 
@@ -45,15 +45,11 @@ namespace Renderer {
         LoadShaders();
         LoadSkybox();
         LoadLevel();
+		LoadModels();
+    }
 
-		// TODO: Improve model loading system
-        _loadedModel = ModelImporter::LoadFromFile("res/models/Sphere.obj");
-        if (_loadedModel) {
-            std::cout << "Successfully loaded model with " << _loadedModel->meshes.size() << " meshes" << std::endl;
-        }
-        else {
-            std::cout << "Failed to load model" << std::endl;
-        }
+    void LoadModels() {
+		_loadedModels.emplace_back(ModelImporter::LoadFromFile("res/models/Sphere.obj"));
     }
 
     // TODO: Improve this
@@ -188,7 +184,13 @@ namespace Renderer {
         _solidColorShader->SetBool("useTexture", true);
         _solidColorShader->SetMat4("model", Model.ToMatrix());
         _solidColorShader->SetVec3("color", cubeColor);
-        _loadedModel->meshes[0]->Draw();
+        for (const auto& model : _loadedModels) {
+            if (model) {
+                for (const auto& mesh : model->meshes) {
+                    mesh->Draw();
+                }
+            }
+        }
 
         // Soon To Be Playermodel For Testing
         const glm::vec3 capsuleColor(0.2f, 0.3f, 0.8f);

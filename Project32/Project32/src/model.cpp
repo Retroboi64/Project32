@@ -7,8 +7,7 @@ void ModelImporter::LoadedModel::CalculateBounds() {
     minBounds = glm::vec3(FLT_MAX);
     maxBounds = glm::vec3(-FLT_MAX);
 
-    // This is a simplified version - you'd need to access vertex data from meshes
-    // For now, we'll calculate bounds during loading
+    // This is a simplified version
     center = (minBounds + maxBounds) * 0.5f;
     size = maxBounds - minBounds;
 }
@@ -23,7 +22,6 @@ std::unique_ptr<ModelImporter::LoadedModel> ModelImporter::LoadFromFile(const st
     std::vector<tinyobj::material_t> materials;
     std::string warn, err;
 
-    // Load the OBJ file
     bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filePath.c_str());
 
     if (!warn.empty()) {
@@ -42,51 +40,42 @@ std::unique_ptr<ModelImporter::LoadedModel> ModelImporter::LoadFromFile(const st
     std::cout << "Loading model: " << filePath << std::endl;
     std::cout << "Shapes: " << shapes.size() << ", Materials: " << materials.size() << std::endl;
 
-    // Store material names
     for (const auto& material : materials) {
         model->materialNames.push_back(material.name);
     }
 
-    // Check what data is available
     model->hasNormals = !attrib.normals.empty();
     model->hasTexCoords = !attrib.texcoords.empty();
 
-    // Process each shape (mesh)
     for (size_t s = 0; s < shapes.size(); s++) {
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
         std::unordered_map<std::string, unsigned int> vertexMap;
 
-        // Process each face
         size_t indexOffset = 0;
         for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
             int fv = shapes[s].mesh.num_face_vertices[f];
 
-            // Only support triangular faces
             if (fv != 3) {
                 std::cerr << "Warning: Non-triangular face found in shape " << s << std::endl;
                 indexOffset += fv;
                 continue;
             }
 
-            // Process each vertex in the face
             for (size_t v = 0; v < 3; v++) {
                 tinyobj::index_t idx = shapes[s].mesh.indices[indexOffset + v];
 
                 Vertex vertex;
 
-                // Position (required)
                 if (idx.vertex_index >= 0) {
                     vertex.position.x = attrib.vertices[3 * idx.vertex_index + 0];
                     vertex.position.y = attrib.vertices[3 * idx.vertex_index + 1];
                     vertex.position.z = attrib.vertices[3 * idx.vertex_index + 2];
 
-                    // Update bounds
                     model->minBounds = glm::min(model->minBounds, vertex.position);
                     model->maxBounds = glm::max(model->maxBounds, vertex.position);
                 }
 
-                // Normal
                 if (idx.normal_index >= 0) {
                     vertex.normal.x = attrib.normals[3 * idx.normal_index + 0];
                     vertex.normal.y = attrib.normals[3 * idx.normal_index + 1];
@@ -96,26 +85,23 @@ std::unique_ptr<ModelImporter::LoadedModel> ModelImporter::LoadFromFile(const st
                     vertex.normal = glm::vec3(0.0f, 1.0f, 0.0f); // Default normal
                 }
 
-                // Texture coordinates
                 if (idx.texcoord_index >= 0) {
                     vertex.uv.x = attrib.texcoords[2 * idx.texcoord_index + 0];
                     vertex.uv.y = flipTextureCoords ?
                         1.0f - attrib.texcoords[2 * idx.texcoord_index + 1] :
                         attrib.texcoords[2 * idx.texcoord_index + 1];
-                    vertex.texCoord = vertex.uv; // Copy to texCoord field as well
+                    vertex.texCoord = vertex.uv;
                 }
                 else {
                     vertex.uv = glm::vec2(0.0f);
                     vertex.texCoord = glm::vec2(0.0f);
                 }
 
-                // Initialize bone data to zero
                 for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {
                     vertex.m_BoneIDs[i] = 0;
                     vertex.m_Weights[i] = 0.0f;
                 }
 
-                // Create a unique key for this vertex to avoid duplicates
                 std::string vertexKey = std::to_string(vertex.position.x) + "_" +
                     std::to_string(vertex.position.y) + "_" +
                     std::to_string(vertex.position.z) + "_" +
@@ -128,11 +114,9 @@ std::unique_ptr<ModelImporter::LoadedModel> ModelImporter::LoadFromFile(const st
                 unsigned int vertexIndex;
                 auto it = vertexMap.find(vertexKey);
                 if (it != vertexMap.end()) {
-                    // Vertex already exists
                     vertexIndex = it->second;
                 }
                 else {
-                    // New vertex
                     vertexIndex = static_cast<unsigned int>(vertices.size());
                     vertices.push_back(vertex);
                     vertexMap[vertexKey] = vertexIndex;
@@ -144,15 +128,12 @@ std::unique_ptr<ModelImporter::LoadedModel> ModelImporter::LoadFromFile(const st
             indexOffset += fv;
         }
 
-        // Generate normals if requested and not present
         if (generateNormals && !model->hasNormals) {
             GenerateNormals(vertices, indices);
         }
 
-        // Generate tangent space
         GenerateTangentSpace(vertices, indices);
 
-        // Create mesh
         auto mesh = std::make_unique<Mesh>();
         mesh->LoadData(vertices, indices);
         model->meshes.push_back(std::move(mesh));
@@ -161,7 +142,6 @@ std::unique_ptr<ModelImporter::LoadedModel> ModelImporter::LoadFromFile(const st
             << indices.size() / 3 << " triangles" << std::endl;
     }
 
-    // Calculate final bounds
     model->center = (model->minBounds + model->maxBounds) * 0.5f;
     model->size = model->maxBounds - model->minBounds;
 
@@ -174,12 +154,10 @@ std::unique_ptr<ModelImporter::LoadedModel> ModelImporter::LoadFromFile(const st
 }
 
 void ModelImporter::GenerateNormals(std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) {
-    // Reset all normals to zero
     for (auto& vertex : vertices) {
         vertex.normal = glm::vec3(0.0f);
     }
 
-    // Calculate face normals and accumulate them at vertices
     for (size_t i = 0; i < indices.size(); i += 3) {
         const glm::vec3& p1 = vertices[indices[i]].position;
         const glm::vec3& p2 = vertices[indices[i + 1]].position;
@@ -192,20 +170,17 @@ void ModelImporter::GenerateNormals(std::vector<Vertex>& vertices, const std::ve
         vertices[indices[i + 2]].normal += faceNormal;
     }
 
-    // Normalize all normals
     for (auto& vertex : vertices) {
         vertex.normal = glm::normalize(vertex.normal);
     }
 }
 
 void ModelImporter::GenerateTangentSpace(std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) {
-    // Initialize tangent and bitangent to zero
     for (auto& vertex : vertices) {
         vertex.tangent = glm::vec3(0.0f);
         vertex.bitangent = glm::vec3(0.0f);
     }
 
-    // Calculate tangent and bitangent for each triangle
     for (size_t i = 0; i < indices.size(); i += 3) {
         unsigned int i0 = indices[i];
         unsigned int i1 = indices[i + 1];
@@ -241,13 +216,10 @@ void ModelImporter::GenerateTangentSpace(std::vector<Vertex>& vertices, const st
         }
     }
 
-    // Orthogonalize and normalize tangent space
     for (auto& vertex : vertices) {
         if (glm::length(vertex.tangent) > 0.001f) {
-            // Gram-Schmidt orthogonalize
             vertex.tangent = glm::normalize(vertex.tangent - vertex.normal * glm::dot(vertex.normal, vertex.tangent));
 
-            // Calculate handedness and make sure bitangent is correct
             if (glm::dot(glm::cross(vertex.normal, vertex.tangent), vertex.bitangent) < 0.0f) {
                 vertex.tangent = -vertex.tangent;
             }
