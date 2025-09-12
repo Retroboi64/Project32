@@ -13,6 +13,7 @@ namespace Renderer {
     void LoadShaders();
     void LoadLevel();
 	void LoadModels();
+	void LoadScene();
     void DrawSkybox(const glm::mat4& projection, const glm::mat4& view);
     void DrawWalls();
     void Cleanup();

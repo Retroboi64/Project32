@@ -11,6 +11,7 @@ public:
     struct LoadedModel {
         std::vector<std::unique_ptr<Mesh>> meshes;
         std::vector<std::string> materialNames;
+
         bool hasNormals = false;
         bool hasTexCoords = false;
 
@@ -20,6 +21,7 @@ public:
         glm::vec3 size = glm::vec3(0.0f);
 
         void CalculateBounds();
+        std::string GetName();
     };
 
     static std::unique_ptr<LoadedModel> LoadFromFile(const std::string& filePath,

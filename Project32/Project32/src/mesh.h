@@ -8,6 +8,8 @@ private:
     GLuint _VAO = 0, _VBO = 0, _EBO = 0;
     GLuint _indexCount = 0;
 
+    std::string _name;
+
 public:
     Mesh() = default;
     ~Mesh();
@@ -16,10 +18,12 @@ public:
     Mesh& operator=(const Mesh&) = delete;
 
     void LoadData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+    void SetName(std::string name) { _name = name; };
     void Draw() const;
 
     bool IsValid() const;
     int GetIndexCount() const { return _indexCount; }
+    std::string GetName() const { return _name; }
 };
 
 namespace StaticMeshes {

@@ -9,6 +9,7 @@
 #include "wall.h"
 #include "imgui.h"
 #include "model.h"
+#include "scene.h"
 
 namespace Renderer {
     TextureManager _textures;
@@ -46,6 +47,7 @@ namespace Renderer {
         LoadSkybox();
         LoadLevel();
 		LoadModels();
+        LoadScene(); // Testing with a scene system
     }
 
     void LoadModels() {
@@ -57,6 +59,16 @@ namespace Renderer {
         _wallSystem = std::make_unique<WallSystem>();
         _wallSystem->CreateMaze();
     }
+
+    void LoadScene() {
+		// Simple test using the scene system
+		SceneManager sceneManager;
+		sceneManager.CreateNewScene();
+		Scene* scene = sceneManager.GetCurrentScene();
+        if (scene) {
+            scene->AddSphere("TestSphere", 16, 16, 0.5f);
+		}
+	}
 
     void LoadShaders() {
         _solidColorShader = std::make_unique<Shader>();

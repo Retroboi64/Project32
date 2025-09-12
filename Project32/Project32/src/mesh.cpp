@@ -45,6 +45,10 @@ void Mesh::Draw() const {
     }
 }
 
+bool Mesh::IsValid() const {
+    return _VAO != 0 && _VBO != 0 && _EBO != 0 && _indexCount > 0;
+}
+
 namespace StaticMeshes
 {
     std::unique_ptr<Mesh> GetQuad() {
