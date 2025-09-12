@@ -13,12 +13,9 @@
 
 namespace Renderer {
     TextureManager _textures;
+	ShaderManager _shaderManager;
 
     std::unique_ptr<WallSystem> _wallSystem;
-
-    std::unique_ptr<Shader> _solidColorShader;
-    std::unique_ptr<Shader> _wireframeShader;
-    std::unique_ptr<Shader> _skyboxShader;
 
     std::unique_ptr<Mesh> _quadMesh;
     std::unique_ptr<Mesh> _cubeMesh;
@@ -71,13 +68,9 @@ namespace Renderer {
 	}
 
     void LoadShaders() {
-        _solidColorShader = std::make_unique<Shader>();
-        _wireframeShader = std::make_unique<Shader>();
-        _skyboxShader = std::make_unique<Shader>();
-
-        _solidColorShader->Load("solidcolor.vert", "solidcolor.frag");
-        _wireframeShader->Load("solidcolor.vert", "wireframe.frag");
-        _skyboxShader->Load("skybox.vert", "skybox.frag");
+		_shaderManager.LoadShader("SolidColor", "solidcolor.vert", "solidcolor.frag");
+		_shaderManager.LoadShader("Wireframe", "solidcolor.vert", "wireframe.frag");
+		_shaderManager.LoadShader("Skybox", "skybox.vert", "skybox.frag");
     }
 
     void LoadSkybox() {
@@ -103,14 +96,14 @@ namespace Renderer {
     void DrawWalls() {
         if (!_wallSystem) return;
 
-        _solidColorShader->SetBool("useTexture", true);
+		_shaderManager.GetShader("SolidColor")->SetBool("useTexture", true);
         _textures.BindTexture(_textures.FindTextureByName("Wall"), GL_TEXTURE0);
 
         const auto& walls = _wallSystem->GetWalls();
         for (const auto& wall : walls) {
             Transform wallTransform = wall.GetTransform();
-            _solidColorShader->SetMat4("model", wallTransform.ToMatrix());
-            _solidColorShader->SetVec3("color", wall.color);
+            _shaderManager.GetShader("SolidColor")->SetMat4("model", wallTransform.ToMatrix());
+            _shaderManager.GetShader("SolidColor")->SetVec3("color", wall.color);
             _cubeMesh->Draw();
         }
     }
@@ -128,15 +121,15 @@ namespace Renderer {
 
         DrawSkybox(projection, view);
 
-        _solidColorShader->Bind();
-        _solidColorShader->SetMat4("projection", projection);
-        _solidColorShader->SetMat4("view", view);
-        _solidColorShader->SetVec3("lightPos", lightPos);
-        _solidColorShader->SetVec3("viewPos", playerPos);
+        _shaderManager.GetShader("SolidColor")->Bind();
+        _shaderManager.GetShader("SolidColor")->SetMat4("projection", projection);
+        _shaderManager.GetShader("SolidColor")->SetMat4("view", view);
+        _shaderManager.GetShader("SolidColor")->SetVec3("lightPos", lightPos);
+        _shaderManager.GetShader("SolidColor")->SetVec3("viewPos", playerPos);
 
         _textures.BindTexture(_textures.FindTextureByName("Wall"), GL_TEXTURE0);
-        _solidColorShader->SetInt("uTexture", 0);
-        _solidColorShader->SetBool("useTexture", false);
+        _shaderManager.GetShader("SolidColor")->SetInt("uTexture", 0);
+        _shaderManager.GetShader("SolidColor")->SetBool("useTexture", false);
 
         if (_wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -154,10 +147,10 @@ namespace Renderer {
                 gridSquare.position = glm::vec3(x, 0, z);
                 gridSquare.scale = glm::vec3(1.0f, 0.1f, 1.0f);
 
-                _solidColorShader->SetMat4("model", gridSquare.ToMatrix());
+                _shaderManager.GetShader("SolidColor")->SetMat4("model", gridSquare.ToMatrix());
 
                 bool lightSquare = ((x + z) % 2) == 0;
-                _solidColorShader->SetVec3("color", lightSquare ? LIGHT_SQUARE : DARK_SQUARE);
+                _shaderManager.GetShader("SolidColor")->SetVec3("color", lightSquare ? LIGHT_SQUARE : DARK_SQUARE);
 
                 _quadMesh->Draw();
             }
@@ -181,9 +174,9 @@ namespace Renderer {
                 .scale = glm::vec3(2.0f)
             };
 
-            _solidColorShader->SetBool("useTexture", true);
-            _solidColorShader->SetMat4("model", cube.ToMatrix());
-            _solidColorShader->SetVec3("color", cubeColor);
+            _shaderManager.GetShader("SolidColor")->SetBool("useTexture", true);
+            _shaderManager.GetShader("SolidColor")->SetMat4("model", cube.ToMatrix());
+            _shaderManager.GetShader("SolidColor")->SetVec3("color", cubeColor);
             // Dont draw cubes for now
             //_cubeMesh->Draw();
         }
@@ -193,9 +186,9 @@ namespace Renderer {
               .scale = glm::vec3(1.0f)
 	    };
 
-        _solidColorShader->SetBool("useTexture", true);
-        _solidColorShader->SetMat4("model", Model.ToMatrix());
-        _solidColorShader->SetVec3("color", cubeColor);
+        _shaderManager.GetShader("SolidColor")->SetBool("useTexture", true);
+        _shaderManager.GetShader("SolidColor")->SetMat4("model", Model.ToMatrix());
+        _shaderManager.GetShader("SolidColor")->SetVec3("color", cubeColor);
         for (const auto& model : _loadedModels) {
             if (model) {
                 for (const auto& mesh : model->meshes) {
@@ -210,11 +203,29 @@ namespace Renderer {
             .position = glm::vec3(0.0f, 1.0f, -2.0f),
             .scale = glm::vec3(1.0f),
         };
-        _solidColorShader->SetBool("useTexture", false);
-        _solidColorShader->SetMat4("model", capsule.ToMatrix());
-        _solidColorShader->SetVec3("color", capsuleColor);
+        _shaderManager.GetShader("SolidColor")->SetBool("useTexture", false);
+        _shaderManager.GetShader("SolidColor")->SetMat4("model", capsule.ToMatrix());
+        _shaderManager.GetShader("SolidColor")->SetVec3("color", capsuleColor);
         _capsuleMesh->Draw();
 
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glEnable(GL_DEPTH);
+
+        Transform playerCollision{
+            .position = (Game::GetPosition() - glm::vec3(0.0f, 0.5f, 0.0f)),
+            .rotation = glm::vec3(0.0f, 0.0f, 0.0f),
+            .scale = glm::vec3(0.1f, 0.0f, 0.1f),
+        };
+
+		const glm::vec3 playerCollisionColor(0.0f, 0.7f, 0.0f);
+        _shaderManager.GetShader("SolidColor")->Bind();
+        _shaderManager.GetShader("SolidColor")->SetMat4("projection", projection);
+        _shaderManager.GetShader("SolidColor")->SetMat4("view", view);
+        _shaderManager.GetShader("SolidColor")->SetMat4("model", playerCollision.ToMatrix());
+        _shaderManager.GetShader("SolidColor")->SetVec3("color", playerCollisionColor);
+        _loadedModels[0]->meshes[0]->Draw();
+
+        glDisable(GL_DEPTH);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         // Render ImGui
@@ -238,10 +249,10 @@ namespace Renderer {
     void DrawSkybox(const glm::mat4& projection, const glm::mat4& view) {
         glm::mat4 skyboxView = glm::mat4(glm::mat3(view));
 
-        _skyboxShader->Bind();
-        _skyboxShader->SetMat4("view", skyboxView);
-        _skyboxShader->SetMat4("projection", projection);
-        _skyboxShader->SetInt("skybox", 0);
+        _shaderManager.GetShader("Skybox")->Bind();
+        _shaderManager.GetShader("Skybox")->SetMat4("view", skyboxView);
+        _shaderManager.GetShader("Skybox")->SetMat4("projection", projection);
+        _shaderManager.GetShader("Skybox")->SetInt("skybox", 0);
 
         _skybox->Draw();
     }
@@ -324,12 +335,7 @@ namespace Renderer {
         ImGui::End();
     }
 
-    // Sets all pointers to null and deletes any allocated resources
-    // TODO: Make this more robust and handle errors
     void Cleanup() {
-        _solidColorShader.reset();
-        _wireframeShader.reset();
-        _skyboxShader.reset();
         _quadMesh.reset();
         _cubeMesh.reset();
         _cylinderMesh.reset();
@@ -339,6 +345,7 @@ namespace Renderer {
         _wallSystem.reset();
 
         _textures.Clear();
+		_shaderManager.Clear();
     }
 
     void ToggleWireframe() { _wireframeMode = !_wireframeMode; }

@@ -96,6 +96,9 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>Source Files\vendor\stb</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common.h">
@@ -144,6 +147,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\math.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

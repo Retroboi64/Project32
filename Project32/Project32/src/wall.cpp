@@ -1,6 +1,4 @@
 #include "wall.h"
-#include <algorithm>
-#include <cmath>
 
 void WallSystem::AddWall(const glm::vec3& pos, const glm::vec3& scale,
     const glm::vec3& color, const glm::vec3& rotation) {

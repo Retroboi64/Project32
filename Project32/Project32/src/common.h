@@ -27,6 +27,13 @@
 #include <memory>
 #include <utility>
 #include <map>
+#include <array>
+#include <cfloat>
+#include <optional>
+#include <chrono>
+#include <filesystem>
+
+#include <tiny_obj_loader.h>
 
 #include "stb_image.h"
 

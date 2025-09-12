@@ -1,5 +1,6 @@
 #include "shader.h"
 
+// Shader implementation
 bool Shader::CheckErrors(unsigned int shader, const std::string& type) {
     int success;
     char infoLog[1024];
@@ -123,4 +124,33 @@ void Shader::SetBool(const std::string& name, bool value) {
 
 bool Shader::IsValid() const {
     return _ID != -1;
+}
+
+// ShaderManager implementation
+bool ShaderManager::LoadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath) {
+    if (_shaders.find(name) != _shaders.end()) {
+        std::cerr << "Shader with name '" << name << "' already exists." << std::endl;
+        return false;
+    }
+    auto shader = std::make_unique<Shader>();
+    shader->Load(vertexPath, fragmentPath);
+    if (!shader->IsValid()) {
+        std::cerr << "Failed to load shader: " << name << std::endl;
+        return false;
+    }
+    _shaders[name] = std::move(shader);
+    return true;
+}
+
+Shader* ShaderManager::GetShader(const std::string& name) {
+    auto it = _shaders.find(name);
+    if (it != _shaders.end()) {
+        return it->second.get();
+    }
+    std::cerr << "Shader with name '" << name << "' not found." << std::endl;
+    return nullptr;
+}
+
+void ShaderManager::Clear() {
+    _shaders.clear();
 }

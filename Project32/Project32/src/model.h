@@ -2,9 +2,6 @@
 
 #include "common.h"
 #include "mesh.h"
-#include <cfloat>
-
-#include <tiny_obj_loader.h>
 
 class ModelImporter {
 public:

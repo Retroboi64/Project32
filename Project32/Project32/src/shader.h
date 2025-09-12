@@ -22,3 +22,19 @@ public:
     bool IsValid() const;
 	int GetID() const { return _ID; }
 };
+
+class ShaderManager {
+private:
+	std::unordered_map<std::string, std::unique_ptr<Shader>> _shaders;
+
+public:
+    ShaderManager() = default;
+    ~ShaderManager() = default;
+
+    ShaderManager(const ShaderManager&) = delete;
+    ShaderManager& operator=(const ShaderManager&) = delete;
+
+    bool LoadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
+    Shader* GetShader(const std::string& name);
+	void Clear();
+};
