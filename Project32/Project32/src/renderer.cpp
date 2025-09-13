@@ -16,6 +16,7 @@ namespace Renderer {
 	ShaderManager _shaderManager;
 
     std::unique_ptr<WallSystem> _wallSystem;
+	std::unique_ptr<SceneManager> _sceneManager;
 
     std::unique_ptr<Mesh> _quadMesh;
     std::unique_ptr<Mesh> _cubeMesh;
@@ -58,14 +59,20 @@ namespace Renderer {
     }
 
     void LoadScene() {
-		// Simple test using the scene system
-		SceneManager sceneManager;
-		sceneManager.CreateNewScene();
-		Scene* scene = sceneManager.GetCurrentScene();
-        if (scene) {
-            scene->AddSphere("TestSphere", 16, 16, 0.5f);
-		}
-	}
+		// TODO: Make this load from a file or something
+
+		// Testing scene manager
+		_sceneManager = std::make_unique<SceneManager>();
+		_sceneManager->CreateScene();
+
+		_sceneManager->GetCurrentScene()->AddSphere("TestSphere", 16, 16, 1.0f, Transform{ .position = glm::vec3(0.0f, 1.0f, -2.0f) });
+		_sceneManager->GetCurrentScene()->DebugPrint();
+        
+		// Testing standalone scene
+		auto scene = std::make_unique<Scene>();
+        scene->AddSphere("TestSphereStandalone", 16, 16, 1.0f, Transform{ glm::vec3(0,1,-5), glm::vec3(10.0f), glm::vec3(0.0f) });
+		scene->DebugPrint();
+    }
 
     void LoadShaders() {
 		_shaderManager.LoadShader("SolidColor", "solidcolor.vert", "solidcolor.frag");
@@ -197,16 +204,9 @@ namespace Renderer {
             }
         }
 
-        // Soon To Be Playermodel For Testing
-        const glm::vec3 capsuleColor(0.2f, 0.3f, 0.8f);
-        Transform capsule{
-            .position = glm::vec3(0.0f, 1.0f, -2.0f),
-            .scale = glm::vec3(1.0f),
-        };
-        _shaderManager.GetShader("SolidColor")->SetBool("useTexture", false);
-        _shaderManager.GetShader("SolidColor")->SetMat4("model", capsule.ToMatrix());
-        _shaderManager.GetShader("SolidColor")->SetVec3("color", capsuleColor);
-        _capsuleMesh->Draw();
+        // Test
+		_sceneManager->GetCurrentScene()->DrawMeshes(*_shaderManager.GetShader("SolidColor"));
+        //_capsuleMesh->Draw();
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glEnable(GL_DEPTH);
