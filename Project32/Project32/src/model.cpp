@@ -234,3 +234,12 @@ glm::vec3 ModelImporter::CalculateNormal(const glm::vec3& p1, const glm::vec3& p
     glm::vec3 v = p3 - p1;
     return glm::normalize(glm::cross(u, v));
 }
+
+Mesh* ModelImporter::LoadedModel::GetMeshByName(const std::string& name) {
+    for (const auto& mesh : meshes) {
+        if (mesh->GetName() == name) {
+            return mesh.get();
+        }
+    }
+    return nullptr;
+}
