@@ -1,6 +1,53 @@
+#define _CRT_SECURE_NO_WARNINGS 
+
 #include "scene.h"
+#include <sstream>
+#include <iomanip>
+#include <fstream>
+#include <iostream>
+#include <map>
 
 uint32_t SceneObject::_nextId = 1;
+
+// SceneUtils implementation
+namespace SceneUtils {
+    Transform ParseTransform(const json& transformJson) {
+        Transform transform;
+
+        if (transformJson.contains("position") && transformJson["position"].is_array() &&
+            transformJson["position"].size() >= 3) {
+            const auto& pos = transformJson["position"];
+            transform.position = glm::vec3(pos[0].get<float>(), pos[1].get<float>(), pos[2].get<float>());
+        }
+
+        if (transformJson.contains("rotation") && transformJson["rotation"].is_array() &&
+            transformJson["rotation"].size() >= 3) {
+            const auto& rot = transformJson["rotation"];
+            transform.rotation = glm::vec3(rot[0].get<float>(), rot[1].get<float>(), rot[2].get<float>());
+        }
+
+        if (transformJson.contains("scale")) {
+            const auto& scale = transformJson["scale"];
+            if (scale.is_array() && scale.size() >= 3) {
+                transform.scale = glm::vec3(scale[0].get<float>(), scale[1].get<float>(), scale[2].get<float>());
+            }
+            else if (scale.is_number()) {
+                float uniformScale = scale.get<float>();
+                transform.scale = glm::vec3(uniformScale);
+            }
+        }
+
+        return transform;
+    }
+
+    json TransformToJSON(const Transform& transform) {
+        json transformJson;
+        transformJson["position"] = { transform.position.x, transform.position.y, transform.position.z };
+        transformJson["rotation"] = { transform.rotation.x, transform.rotation.y, transform.rotation.z };
+        transformJson["scale"] = { transform.scale.x, transform.scale.y, transform.scale.z };
+        return transformJson;
+    }
+}
 
 // SceneObject implementation
 SceneObject::SceneObject(std::string name, std::unique_ptr<Mesh> mesh, const Transform& transform, Type type)
@@ -36,8 +83,7 @@ json SceneObject::ToJSON() const {
     case Type::Custom: objectJson["type"] = "custom"; break;
     }
 
-	// CHANGE ME: When Scene::TransformToJSON is moved to a utility namespace/class
-    objectJson["transform"] = Scene::TransformToJSON(_transform);
+    objectJson["transform"] = SceneUtils::TransformToJSON(_transform);
 
     if (!_parameters.empty()) {
         objectJson["parameters"] = _parameters;
@@ -64,8 +110,7 @@ std::unique_ptr<SceneObject> SceneObject::FromJSON(const json& objectJson) {
 
     Transform transform;
     if (objectJson.contains("transform")) {
-		// UPDATE ME: When Scene::ParseTransform is moved to a utility namespace/class
-        transform = Scene::ParseTransform(objectJson["transform"]);
+        transform = SceneUtils::ParseTransform(objectJson["transform"]);
     }
 
     std::unique_ptr<Mesh> mesh;
@@ -447,45 +492,6 @@ std::string Scene::GenerateUniqueName(const std::string& baseName) const {
     } while (!IsNameAvailable(uniqueName));
 
     return uniqueName;
-}
-
-// FIX ME: Store these functions properly perhaps in a utility namespace or class
-Transform Scene::ParseTransform(const json& transformJson) {
-    Transform transform;
-
-    if (transformJson.contains("position") && transformJson["position"].is_array() &&
-        transformJson["position"].size() >= 3) {
-        const auto& pos = transformJson["position"];
-        transform.position = glm::vec3(pos[0].get<float>(), pos[1].get<float>(), pos[2].get<float>());
-    }
-
-    if (transformJson.contains("rotation") && transformJson["rotation"].is_array() &&
-        transformJson["rotation"].size() >= 3) {
-        const auto& rot = transformJson["rotation"];
-        transform.rotation = glm::vec3(rot[0].get<float>(), rot[1].get<float>(), rot[2].get<float>());
-    }
-
-    if (transformJson.contains("scale")) {
-        const auto& scale = transformJson["scale"];
-        if (scale.is_array() && scale.size() >= 3) {
-            transform.scale = glm::vec3(scale[0].get<float>(), scale[1].get<float>(), scale[2].get<float>());
-        }
-        else if (scale.is_number()) {
-            float uniformScale = scale.get<float>();
-            transform.scale = glm::vec3(uniformScale);
-        }
-    }
-
-    return transform;
-}
-
-// FIX ME: Store these functions properly perhaps in a utility namespace or class
-json Scene::TransformToJSON(const Transform& transform) {
-    json transformJson;
-    transformJson["position"] = { transform.position.x, transform.position.y, transform.position.z };
-    transformJson["rotation"] = { transform.rotation.x, transform.rotation.y, transform.rotation.z };
-    transformJson["scale"] = { transform.scale.x, transform.scale.y, transform.scale.z };
-    return transformJson;
 }
 
 json Scene::MetadataToJSON(const Metadata& metadata) {

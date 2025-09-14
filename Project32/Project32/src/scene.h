@@ -17,14 +17,16 @@
 
 using json = nlohmann::json;
 
-// Forward declarations
 class Scene;
 class SceneNode;
 
-// Improved SceneObject with better encapsulation
+namespace SceneUtils {
+    Transform ParseTransform(const json& transformJson);
+    json TransformToJSON(const Transform& transform);
+}
+
 class SceneObject {
 public:
-    // Object types for better type safety
     enum class Type {
         Sphere,
         Cube,
@@ -34,14 +36,12 @@ public:
         Custom
     };
 
-    // Constructors
     SceneObject(std::string name, std::unique_ptr<Mesh> mesh, const Transform& transform, Type type = Type::Custom);
     SceneObject(const SceneObject&) = delete;
     SceneObject& operator=(const SceneObject&) = delete;
     SceneObject(SceneObject&&) = default;
     SceneObject& operator=(SceneObject&&) = default;
 
-    // Getters
     const std::string& GetName() const noexcept { return _name; }
     const Transform& GetTransform() const noexcept { return _transform; }
     Transform& GetTransform() noexcept { return _transform; }
@@ -51,12 +51,10 @@ public:
     uint32_t GetId() const noexcept { return _id; }
     bool IsVisible() const noexcept { return _visible; }
 
-    // Setters
     void SetTransform(const Transform& transform) { _transform = transform; }
     void SetVisible(bool visible) { _visible = visible; }
     void SetName(const std::string& name) { _name = name; }
 
-    // Operations
     void Draw() const;
     json ToJSON() const;
     static std::unique_ptr<SceneObject> FromJSON(const json& objectJson);
@@ -71,14 +69,11 @@ private:
 
     static uint32_t _nextId;
 
-    // Type-specific parameters stored as JSON for flexibility
     json _parameters;
 };
 
-// Scene class with improved design
 class Scene {
 public:
-    // Scene metadata
     struct Metadata {
         std::string name = "Untitled Scene";
         std::string description;
@@ -88,7 +83,6 @@ public:
         std::chrono::system_clock::time_point modified = std::chrono::system_clock::now();
     };
 
-    // Event system for scene changes
     using ObjectAddedCallback = std::function<void(const SceneObject&)>;
     using ObjectRemovedCallback = std::function<void(uint32_t id, const std::string& name)>;
     using ObjectModifiedCallback = std::function<void(const SceneObject&)>;
@@ -97,18 +91,15 @@ public:
     explicit Scene(const std::string& name);
     ~Scene() = default;
 
-    // Non-copyable but moveable
     Scene(const Scene&) = delete;
     Scene& operator=(const Scene&) = delete;
     Scene(Scene&&) = default;
     Scene& operator=(Scene&&) = default;
 
-    // Metadata operations
     const Metadata& GetMetadata() const noexcept { return _metadata; }
     void SetMetadata(const Metadata& metadata) { _metadata = metadata; UpdateModifiedTime(); }
     void SetName(const std::string& name) { _metadata.name = name; UpdateModifiedTime(); }
 
-    // Object management
     template<typename... Args>
     SceneObject* AddSphere(const std::string& name, Args&&... args);
     SceneObject* AddCube(const std::string& name, const Transform& transform = {});
@@ -122,7 +113,6 @@ public:
     bool RemoveObject(uint32_t id);
     void Clear();
 
-    // Object queries
     SceneObject* FindObject(const std::string& name) noexcept;
     const SceneObject* FindObject(const std::string& name) const noexcept;
     SceneObject* FindObject(uint32_t id) noexcept;
@@ -131,33 +121,27 @@ public:
     std::vector<SceneObject*> FindObjectsByType(SceneObject::Type type);
     std::vector<const SceneObject*> FindObjectsByType(SceneObject::Type type) const;
 
-    // Rendering
     void Render() const;
     void RenderObject(const std::string& name) const;
     void RenderObject(uint32_t id) const;
 
-    // Iteration support
     auto begin() noexcept { return _objects.begin(); }
     auto end() noexcept { return _objects.end(); }
     auto begin() const noexcept { return _objects.begin(); }
     auto end() const noexcept { return _objects.end(); }
 
-    // Properties
     size_t GetObjectCount() const noexcept { return _objects.size(); }
     bool IsEmpty() const noexcept { return _objects.empty(); }
 
-    // Serialization
     bool LoadFromFile(const std::string& filePath);
     bool SaveToFile(const std::string& filePath) const;
     bool LoadFromJSON(const json& sceneJson);
     json SaveToJSON() const;
 
-    // Event callbacks
     void SetObjectAddedCallback(ObjectAddedCallback callback) { _onObjectAdded = std::move(callback); }
     void SetObjectRemovedCallback(ObjectRemovedCallback callback) { _onObjectRemoved = std::move(callback); }
     void SetObjectModifiedCallback(ObjectModifiedCallback callback) { _onObjectModified = std::move(callback); }
 
-    // Debug
     void DebugPrint() const;
     void PrintStatistics() const;
 
@@ -167,26 +151,20 @@ private:
     std::unordered_map<uint32_t, size_t> _idToIndex;
     Metadata _metadata;
 
-    // Event callbacks
     ObjectAddedCallback _onObjectAdded;
     ObjectRemovedCallback _onObjectRemoved;
     ObjectModifiedCallback _onObjectModified;
 
-    // Helper methods
     void UpdateModifiedTime() { _metadata.modified = std::chrono::system_clock::now(); }
     void UpdateIndices();
     void AddObjectInternal(std::unique_ptr<SceneObject> object);
     bool IsNameAvailable(const std::string& name) const;
     std::string GenerateUniqueName(const std::string& baseName) const;
 
-    // JSON helpers
-    //static Transform ParseTransform(const json& transformJson);
-    //static json TransformToJSON(const Transform& transform);
     static json MetadataToJSON(const Metadata& metadata);
     static Metadata ParseMetadata(const json& metadataJson);
 };
 
-// Improved SceneManager with better resource management
 class SceneManager {
 public:
     static SceneManager& Instance() {
@@ -194,7 +172,6 @@ public:
         return instance;
     }
 
-    // Scene management
     Scene* CreateScene(const std::string& name = "New Scene");
     bool LoadScene(const std::string& filePath);
     bool SaveScene(size_t index, const std::string& filePath) const;
@@ -202,7 +179,6 @@ public:
     bool RemoveScene(size_t index);
     void RemoveAllScenes();
 
-    // Scene selection
     bool SetCurrentScene(size_t index);
     bool SetCurrentScene(const std::string& name);
     Scene* GetCurrentScene() noexcept;
@@ -213,16 +189,13 @@ public:
     Scene* GetScene(const std::string& name) noexcept;
     const Scene* GetScene(const std::string& name) const noexcept;
 
-    // Properties
     size_t GetSceneCount() const noexcept { return _scenes.size(); }
     std::optional<size_t> GetCurrentSceneIndex() const noexcept;
     std::vector<std::string> GetSceneNames() const;
 
-    // Rendering
     void RenderCurrentScene() const;
     void RenderScene(size_t index) const;
 
-    // Convenience methods for current scene
     template<typename... Args>
     SceneObject* AddSphereToCurrentScene(Args&&... args);
     template<typename... Args>
@@ -230,7 +203,6 @@ public:
     bool RemoveObjectFromCurrentScene(const std::string& name);
     SceneObject* FindObjectInCurrentScene(const std::string& name);
 
-    // Debug
     void PrintSceneList() const;
 
 private:
@@ -245,7 +217,6 @@ private:
     void UpdateCurrentSceneIndex();
 };
 
-// Template implementations
 template<typename... Args>
 SceneObject* Scene::AddSphere(const std::string& name, Args&&... args) {
     auto sphereMesh = StaticMeshes::GetSphere(std::forward<Args>(args)...);
