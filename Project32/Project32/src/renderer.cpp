@@ -16,7 +16,7 @@ namespace Renderer {
 	ShaderManager _shaderManager;
 
     std::unique_ptr<WallSystem> _wallSystem;
-	std::unique_ptr<SceneManager> _sceneManager;
+	auto& _sceneManager = SceneManager::Instance();
 
     std::unique_ptr<Mesh> _quadMesh;
     std::unique_ptr<Mesh> _cubeMesh;
@@ -59,19 +59,19 @@ namespace Renderer {
     }
 
     void LoadScene() {
-		// TODO: Make this load from a file or something
+        if (_sceneManager.LoadScene("res/scene.json")) {
+            std::cout << "Loaded scene from JSON file successfully" << std::endl;
+            if (auto* currentScene = _sceneManager.GetCurrentScene()) {
+                currentScene->DebugPrint();
+                currentScene->PrintStatistics();
+            }
+        }
+        else {
+            std::cout << "Failed to load scene from res/scene.json" << std::endl;
 
-		// Testing scene manager
-		_sceneManager = std::make_unique<SceneManager>();
-		_sceneManager->CreateScene();
-
-		_sceneManager->GetCurrentScene()->AddSphere("TestSphere", 16, 16, 1.0f, Transform{ .position = glm::vec3(0.0f, 1.0f, -2.0f) });
-        _sceneManager->GetCurrentScene()->DebugPrint();
-
-		// Testing standalone scene
-		auto scene = std::make_unique<Scene>();
-        scene->AddSphere("TestSphereStandalone", 16, 16, 1.0f, Transform{ glm::vec3(0,1,-5), glm::vec3(10.0f), glm::vec3(0.0f) });
-		scene->DebugPrint();
+            auto* defaultScene = _sceneManager.CreateScene("Default Scene");
+            std::cout << "Created default scene: " << defaultScene->GetMetadata().name << std::endl;
+        }
     }
 
     void LoadShaders() {
@@ -168,9 +168,9 @@ namespace Renderer {
         DrawWalls();
 
 	    _shaderManager.GetShader("SolidColor")->SetBool("useTexture", true);
-		_shaderManager.GetShader("SolidColor")->SetMat4("model", _sceneManager->GetMeshTransformInCurrentScene("TestSphere").ToMatrix());
+		_shaderManager.GetShader("SolidColor")->SetMat4("model", _sceneManager.GetCurrentScene()->FindObject("Ball")->GetTransform().ToMatrix());
 		_shaderManager.GetShader("SolidColor")->SetVec3("color", glm::vec3(0.2f, 0.8f, 0.3f));
-		_sceneManager->GetCurrentScene()->DrawMeshes();
+		_sceneManager.GetCurrentScene()->FindObject("Ball")->Draw();
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glEnable(GL_DEPTH);

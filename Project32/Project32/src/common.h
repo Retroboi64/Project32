@@ -32,6 +32,9 @@
 #include <optional>
 #include <chrono>
 #include <filesystem>
+#include <algorithm>
+#include <iomanip>
+#include <functional>
 
 #include <tiny_obj_loader.h>
 
