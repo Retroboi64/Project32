@@ -66,8 +66,8 @@ namespace Renderer {
 		_sceneManager->CreateScene();
 
 		_sceneManager->GetCurrentScene()->AddSphere("TestSphere", 16, 16, 1.0f, Transform{ .position = glm::vec3(0.0f, 1.0f, -2.0f) });
-		_sceneManager->GetCurrentScene()->DebugPrint();
-        
+        _sceneManager->GetCurrentScene()->DebugPrint();
+
 		// Testing standalone scene
 		auto scene = std::make_unique<Scene>();
         scene->AddSphere("TestSphereStandalone", 16, 16, 1.0f, Transform{ glm::vec3(0,1,-5), glm::vec3(10.0f), glm::vec3(0.0f) });
@@ -167,46 +167,10 @@ namespace Renderer {
 
         DrawWalls();
 
-        std::vector<glm::vec3> cubePositions = {
-            glm::vec3(0, 1, -5),    glm::vec3(3, 1, -8),    glm::vec3(-4, 1, -3),
-            glm::vec3(6, 1, 2),     glm::vec3(-2, 1, 7),    glm::vec3(8, 2, -2),
-            glm::vec3(-6, 3, -10),  glm::vec3(12, 1, 5),    glm::vec3(-8, 2, 12),
-            glm::vec3(15, 4, -7)
-        };
-
-        const glm::vec3 cubeColor(0.8f, 0.3f, 0.2f);
-        for (const auto& pos : cubePositions) {
-            Transform cube{
-                .position = pos,
-                .scale = glm::vec3(2.0f)
-            };
-
-            _shaderManager.GetShader("SolidColor")->SetBool("useTexture", true);
-            _shaderManager.GetShader("SolidColor")->SetMat4("model", cube.ToMatrix());
-            _shaderManager.GetShader("SolidColor")->SetVec3("color", cubeColor);
-            // Dont draw cubes for now
-            //_cubeMesh->Draw();
-        }
-
-        Transform Model{
-              .position = glm::vec3(-5.0f, 1.0f, -5.0f),
-              .scale = glm::vec3(1.0f)
-	    };
-
-        _shaderManager.GetShader("SolidColor")->SetBool("useTexture", true);
-        _shaderManager.GetShader("SolidColor")->SetMat4("model", Model.ToMatrix());
-        _shaderManager.GetShader("SolidColor")->SetVec3("color", cubeColor);
-        for (const auto& model : _loadedModels) {
-            if (model) {
-                for (const auto& mesh : model->meshes) {
-                    mesh->Draw();
-                }
-            }
-        }
-
-        // Test
-		_sceneManager->GetCurrentScene()->DrawMeshes(*_shaderManager.GetShader("SolidColor"));
-        //_capsuleMesh->Draw();
+	    _shaderManager.GetShader("SolidColor")->SetBool("useTexture", true);
+		_shaderManager.GetShader("SolidColor")->SetMat4("model", _sceneManager->GetMeshTransformInCurrentScene("TestSphere").ToMatrix());
+		_shaderManager.GetShader("SolidColor")->SetVec3("color", glm::vec3(0.2f, 0.8f, 0.3f));
+		_sceneManager->GetCurrentScene()->DrawMeshes();
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glEnable(GL_DEPTH);
@@ -219,11 +183,12 @@ namespace Renderer {
 
 		const glm::vec3 playerCollisionColor(0.0f, 0.7f, 0.0f);
         _shaderManager.GetShader("SolidColor")->Bind();
+		_shaderManager.GetShader("SolidColor")->SetBool("useTexture", false);
         _shaderManager.GetShader("SolidColor")->SetMat4("projection", projection);
         _shaderManager.GetShader("SolidColor")->SetMat4("view", view);
         _shaderManager.GetShader("SolidColor")->SetMat4("model", playerCollision.ToMatrix());
         _shaderManager.GetShader("SolidColor")->SetVec3("color", playerCollisionColor);
-        _loadedModels[0]->meshes[0]->Draw();
+        _loadedModels[0]->meshes[0]->Draw(); 
 
         glDisable(GL_DEPTH);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

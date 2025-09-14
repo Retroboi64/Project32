@@ -4,6 +4,15 @@
 #include "mesh.h"
 
 class ModelImporter {
+private:
+    static void GenerateNormals(std::vector<Vertex>& vertices,
+        const std::vector<unsigned int>& indices);
+
+    static void GenerateTangentSpace(std::vector<Vertex>& vertices,
+        const std::vector<unsigned int>& indices);
+
+    static glm::vec3 CalculateNormal(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3);
+
 public:
     struct LoadedModel {
         std::vector<std::unique_ptr<Mesh>> meshes;
@@ -19,18 +28,11 @@ public:
 
         void CalculateBounds();
         std::string GetName();
+
+		Mesh* GetMeshByName(const std::string& name);
     };
 
     static std::unique_ptr<LoadedModel> LoadFromFile(const std::string& filePath,
         bool generateNormals = true,
         bool flipTextureCoords = false);
-
-private:
-    static void GenerateNormals(std::vector<Vertex>& vertices,
-        const std::vector<unsigned int>& indices);
-
-    static void GenerateTangentSpace(std::vector<Vertex>& vertices,
-        const std::vector<unsigned int>& indices);
-
-    static glm::vec3 CalculateNormal(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3);
 };
