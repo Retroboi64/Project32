@@ -1,9 +1,36 @@
-Copyright (c) 2025 Patrick Reese
+MIT License with Attribution Requirements
 
-Permission is hereby granted, free of charge, to the copyright holder only, to use, copy, modify, and distribute this software and its documentation for private, personal, and non-commercial purposes.
+Copyright (c) 2025 Patrick Reese (Retroboi64)
 
-No part of this software may be used, copied, modified, or distributed by any other person or entity without the express written permission of the copyright holder.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-Exception: Third-party code and libraries located in the "vendor" directory are subject to their own respective licenses, as provided by their authors. Such code is not covered by this license and must retain its original license notices.
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OR PERFORMANCE OF THIS SOFTWARE.
+MANDATORY ATTRIBUTION: Any software, application, game, or project that incorporates this Software must provide clear attribution to Patrick Reese (Retroboi64) in multiple prominent locations, including but not limited to:
+- Credits section of applications or games
+- Documentation or README files
+- About pages or help sections
+- Source code comments (if source is distributed)
+- User-facing interfaces where credits are typically displayed
+
+The attribution must be present in ALL applicable locations and must include:
+- The original copyright notice
+- Acknowledgment of Patrick Reese (Retroboi64) as the original author
+- A link to the original GitHub repository: https://github.com/Retroboi64/Project32
+
+COMMERCIAL DISTRIBUTION REQUIREMENTS: If any modified version of this Software is sold, distributed commercially, or monetized in any way, the attribution must be prominently displayed in all public-facing promotional and distribution materials, including but not limited to:
+- Store pages (Steam, App Store, Google Play, etc.)
+- Marketing websites and landing pages
+- Product descriptions and promotional materials
+- Press releases and media kits
+- Social media promotional content
+
+For commercial products, the attribution must be clearly visible to potential customers BEFORE purchase and must state: "Includes components by Patrick Reese - https://github.com/Retroboi64/Project32"
+
+IMMUTABLE ATTRIBUTION LOCATIONS: The requirement for attribution in multiple locations cannot be reduced or limited by any party other than the original copyright holder, Patrick Reese (Retroboi64).
+
+LICENSE PRESERVATION: This license and copyright notice may not be removed or obscured from any copy or substantial portion of the Software.
+
+IMMUTABLE ATTRIBUTION: The attribution requirements specified in this license cannot be modified, removed, or waived by any party other than the original copyright holder, Patrick Reese (Retroboi64).
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
