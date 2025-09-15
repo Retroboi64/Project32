@@ -1,6 +1,6 @@
-# Project32
+﻿# Project32
 
-> A compact yet powerful and flexible C++ software framework designed for modern development needs.
+> A compact yet powerful and flexible C++ Game Engine designed for modern development needs.
 
 ## 🚀 Features
 
