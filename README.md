@@ -12,7 +12,7 @@
 
 - **Operating System**: Windows (macOS and Linux support coming soon)
 - **IDE**: Visual Studio 2022 with C++ development tools
-- **C++ Standard**: C++17 or later
+- **C++ Standard**: C++20 or later
 - **Additional Dependencies**: [Add any specific libraries or SDKs needed]
 
 ## 🛠️ Installation And Building
