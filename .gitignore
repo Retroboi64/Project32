@@ -369,4 +369,5 @@ FodyWeavers.xsd
 !Project32/Project32/vendor/dlls/Release/
 !Project32/Project32/vendor/dlls/Debug/
 
-./TODO.md
+./Dump/
+/Dump
