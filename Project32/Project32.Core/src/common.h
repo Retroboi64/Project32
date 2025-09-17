@@ -43,17 +43,7 @@
 #include <unordered_map>
 #include <cmath>
 #include <memory>
-/*
- * This file is part of Project32 - Modern C++
- * Copyright (c) 2025 Patrick Reese (Retroboi64)
- *
- * Licensed under MIT with Attribution Requirements
- * See LICENSE file for full terms
- * GitHub: https://github.com/Retroboi64/Project32
- *
- * This header must not be removed from any source file.
- */
-
+#include <thread>
 #include <utility>
 #include <map>
 #include <array>

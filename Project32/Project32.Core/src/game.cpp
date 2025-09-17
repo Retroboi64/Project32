@@ -15,11 +15,12 @@
 #include "renderer.h"
 #include "camera.h"
 #include "player.h"
-#include "GL.h"
+#include "engine.h"
 
 namespace Game {
     Player player;
     CameraManager manager;
+	Engine* engine;
 
     int cam1;
     int cam2;
@@ -30,6 +31,7 @@ namespace Game {
     }
 
     void Init() {
+        engine = Engine::GetInstance();
         Input::Init();
 
         std::cout << "=== Quake Movement Controls ===" << std::endl;
@@ -55,7 +57,7 @@ namespace Game {
 
     void Update(float deltaTime) {
         if (Input::KeyPressed(GLFW_KEY_ESCAPE)) {
-            GL::SetWindowShouldClose(true);
+			engine->GetWindow()->SetShouldClose(true);
         }
         if (Input::KeyPressed(GLFW_KEY_M)) {
             Renderer::ToggleWireframe();

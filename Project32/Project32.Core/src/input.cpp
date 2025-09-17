@@ -11,12 +11,14 @@
 
 #include "common.h"
 #include "input.h"
-#include "GL.h"
+#include "engine.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 
 namespace Input {
+	Engine* _engine = nullptr;
+
     constexpr int MAX_KEYS = 512;
     bool _keyPressed[MAX_KEYS] = { false };
     bool _keyDown[MAX_KEYS] = { false };
@@ -36,7 +38,7 @@ namespace Input {
 
     void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
         if (key == GLFW_KEY_F11 && action == GLFW_PRESS) {
-            GL::ToggleFullscreen();
+            _engine->GetWindow()->ToggleFullscreen();
         }
         if (key == GLFW_KEY_F1 && action == GLFW_PRESS) {
             _mouseLocked = !_mouseLocked;
@@ -46,13 +48,14 @@ namespace Input {
     }
 
     void Init() {
-        GLFWwindow* window = GL::GetWindowPointer();
+        _engine = Engine::GetInstance();
+        GLFWwindow* window = _engine->GetWindow()->GetGLFWwindow();
         glfwSetCursorPosCallback(window, MouseCallback);
         glfwSetKeyCallback(window, KeyCallback);
     }
 
     void Update() {
-        GLFWwindow* window = GL::GetWindowPointer();
+        GLFWwindow* window = _engine->GetWindow()->GetGLFWwindow();
         for (int i = 0; i < MAX_KEYS; i++) {
             bool currentState = (glfwGetKey(window, i) == GLFW_PRESS);
             _keyPressed[i] = (currentState && !_keyDownLastFrame[i]);

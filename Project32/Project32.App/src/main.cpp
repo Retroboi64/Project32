@@ -13,7 +13,6 @@
 #include <iostream>
 #include <string>
 
- // Engine function types
 typedef bool (*EngineInitFunc)(int width, int height, const char* title);
 typedef void (*EngineRunFunc)();
 typedef void (*EngineShutdownFunc)();
@@ -34,7 +33,6 @@ struct GameState {
     bool wireframe = false;
 } game;
 
-// Engine function pointers
 struct EngineFunctions {
     EngineInitFunc Init;
     EngineRunFunc Run;
@@ -46,7 +44,6 @@ struct EngineFunctions {
     GetMouseDeltaFunc GetMouseDelta;
 } engine;
 
-// Game callbacks that the engine will call
 extern "C" {
     __declspec(dllexport) void GameInit() {
         std::cout << "=== Game Initialized ===" << std::endl;

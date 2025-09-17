@@ -15,12 +15,12 @@
 #include "skybox.h"
 #include "mesh.h"
 #include "game.h"
-#include "GL.h"
 #include "textures.h"
 #include "wall.h"
 #include "imgui.h"
 #include "model.h"
 #include "scene.h"
+#include "engine.h"
 
 namespace Renderer {
     TextureManager _textures;
@@ -28,6 +28,7 @@ namespace Renderer {
 
     std::unique_ptr<WallSystem> _wallSystem;
 	auto& _sceneManager = SceneManager::Instance();
+    Engine* _engine;
 
     std::unique_ptr<Mesh> _quadMesh;
     std::unique_ptr<Mesh> _cubeMesh;
@@ -49,6 +50,8 @@ namespace Renderer {
     float _fov = 90.0f;
 
     void Init() {
+        _engine = Engine::GetInstance();
+
         LoadShaders();
         LoadMeshes();
         LoadTextures();
@@ -130,7 +133,7 @@ namespace Renderer {
         glClearColor(_backgroundColor[0], _backgroundColor[1], _backgroundColor[2], 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::ivec2 windowSize = GL::GetWindowSize();
+        glm::ivec2 windowSize = _engine->GetWindow()->GetSize();
         glm::mat4 projection = glm::perspective(glm::radians(_fov),
             static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y), NEAR_PLANE, FAR_PLANE);
         glm::mat4 view = Game::GetViewMatrix();
@@ -222,7 +225,7 @@ namespace Renderer {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         // Render ImGui
-        GL::BeginImGuiFrame();
+		_engine->GetWindow()->BeginImGuiFrame();
 
         if (_showDebugInfo) {
             DrawImGuiHUD();
@@ -236,7 +239,7 @@ namespace Renderer {
             ImGui::ShowDemoWindow(&_showImGuiDemo);
         }
 
-        GL::EndImGuiFrame();
+        _engine->GetWindow()->EndImGuiFrame();
     }
 
     void DrawSkybox(const glm::mat4& projection, const glm::mat4& view) {
@@ -295,8 +298,9 @@ namespace Renderer {
             ImGui::Text("GPU: %s", glGetString(GL_RENDERER));
             ImGui::Text("GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-            glm::ivec2 windowSize = GL::GetWindowSize();
-            ImGui::Text("Window Size: %dx%d", windowSize.x, windowSize.y);
+			// TODO: Fix this
+            //glm::ivec2 windowSize = GL::GetWindowSize();
+            //ImGui::Text("Window Size: %dx%d", windowSize.x, windowSize.y);
         }
 
         ImGui::End();
@@ -309,9 +313,10 @@ namespace Renderer {
             ImGui::ColorEdit3("Background Color", _backgroundColor);
             ImGui::SliderFloat("FOV", &_fov, 45.0f, 120.0f);
 
-            bool vsync = GL::_vsync;
+            bool vsync = _engine->GetWindow()->IsVSync();
             if (ImGui::Checkbox("V-Sync", &vsync)) {
-                GL::SetVSync(vsync);
+				// TODO: Fix this
+                //GL::SetVSync(vsync);
             }
         }
 
