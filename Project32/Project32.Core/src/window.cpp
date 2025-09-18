@@ -16,8 +16,7 @@
 #include "window.h"
 #include <iostream>
 
-static int s_nextWindowID = 1;
-
+// Window Implamentation
 static void StaticFramebufferSizeCallback(GLFWwindow* glfwWindow, int width, int height) {
     Window* window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
     if (window) {
@@ -26,7 +25,7 @@ static void StaticFramebufferSizeCallback(GLFWwindow* glfwWindow, int width, int
 }
 
 Window::Window(int width, int height, const std::string& title)
-    : _width(width), _height(height), _title(title), _ID(s_nextWindowID++)
+    : _width(width), _height(height), _title(title), _ID(_ID++)
 {
 
     if (!glfwInit()) {
@@ -277,4 +276,66 @@ void Window::BeginImGuiFrame() {
 void Window::EndImGuiFrame() {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+// WindowManager Implamentation
+int WindowManager::Count() {
+    return static_cast<int>(_windows.size());
+}
+
+int WindowManager::AddWindow(int width, int height, const std::string& name) {
+    int s = static_cast<int>(_windows.size());
+    _windows.push_back(std::make_unique<Window>(width, height, name));
+    return s;
+}
+
+int WindowManager::RemoveWindow(int index) {
+    for (auto it = _windows.begin(); it != _windows.end(); ++it) {
+        if ((*it)->GetID() == index) {
+            _windows.erase(it);
+            if (currentWindow == index) {
+                currentWindow = -1;
+			}
+			return currentWindow;
+        }
+    }
+	return -1;
+}
+
+void WindowManager::SetCurrentWindow(int index) {
+    for (int i = 0; i < Count(); i++) {
+        if (_windows[i]->GetID() == index) {
+            currentWindow = index;
+            _windows[i]->MakeContextCurrent();
+            return;
+        }
+    }
+    throw std::runtime_error("Window with ID " + std::to_string(index) + " not found.");
+}
+
+Window* WindowManager::GetWindowByID(int index) {
+    for (int i = 0; i < Count(); i++) {
+        if (_windows[i]->GetID() == index) {
+            return _windows[i].get();
+        }
+    }
+    return nullptr;
+}
+
+Window* WindowManager::GetWindowByTitle(const std::string& title) {
+    for (int i = 0; i < Count(); i++) {
+        if (_windows[i]->GetTitle() == title) {
+            return _windows[i].get();
+        }
+    }
+    return nullptr;
+}
+
+std::string WindowManager::GetWindowTitle(int index) {
+    for (int i = 0; i < Count(); i++) {
+        if (_windows[i]->GetID() == index) {
+            return _windows[i]->GetTitle();
+        }
+    }
+    return "";
 }

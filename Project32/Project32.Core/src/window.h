@@ -32,7 +32,7 @@ private:
     bool _vsync = true;
     bool _isOpen = false;
     bool _isFullscreen = false;
-    int _ID;
+    int _ID = -1;
 
     glm::ivec2 _windowedPos{ 100, 100 };
     glm::ivec2 _windowedSize{ 800, 600 };
@@ -114,4 +114,23 @@ public:
     static constexpr int MOUSE_BUTTON_LEFT = GLFW_MOUSE_BUTTON_LEFT;
     static constexpr int MOUSE_BUTTON_RIGHT = GLFW_MOUSE_BUTTON_RIGHT;
     static constexpr int MOUSE_BUTTON_MIDDLE = GLFW_MOUSE_BUTTON_MIDDLE;
+};
+
+// TODO: Not finished yet
+class WindowManager {
+private:
+    std::vector<std::unique_ptr<Window>> _windows;
+    int currentWindow = -1;
+
+public:
+    int Count();
+	int GetCurrentWindowID() const { return currentWindow; }
+    int AddWindow(int width, int height, const std::string& name);
+    int RemoveWindow(int index);
+
+	void SetCurrentWindow(int index);
+	std::string GetWindowTitle(int index);
+
+    Window* GetWindowByID(int index);
+    Window* GetWindowByTitle(const std::string& title);
 };

@@ -74,8 +74,7 @@ public:
     }
 };
 
-// You don't necessarily need a CameraManager, but
-// I wanted to test different approaches and this seemed like a good fit
+// TODO: Move some functions to camera.cpp
 class CameraManager {
 private:
     std::vector<std::unique_ptr<Camera>> _cameras;

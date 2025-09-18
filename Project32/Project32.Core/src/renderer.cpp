@@ -14,7 +14,6 @@
 #include "shader.h"
 #include "skybox.h"
 #include "mesh.h"
-#include "game.h"
 #include "textures.h"
 #include "wall.h"
 #include "imgui.h"
@@ -133,11 +132,15 @@ namespace Renderer {
         glClearColor(_backgroundColor[0], _backgroundColor[1], _backgroundColor[2], 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        Transform playerTransform{
+            .position = glm::vec3(0.0f, 1.0f, 0.0f)
+        };
+
         glm::ivec2 windowSize = _engine->GetWindow()->GetSize();
         glm::mat4 projection = glm::perspective(glm::radians(_fov),
             static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y), NEAR_PLANE, FAR_PLANE);
-        glm::mat4 view = Game::GetViewMatrix();
-        glm::vec3 playerPos = Game::GetPosition();
+        glm::mat4 view = playerTransform.ToMatrix();
+        glm::vec3 playerPos = playerTransform.position;
         glm::vec3 lightPos = glm::vec3(_lightPosition[0], _lightPosition[1], _lightPosition[2]);
 
         DrawSkybox(projection, view);
@@ -203,24 +206,6 @@ namespace Renderer {
             currentScene->RenderObject(i);
         }
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glEnable(GL_DEPTH);
-
-        Transform playerCollision{
-            .position = (Game::GetPosition() - glm::vec3(0.0f, 0.5f, 0.0f)),
-            .rotation = glm::vec3(0.0f, 0.0f, 0.0f),
-            .scale = glm::vec3(0.1f, 0.0f, 0.1f),
-        };
-
-		const glm::vec3 playerCollisionColor(0.0f, 0.7f, 0.0f);
-        _shaderManager.GetShader("SolidColor")->Bind();
-		_shaderManager.GetShader("SolidColor")->SetBool("useTexture", false);
-        _shaderManager.GetShader("SolidColor")->SetMat4("projection", projection);
-        _shaderManager.GetShader("SolidColor")->SetMat4("view", view);
-        _shaderManager.GetShader("SolidColor")->SetMat4("model", playerCollision.ToMatrix());
-        _shaderManager.GetShader("SolidColor")->SetVec3("color", playerCollisionColor);
-        _loadedModels[0]->meshes[0]->Draw(); 
-
         glDisable(GL_DEPTH);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -257,22 +242,6 @@ namespace Renderer {
         ImGui::Begin("Debug Info", &_showDebugInfo, ImGuiWindowFlags_AlwaysAutoResize);
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
-        // Player info
-        glm::vec3 playerPos = Game::GetPosition();
-        float speed = Game::GetSpeed();
-        ImGui::Separator();
-        ImGui::Text("Player Position: (%.2f, %.2f, %.2f)", playerPos.x, playerPos.y, playerPos.z);
-        ImGui::Text("Player Speed: %.2f", speed);
-
-        // Speed bar visualization
-        float speedNormalized = std::min(speed / 20.0f, 1.0f);
-        ImVec4 speedColor = speed > 15.0f ? ImVec4(1.0f, 0.2f, 0.2f, 1.0f) :
-            speed > 10.0f ? ImVec4(1.0f, 1.0f, 0.2f, 1.0f) :
-            ImVec4(0.2f, 1.0f, 0.2f, 1.0f);
-        ImGui::PushStyleColor(ImGuiCol_PlotHistogram, speedColor);
-        ImGui::ProgressBar(speedNormalized, ImVec2(200, 20), "");
-        ImGui::PopStyleColor();
 
         ImGui::Separator();
 
@@ -315,8 +284,7 @@ namespace Renderer {
 
             bool vsync = _engine->GetWindow()->IsVSync();
             if (ImGui::Checkbox("V-Sync", &vsync)) {
-				// TODO: Fix this
-                //GL::SetVSync(vsync);
+				_engine->GetWindow()->SetVSync(vsync);
             }
         }
 

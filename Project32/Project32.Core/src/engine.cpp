@@ -12,7 +12,6 @@
 #include "common.h"
 
 #include "engine.h"
-#include "game.h"
 #include "renderer.h"
 #include "input.h"
 #include "window.h"
@@ -26,7 +25,7 @@
 Engine* Engine::s_instance = nullptr; 
 
 Engine::Engine(int width, int height, const std::string& title)
-    : width(width), height(height), title(title)
+	: width(width), height(height), title(title), _ID(_ID++)
 {
     s_instance = this;
     _window = std::make_unique<Window>(width, height, title);
@@ -46,7 +45,6 @@ void Engine::Init() {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
         Renderer::Init();
-        Game::Init();
         Input::Init();
         isRunning = true;
     }
@@ -66,17 +64,18 @@ void Engine::Run() {
 
         _window->PollEvents();
         Input::Update();
-        Game::Update(dt);
         Renderer::RenderFrame();
         _window->SwapBuffers();
+
+        if (Input::KeyPressed(Engine::GetInstance()->GetWindow()->KEY_ESCAPE)) {
+			Shutdown();
+        }
     }
 }
 
 void Engine::Shutdown() {
     if (!isRunning) return;
 
-	// TODO: Properly cleanup all subsystems
-    // Game::Cleanup();
     Renderer::Cleanup();
     _window->Shutdown();
 
