@@ -133,4 +133,5 @@ public:
 
     Window* GetWindowByID(int index);
     Window* GetWindowByTitle(const std::string& title);
+    Window* GetCurrentWindow();
 };

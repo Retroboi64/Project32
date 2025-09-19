@@ -128,9 +128,6 @@
     <ClInclude Include="src\engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine_api.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\window.h">
       <Filter>Header Files</Filter>
     </ClInclude>

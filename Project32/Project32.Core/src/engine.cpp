@@ -16,6 +16,9 @@
 #include "input.h"
 #include "window.h"
 
+std::vector<std::unique_ptr<Window>> s_windows; // Testing multiple windows
+std::unique_ptr<WindowManager> s_windowManager = nullptr;
+
 /*
     TODO: CHANGE THIS LATER this is just for testing and demo purposes
     this only allows one engine instance at a time
@@ -28,7 +31,8 @@ Engine::Engine(int width, int height, const std::string& title)
 	: width(width), height(height), title(title), _ID(_ID++)
 {
     s_instance = this;
-    _window = std::make_unique<Window>(width, height, title);
+	s_windowManager = std::make_unique<WindowManager>();
+	int windowID = s_windowManager->AddWindow(width, height, title);
     Init();
 }
 
@@ -39,13 +43,13 @@ Engine::~Engine() {
 
 void Engine::Init() {
     try {
-        _window->Init();
-        while (!_window->WindowIsOpen()) {
-            glfwPollEvents();
+		s_windowManager->GetWindowByID(0)->Init();
+        while (!s_windowManager->GetWindowByID(0)->WindowIsOpen()) {
+            // glfwPollEvents();
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
-        Renderer::Init();
-        Input::Init();
+        //Renderer::Init();
+        //Input::Init();
         isRunning = true;
     }
     catch (const std::exception& e) {
@@ -58,16 +62,16 @@ void Engine::Init() {
 void Engine::Run() {
     FrameTimer timer;
 
-    while (isRunning && _window->WindowIsOpen()) {
+    while (isRunning && s_windowManager->GetWindowByID(0)->WindowIsOpen()) {
         timer.Update();
         float dt = timer.GetDeltaTime();
 
-        _window->PollEvents();
-        Input::Update();
-        Renderer::RenderFrame();
-        _window->SwapBuffers();
+        //_window->PollEvents();
+        //Input::Update();
+        //Renderer::RenderFrame();
+        //_window->SwapBuffers();
 
-        if (Input::KeyPressed(Engine::GetInstance()->GetWindow()->KEY_ESCAPE)) {
+        if (Input::KeyPressed(Engine::GetInstance()->GetWindowManager()->GetCurrentWindow()->KEY_ESCAPE)) {
 			Shutdown();
         }
     }
@@ -76,8 +80,8 @@ void Engine::Run() {
 void Engine::Shutdown() {
     if (!isRunning) return;
 
-    Renderer::Cleanup();
-    _window->Shutdown();
+    //Renderer::Cleanup();
+    //_window->Shutdown();
 
     isRunning = false;
 }

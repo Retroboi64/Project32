@@ -331,6 +331,10 @@ Window* WindowManager::GetWindowByTitle(const std::string& title) {
     return nullptr;
 }
 
+Window* WindowManager::GetCurrentWindow() {
+    return GetWindowByID(currentWindow);
+}
+
 std::string WindowManager::GetWindowTitle(int index) {
     for (int i = 0; i < Count(); i++) {
         if (_windows[i]->GetID() == index) {

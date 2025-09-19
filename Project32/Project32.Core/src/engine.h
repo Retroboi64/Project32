@@ -28,6 +28,7 @@ public:
 	bool IsRunning() const { return isRunning; }
 
     Window* GetWindow() const { return _window.get(); }
+	WindowManager* GetWindowManager() const { return _windowManager.get(); }
 
     static Engine* GetInstance() { return s_instance; }
 

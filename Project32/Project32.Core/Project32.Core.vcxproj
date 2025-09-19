@@ -112,7 +112,6 @@
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\engine.h" />
-    <ClInclude Include="src\engine_api.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\math.h" />
     <ClInclude Include="src\mesh.h" />
@@ -133,6 +132,7 @@
     <ProjectGuid>{109bc2d9-ab4a-46e7-933a-5b93da5f3405}</ProjectGuid>
     <RootNamespace>Project32Core</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Project32.Core</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
