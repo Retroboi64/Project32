@@ -13,11 +13,12 @@
 
 #include "input.h"
 #include "common.h"
+#include "engine.h"
 
 namespace Input {
     void MouseCallback(GLFWwindow* window, double xpos, double ypos);
     void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-    void Init();
+    void Init(Engine* engine);
     void Update();
     bool KeyPressed(int keycode);
     bool KeyDown(int keycode);

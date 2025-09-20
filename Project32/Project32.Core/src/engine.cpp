@@ -18,6 +18,7 @@
 
 std::vector<std::unique_ptr<Window>> s_windows; // Testing multiple windows
 std::unique_ptr<WindowManager> s_windowManager = nullptr;
+std::unique_ptr<Renderer> s_renderer = nullptr;
 
 /*
     TODO: CHANGE THIS LATER this is just for testing and demo purposes
@@ -33,6 +34,7 @@ Engine::Engine(int width, int height, const std::string& title)
     s_instance = this;
 	s_windowManager = std::make_unique<WindowManager>();
 	int windowID = s_windowManager->AddWindow(width, height, title);
+	s_renderer = std::make_unique<Renderer>();
     Init();
 }
 
@@ -43,13 +45,17 @@ Engine::~Engine() {
 
 void Engine::Init() {
     try {
+		// TODO: Input Does Not Initialize Properly
 		s_windowManager->GetWindowByID(0)->Init();
         while (!s_windowManager->GetWindowByID(0)->WindowIsOpen()) {
-            // glfwPollEvents();
+            glfwPollEvents();
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
-        //Renderer::Init();
-        //Input::Init();
+        s_renderer->Init();
+        while (!s_renderer->IsReady()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        Input::Init(s_instance);
         isRunning = true;
     }
     catch (const std::exception& e) {
@@ -66,12 +72,12 @@ void Engine::Run() {
         timer.Update();
         float dt = timer.GetDeltaTime();
 
-        //_window->PollEvents();
-        //Input::Update();
-        //Renderer::RenderFrame();
-        //_window->SwapBuffers();
+        s_windowManager->GetWindowByID(0)->PollEvents();
+		s_renderer->RenderFrame();
+        s_windowManager->GetWindowByID(0)->SwapBuffers();
+        Input::Update();
 
-        if (Input::KeyPressed(Engine::GetInstance()->GetWindowManager()->GetCurrentWindow()->KEY_ESCAPE)) {
+        if (Input::KeyPressed(Engine::GetInstance()->GetWindowManager()->GetWindowByID(0)->KEY_ESCAPE)) {
 			Shutdown();
         }
     }
@@ -80,7 +86,7 @@ void Engine::Run() {
 void Engine::Shutdown() {
     if (!isRunning) return;
 
-    //Renderer::Cleanup();
+	s_renderer->Cleanup();
     //_window->Shutdown();
 
     isRunning = false;

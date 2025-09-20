@@ -16,8 +16,11 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 
+ // TODO: Refactor Input System to a class based system
 namespace Input {
 	Engine* _engine = nullptr;
+
+    GLFWwindow* _window = nullptr;
 
     constexpr int MAX_KEYS = 512;
     bool _keyPressed[MAX_KEYS] = { false };
@@ -47,17 +50,17 @@ namespace Input {
         }
     }
 
-    void Init() {
+    void Init(Engine* engine) {
         _engine = Engine::GetInstance();
-        GLFWwindow* window = _engine->GetWindow()->GetGLFWwindow();
-        glfwSetCursorPosCallback(window, MouseCallback);
-        glfwSetKeyCallback(window, KeyCallback);
+        _window = _engine->GetWindowManager()->GetWindowByID(0)->GetGLFWwindow();
+        //GLFWwindow* window = _engine->GetWindow()->GetGLFWwindow();
+        glfwSetCursorPosCallback(_window, MouseCallback);
+        glfwSetKeyCallback(_window, KeyCallback);
     }
 
     void Update() {
-        GLFWwindow* window = _engine->GetWindow()->GetGLFWwindow();
         for (int i = 0; i < MAX_KEYS; i++) {
-            bool currentState = (glfwGetKey(window, i) == GLFW_PRESS);
+            bool currentState = (glfwGetKey(_window, i) == GLFW_PRESS);
             _keyPressed[i] = (currentState && !_keyDownLastFrame[i]);
             _keyDown[i] = currentState;
             _keyDownLastFrame[i] = currentState;
