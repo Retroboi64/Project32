@@ -14,6 +14,8 @@
 #include "common.h"
 #include <functional>
 #include <string>
+#include <vector>
+#include <memory>
 
 enum class CursorMode {
     Normal,
@@ -26,12 +28,13 @@ private:
     GLFWwindow* _window = nullptr;
     int _width;
     int _height;
-    
+
     std::string _title;
     std::string _iconPath;
     bool _vsync = true;
     bool _isOpen = false;
     bool _isFullscreen = false;
+    static int _nextID;  
     int _ID;
 
     glm::ivec2 _windowedPos{ 100, 100 };
@@ -48,10 +51,10 @@ public:
     Window(const Window&) = delete;
     Window& operator=(const Window&) = delete;
 
-	void Init();
-	void InitGLAD();
-	void InitImGui();
-	void Shutdown();
+    void Init();
+    void InitGLAD();
+    void InitImGui();
+    void Shutdown();
 
     void PollEvents();
     void SwapBuffers();
@@ -61,8 +64,8 @@ public:
     bool IsOpen() const;
     void SetShouldClose(bool value);
 
-	void BeginImGuiFrame();
-	void EndImGuiFrame();
+    void BeginImGuiFrame();
+    void EndImGuiFrame();
 
     void GetSize(int& width, int& height) const;
     glm::ivec2 GetSize() const;
@@ -98,7 +101,8 @@ public:
     const std::string& GetTitle() const { return _title; }
     bool IsVSync() const { return _vsync; }
     bool IsFullscreen() const { return _isFullscreen; }
-	bool WindowIsOpen() const { return _isOpen; }
+    bool WindowIsOpen() const { return _window != nullptr && _isOpen; }
+    bool IsWindowValid() const { return _window != nullptr; }
     CursorMode GetCursorMode() const { return _cursorMode; }
 
     static constexpr int KEY_ESCAPE = GLFW_KEY_ESCAPE;
@@ -114,4 +118,23 @@ public:
     static constexpr int MOUSE_BUTTON_LEFT = GLFW_MOUSE_BUTTON_LEFT;
     static constexpr int MOUSE_BUTTON_RIGHT = GLFW_MOUSE_BUTTON_RIGHT;
     static constexpr int MOUSE_BUTTON_MIDDLE = GLFW_MOUSE_BUTTON_MIDDLE;
+};
+
+class WindowManager {
+private:
+    std::vector<std::unique_ptr<Window>> _windows;
+    int currentWindow = -1;
+
+public:
+    int Count();
+    int GetCurrentWindowID() const { return currentWindow; }
+    int AddWindow(int width, int height, const std::string& name);
+    int RemoveWindow(int index);
+
+    void SetCurrentWindow(int index);
+    std::string GetWindowTitle(int index);
+
+    Window* GetWindowByID(int index);
+    Window* GetWindowByTitle(const std::string& title);
+    Window* GetCurrentWindow();
 };

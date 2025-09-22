@@ -13,6 +13,7 @@
 #include <memory>
 
 static std::unique_ptr<Engine> g_engine;
+std::unique_ptr<Window> window = nullptr;
 
 extern "C" {
     __declspec(dllexport) bool EngineInit() {

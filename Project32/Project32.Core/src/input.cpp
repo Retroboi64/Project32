@@ -9,76 +9,135 @@
  * This header must not be removed from any source file.
  */
 
-#include "common.h"
 #include "input.h"
 #include "engine.h"
-
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
+#include <GLFW/glfw3.h>
 
-namespace Input {
-	Engine* _engine = nullptr;
+Input* Input::_instance = nullptr;
 
-    constexpr int MAX_KEYS = 512;
-    bool _keyPressed[MAX_KEYS] = { false };
-    bool _keyDown[MAX_KEYS] = { false };
-    bool _keyDownLastFrame[MAX_KEYS] = { false };
-    double _mouseX = 0.0, _mouseY = 0.0;
-    double _lastMouseX = 0.0, _lastMouseY = 0.0;
-    bool _firstMouse = true;
-    bool _mouseLocked = true;
+Input::Input() {
+    std::fill(std::begin(keyPressed), std::end(keyPressed), false);
+    std::fill(std::begin(keyDown), std::end(keyDown), false);
+    std::fill(std::begin(keyDownLastFrame), std::end(keyDownLastFrame), false);
+}
 
-    void MouseCallback(GLFWwindow* window, double xpos, double ypos) {
-        ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
-        {
-            _mouseX = xpos;
-            _mouseY = ypos;
-        }
+Input* Input::GetInstance() {
+    if (_instance == nullptr) {
+        _instance = new Input();
     }
+    return _instance;
+}
 
-    void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-        if (key == GLFW_KEY_F11 && action == GLFW_PRESS) {
-            _engine->GetWindow()->ToggleFullscreen();
+void Input::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
+    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+
+    Input* input = GetInstance();
+    input->mouseX = xpos;
+    input->mouseY = ypos;
+}
+
+void Input::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+
+    Input* input = GetInstance();
+
+    if (action == GLFW_PRESS) {
+        if (key == GLFW_KEY_F11) {
+            if (input->_engine && input->_engine->GetWindow()) {
+                input->_engine->GetWindow()->ToggleFullscreen();
+            }
         }
-        if (key == GLFW_KEY_F1 && action == GLFW_PRESS) {
-            _mouseLocked = !_mouseLocked;
+        else if (key == GLFW_KEY_F1) {
+            input->_mouseLocked = !input->_mouseLocked;
             glfwSetInputMode(window, GLFW_CURSOR,
-                _mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+                input->_mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
         }
     }
+}
 
-    void Init() {
-        _engine = Engine::GetInstance();
-        GLFWwindow* window = _engine->GetWindow()->GetGLFWwindow();
-        glfwSetCursorPosCallback(window, MouseCallback);
-        glfwSetKeyCallback(window, KeyCallback);
+void Input::Init() {
+    _engine = Engine::GetInstance();
+    if (!_engine) {
+        throw std::runtime_error("Engine instance not available for Input initialization");
     }
 
-    void Update() {
-        GLFWwindow* window = _engine->GetWindow()->GetGLFWwindow();
-        for (int i = 0; i < MAX_KEYS; i++) {
-            bool currentState = (glfwGetKey(window, i) == GLFW_PRESS);
-            _keyPressed[i] = (currentState && !_keyDownLastFrame[i]);
-            _keyDown[i] = currentState;
-            _keyDownLastFrame[i] = currentState;
-        }
+    Window* mainWindow = _engine->GetWindow();
+    if (!mainWindow) {
+        throw std::runtime_error("Main window not available for Input initialization");
     }
 
-    bool KeyPressed(int keycode) { return keycode < MAX_KEYS && _keyPressed[keycode]; }
-    bool KeyDown(int keycode) { return keycode < MAX_KEYS && _keyDown[keycode]; }
-    bool IsMouseLocked() { return _mouseLocked; }
-
-    glm::vec2 GetMouseDelta() {
-        if (_firstMouse) {
-            _lastMouseX = _mouseX;
-            _lastMouseY = _mouseY;
-            _firstMouse = false;
-            return glm::vec2(0.0f);
-        }
-
-        glm::vec2 delta = glm::vec2(_mouseX - _lastMouseX, _lastMouseY - _mouseY);
-        _lastMouseX = _mouseX;
-        _lastMouseY = _mouseY;
-        return delta;
+    _window = mainWindow->GetGLFWwindow();
+    if (!_window) {
+        throw std::runtime_error("GLFW window not available for Input initialization");
     }
+
+    glfwSetCursorPosCallback(_window, MouseCallback);
+    glfwSetKeyCallback(_window, KeyCallback);
+
+    glfwSetInputMode(_window, GLFW_CURSOR,
+        _mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+
+    std::cout << "[Input::Init] Input system initialized" << std::endl;
+}
+
+void Input::Update() {
+    if (!_window) return;
+
+    for (int i = 0; i < MAX_KEYS; i++) {
+        bool currentState = (glfwGetKey(_window, i) == GLFW_PRESS);
+        keyPressed[i] = (currentState && !keyDownLastFrame[i]);
+        keyDown[i] = currentState;
+        keyDownLastFrame[i] = currentState;
+    }
+}
+
+bool Input::KeyPressed(int keycode) const {
+    return keycode >= 0 && keycode < MAX_KEYS && keyPressed[keycode];
+}
+
+bool Input::KeyDown(int keycode) const {
+    return keycode >= 0 && keycode < MAX_KEYS && keyDown[keycode];
+}
+
+bool Input::IsMouseLocked() const {
+    return _mouseLocked;
+}
+
+void Input::SetMouseLocked(bool locked) {
+    _mouseLocked = locked;
+    if (_window) {
+        glfwSetInputMode(_window, GLFW_CURSOR,
+            _mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    }
+}
+
+glm::vec2 Input::GetMousePosition() const {
+    return glm::vec2(static_cast<float>(mouseX), static_cast<float>(mouseY));
+}
+
+glm::vec2 Input::GetMouseDelta() {
+    if (_firstMouse) {
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
+        _firstMouse = false;
+        return glm::vec2(0.0f);
+    }
+
+    glm::vec2 delta = glm::vec2(
+        static_cast<float>(mouseX - lastMouseX),
+        static_cast<float>(lastMouseY - mouseY)
+    );
+    lastMouseX = mouseX;
+    lastMouseY = mouseY;
+    return delta;
+}
+
+Input::~Input() {
+    if (_window) {
+        glfwSetCursorPosCallback(_window, nullptr);
+        glfwSetKeyCallback(_window, nullptr);
+    }
+    std::cout << "[Input::~Input] Input system cleaned up" << std::endl;
 }

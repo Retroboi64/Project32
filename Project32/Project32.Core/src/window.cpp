@@ -9,14 +9,14 @@
  * This header must not be removed from any source file.
  */
 
-/*
-	TODO: Move all OpenGL/GLAD and Imgui To A Better Place
-*/
+ /*
+     TODO: Move all OpenGL/GLAD and Imgui To A Better Place
+ */
 
 #include "window.h"
 #include <iostream>
 
-static int s_nextWindowID = 1;
+int Window::_nextID = 0;
 
 static void StaticFramebufferSizeCallback(GLFWwindow* glfwWindow, int width, int height) {
     Window* window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
@@ -26,12 +26,21 @@ static void StaticFramebufferSizeCallback(GLFWwindow* glfwWindow, int width, int
 }
 
 Window::Window(int width, int height, const std::string& title)
-    : _width(width), _height(height), _title(title), _ID(s_nextWindowID++)
+    : _width(width), _height(height), _title(title), _ID(_nextID++)
 {
+    std::cout << "Window::Window() constructor called: " << width << "x" << height << " '" << title << "'" << std::endl;
+    std::cout.flush();
+
+    std::cout << "Step W1: Initializing GLFW..." << std::endl;
+    std::cout.flush();
 
     if (!glfwInit()) {
+        std::cerr << "Failed to initialize GLFW in Window constructor" << std::endl;
         throw std::runtime_error("Failed to initialize GLFW");
     }
+
+    std::cout << "Step W2: Setting window hints..." << std::endl;
+    std::cout.flush();
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -40,19 +49,35 @@ Window::Window(int width, int height, const std::string& title)
     glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
+    std::cout << "Step W3: Creating GLFW window..." << std::endl;
+    std::cout.flush();
+
     _window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
     if (!_window) {
+        std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         throw std::runtime_error("Failed to create GLFW window");
     }
 
+    std::cout << "Step W4: GLFW window created at: " << _window << std::endl;
+    std::cout.flush();
+
     glfwSetWindowUserPointer(_window, this);
+
+    std::cout << "Step W5: Making context current..." << std::endl;
+    std::cout.flush();
 
     glfwMakeContextCurrent(_window);
     glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetFramebufferSizeCallback(_window, StaticFramebufferSizeCallback);
 
+    std::cout << "Step W6: Initializing GLAD..." << std::endl;
+    std::cout.flush();
+
     InitGLAD();
+
+    std::cout << "Step W7: Setting OpenGL state..." << std::endl;
+    std::cout.flush();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
@@ -63,24 +88,30 @@ Window::Window(int width, int height, const std::string& title)
     SetVSync(_vsync);
     _isOpen = true;
 
-	InitImGui();
+    std::cout << "Step W8: Initializing ImGui..." << std::endl;
+    std::cout.flush();
 
-    std::cout << "Window " << _ID << " created: " << width << "x" << height << " '" << title << "'" << std::endl;
+    InitImGui();
+
+    std::cout << "Window " << _ID << " created successfully: " << width << "x" << height << " '" << title << "'" << std::endl;
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
     std::cout << "GPU: " << glGetString(GL_RENDERER) << std::endl;
+    std::cout.flush();
 }
 
 Window::~Window() {
     if (_window) {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+
         glfwDestroyWindow(_window);
         std::cout << "Window " << _ID << " destroyed" << std::endl;
     }
     glfwTerminate();
 }
 
-void Window::Init() {
-    // Placeholder for any future initialization code
-}
+void Window::Init() {}
 
 void Window::InitImGui() {
     IMGUI_CHECKVERSION();
@@ -111,6 +142,10 @@ void Window::InitGLAD() {
 
 void Window::Shutdown() {
     if (_window) {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+
         glfwDestroyWindow(_window);
         _window = nullptr;
         _isOpen = false;
@@ -269,12 +304,87 @@ void Window::FramebufferSizeCallback(GLFWwindow* window, int width, int height) 
 }
 
 void Window::BeginImGuiFrame() {
+    if (!_window) {
+        std::cerr << "Warning: BeginImGuiFrame called but _window is nullptr!" << std::endl;
+        return;
+    }
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 }
 
 void Window::EndImGuiFrame() {
+    if (!_window) {
+        std::cerr << "Warning: EndImGuiFrame called but _window is nullptr!" << std::endl;
+        return;
+    }
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+// WindowManager Implementation
+int WindowManager::Count() {
+    return static_cast<int>(_windows.size());
+}
+
+int WindowManager::AddWindow(int width, int height, const std::string& name) {
+    auto window = std::make_unique<Window>(width, height, name);
+    int windowID = window->GetID();
+    _windows.push_back(std::move(window));
+    return windowID;
+}
+
+int WindowManager::RemoveWindow(int index) {
+    for (auto it = _windows.begin(); it != _windows.end(); ++it) {
+        if ((*it)->GetID() == index) {
+            _windows.erase(it);
+            if (currentWindow == index) {
+                currentWindow = -1;
+            }
+            return currentWindow;
+        }
+    }
+    return -1;
+}
+
+void WindowManager::SetCurrentWindow(int index) {
+    for (int i = 0; i < Count(); i++) {
+        if (_windows[i]->GetID() == index) {
+            currentWindow = index;
+            _windows[i]->MakeContextCurrent();
+            return;
+        }
+    }
+    throw std::runtime_error("Window with ID " + std::to_string(index) + " not found.");
+}
+
+Window* WindowManager::GetWindowByID(int index) {
+    for (int i = 0; i < Count(); i++) {
+        if (_windows[i]->GetID() == index) {
+            return _windows[i].get();
+        }
+    }
+    return nullptr;
+}
+
+Window* WindowManager::GetWindowByTitle(const std::string& title) {
+    for (int i = 0; i < Count(); i++) {
+        if (_windows[i]->GetTitle() == title) {
+            return _windows[i].get();
+        }
+    }
+    return nullptr;
+}
+
+Window* WindowManager::GetCurrentWindow() {
+    return GetWindowByID(currentWindow);
+}
+
+std::string WindowManager::GetWindowTitle(int index) {
+    for (int i = 0; i < Count(); i++) {
+        if (_windows[i]->GetID() == index) {
+            return _windows[i]->GetTitle();
+        }
+    }
+    return "";
 }

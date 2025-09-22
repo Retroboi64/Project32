@@ -18,20 +18,10 @@ typedef void (*EngineRunFunc)();
 typedef void (*EngineShutdownFunc)();
 typedef bool (*EngineIsRunningFunc)();
 
-// Input function types
 typedef bool (*KeyPressedFunc)(int key);
 typedef bool (*KeyDownFunc)(int key);
 typedef void (*GetMousePosFunc)(float* x, float* y);
 typedef void (*GetMouseDeltaFunc)(float* dx, float* dy);
-
-// Game state
-struct GameState {
-    float cameraX = 0.0f, cameraY = 1.0f, cameraZ = 5.0f;
-    float yaw = 0.0f, pitch = 0.0f;
-    float moveSpeed = 5.0f;
-    float mouseSensitivity = 0.002f;
-    bool wireframe = false;
-} game;
 
 struct EngineFunctions {
     EngineInitFunc Init;
@@ -44,77 +34,6 @@ struct EngineFunctions {
     GetMouseDeltaFunc GetMouseDelta;
 } engine;
 
-extern "C" {
-    __declspec(dllexport) void GameInit() {
-        std::cout << "=== Game Initialized ===" << std::endl;
-        std::cout << "WASD: Move around" << std::endl;
-        std::cout << "Mouse: Look around" << std::endl;
-        std::cout << "Space/Shift: Up/Down" << std::endl;
-        std::cout << "M: Toggle wireframe" << std::endl;
-        std::cout << "ESC: Exit" << std::endl;
-        std::cout << "=========================" << std::endl;
-    }
-
-    __declspec(dllexport) void GameUpdate(float deltaTime) {
-        // Handle input
-        if (engine.KeyPressed(VK_ESCAPE)) {
-            PostQuitMessage(0);
-            return;
-        }
-
-        if (engine.KeyPressed('M')) {
-            game.wireframe = !game.wireframe;
-            std::cout << "Wireframe: " << (game.wireframe ? "ON" : "OFF") << std::endl;
-        }
-
-        // Mouse look
-        float dx, dy;
-        engine.GetMouseDelta(&dx, &dy);
-
-        game.yaw += dx * game.mouseSensitivity;
-        game.pitch -= dy * game.mouseSensitivity;
-
-        // Clamp pitch
-        if (game.pitch > 1.5f) game.pitch = 1.5f;
-        if (game.pitch < -1.5f) game.pitch = -1.5f;
-
-        // Movement
-        float speed = game.moveSpeed * deltaTime;
-
-        if (engine.KeyDown('W')) {
-            game.cameraX += cos(game.yaw) * speed;
-            game.cameraZ += sin(game.yaw) * speed;
-        }
-        if (engine.KeyDown('S')) {
-            game.cameraX -= cos(game.yaw) * speed;
-            game.cameraZ -= sin(game.yaw) * speed;
-        }
-        if (engine.KeyDown('A')) {
-            game.cameraX -= cos(game.yaw + 1.57f) * speed;
-            game.cameraZ -= sin(game.yaw + 1.57f) * speed;
-        }
-        if (engine.KeyDown('D')) {
-            game.cameraX += cos(game.yaw + 1.57f) * speed;
-            game.cameraZ += sin(game.yaw + 1.57f) * speed;
-        }
-        if (engine.KeyDown(VK_SPACE)) {
-            game.cameraY += speed;
-        }
-        if (engine.KeyDown(VK_SHIFT)) {
-            game.cameraY -= speed;
-        }
-    }
-
-    __declspec(dllexport) void GameRender() {
-        // Custom rendering would go here
-        // The engine handles the basic render loop
-    }
-
-    __declspec(dllexport) void GameShutdown() {
-        std::cout << "Game shutting down..." << std::endl;
-    }
-}
-
 bool LoadEngineDLL(const std::wstring& dllPath) {
     HMODULE hDll = LoadLibrary(dllPath.c_str());
     if (!hDll) {
@@ -122,7 +41,6 @@ bool LoadEngineDLL(const std::wstring& dllPath) {
         return false;
     }
 
-    // Load engine functions
     engine.Init = (EngineInitFunc)GetProcAddress(hDll, "EngineInit");
     engine.Run = (EngineRunFunc)GetProcAddress(hDll, "EngineRun");
     engine.Shutdown = (EngineShutdownFunc)GetProcAddress(hDll, "EngineShutdown");
@@ -146,14 +64,12 @@ int main(int argc, char* argv[]) {
     std::cout << "Project32 Game Launcher" << std::endl;
     std::cout << "======================" << std::endl;
 
-    // Load the engine DLL
     if (!LoadEngineDLL(L"Project32.Core.dll")) {
         std::cerr << "Engine initialization failed!" << std::endl;
         system("pause");
         return 1;
     }
 
-    // Parse command line arguments for window size
     int width = 1920, height = 1080;
     std::string title = "Project32 Game";
 
@@ -166,17 +82,14 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        // Initialize engine
         if (!engine.Init(width, height, title.c_str())) {
             throw std::runtime_error("Engine initialization failed!");
         }
 
         std::cout << "Starting game loop..." << std::endl;
 
-        // Run the game
         engine.Run();
 
-        // Cleanup
         engine.Shutdown();
         std::cout << "Game ended successfully." << std::endl;
 
