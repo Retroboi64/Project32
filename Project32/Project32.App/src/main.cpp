@@ -18,7 +18,6 @@ typedef void (*EngineRunFunc)();
 typedef void (*EngineShutdownFunc)();
 typedef bool (*EngineIsRunningFunc)();
 
-// Input function types
 typedef bool (*KeyPressedFunc)(int key);
 typedef bool (*KeyDownFunc)(int key);
 typedef void (*GetMousePosFunc)(float* x, float* y);
@@ -42,7 +41,6 @@ bool LoadEngineDLL(const std::wstring& dllPath) {
         return false;
     }
 
-    // Load engine functions
     engine.Init = (EngineInitFunc)GetProcAddress(hDll, "EngineInit");
     engine.Run = (EngineRunFunc)GetProcAddress(hDll, "EngineRun");
     engine.Shutdown = (EngineShutdownFunc)GetProcAddress(hDll, "EngineShutdown");
@@ -66,14 +64,12 @@ int main(int argc, char* argv[]) {
     std::cout << "Project32 Game Launcher" << std::endl;
     std::cout << "======================" << std::endl;
 
-    // Load the engine DLL
     if (!LoadEngineDLL(L"Project32.Core.dll")) {
         std::cerr << "Engine initialization failed!" << std::endl;
         system("pause");
         return 1;
     }
 
-    // Parse command line arguments for window size
     int width = 1920, height = 1080;
     std::string title = "Project32 Game";
 
@@ -86,17 +82,14 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        // Initialize engine
         if (!engine.Init(width, height, title.c_str())) {
             throw std::runtime_error("Engine initialization failed!");
         }
 
         std::cout << "Starting game loop..." << std::endl;
 
-        // Run the game
         engine.Run();
 
-        // Cleanup
         engine.Shutdown();
         std::cout << "Game ended successfully." << std::endl;
 

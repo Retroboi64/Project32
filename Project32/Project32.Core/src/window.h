@@ -34,7 +34,7 @@ private:
     bool _vsync = true;
     bool _isOpen = false;
     bool _isFullscreen = false;
-    static int _nextID;  // Static counter for unique IDs
+    static int _nextID;  
     int _ID;
 
     glm::ivec2 _windowedPos{ 100, 100 };

@@ -11,18 +11,51 @@
 
 #pragma once
 
-#include "input.h"
 #include "common.h"
-#include "engine.h"
+#include <glm/glm.hpp>
 
-namespace Input {
-    void MouseCallback(GLFWwindow* window, double xpos, double ypos);
-    void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-    void Init(Engine* engine);
+class Engine;
+struct GLFWwindow;
+
+class Input {
+private:
+    Engine* _engine = nullptr;
+    GLFWwindow* _window = nullptr;
+
+    static constexpr int MAX_KEYS = 512;
+    bool keyPressed[MAX_KEYS];
+    bool keyDown[MAX_KEYS];
+    bool keyDownLastFrame[MAX_KEYS];
+
+    double mouseX = 0.0;
+    double mouseY = 0.0;
+    double lastMouseX = 0.0;
+    double lastMouseY = 0.0;
+    bool _firstMouse = true;
+    bool _mouseLocked = false; 
+
+    static Input* _instance;
+
+    Input();
+
+public:
+    static Input* GetInstance();
+
+    static void MouseCallback(GLFWwindow* window, double xpos, double ypos);
+    static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+    void Init();
     void Update();
-    bool KeyPressed(int keycode);
-    bool KeyDown(int keycode);
-    bool IsMouseLocked();
 
+    bool KeyPressed(int keycode) const;
+    bool KeyDown(int keycode) const;
+    bool IsMouseLocked() const;
+    void SetMouseLocked(bool locked);
+    glm::vec2 GetMousePosition() const;
     glm::vec2 GetMouseDelta();
-}
+
+    ~Input();
+
+    Input(const Input&) = delete;
+    Input& operator=(const Input&) = delete;
+};

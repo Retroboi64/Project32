@@ -8,6 +8,7 @@
  *
  * This header must not be removed from any source file.
  */
+
 #pragma once
 #include "mesh.h"
 #include "shader.h"

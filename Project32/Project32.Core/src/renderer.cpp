@@ -125,11 +125,17 @@ void Renderer::RenderFrame() {
     glClearColor(_backgroundColor[0], _backgroundColor[1], _backgroundColor[2], 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // Ensure depth testing is enabled
+    glEnable(GL_DEPTH_TEST);
+
     Transform playerTransform{
         .position = glm::vec3(0.0f, 1.0f, 0.0f)
     };
 
-    glm::ivec2 windowSize = _engine->GetWindow()->GetSize();
+    Window* window = _engine->GetWindow();
+    if (!window) return;
+
+    glm::ivec2 windowSize = window->GetSize();
     glm::mat4 projection = glm::perspective(glm::radians(_fov),
         static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y), NEAR_PLANE, FAR_PLANE);
     glm::mat4 view = playerTransform.ToMatrix();
@@ -138,15 +144,18 @@ void Renderer::RenderFrame() {
 
     DrawSkybox(projection, view);
 
-    _shaderManager.GetShader("SolidColor")->Bind();
-    _shaderManager.GetShader("SolidColor")->SetMat4("projection", projection);
-    _shaderManager.GetShader("SolidColor")->SetMat4("view", view);
-    _shaderManager.GetShader("SolidColor")->SetVec3("lightPos", lightPos);
-    _shaderManager.GetShader("SolidColor")->SetVec3("viewPos", playerPos);
+    auto* shader = _shaderManager.GetShader("SolidColor");
+    if (!shader) return;
+
+    shader->Bind();
+    shader->SetMat4("projection", projection);
+    shader->SetMat4("view", view);
+    shader->SetVec3("lightPos", lightPos);
+    shader->SetVec3("viewPos", playerPos);
 
     _textures.BindTexture(_textures.FindTextureByName("Wall"), GL_TEXTURE0);
-    _shaderManager.GetShader("SolidColor")->SetInt("uTexture", 0);
-    _shaderManager.GetShader("SolidColor")->SetBool("useTexture", false);
+    shader->SetInt("uTexture", 0);
+    shader->SetBool("useTexture", false);
 
     if (_wireframeMode) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -155,6 +164,7 @@ void Renderer::RenderFrame() {
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1.0f, 1.0f);
 
+    // Draw grid
     constexpr int GRID_SIZE = 40;
     constexpr int HALF_GRID = GRID_SIZE / 2;
 
@@ -164,12 +174,14 @@ void Renderer::RenderFrame() {
             gridSquare.position = glm::vec3(x, 0, z);
             gridSquare.scale = glm::vec3(1.0f, 0.1f, 1.0f);
 
-            _shaderManager.GetShader("SolidColor")->SetMat4("model", gridSquare.ToMatrix());
+            shader->SetMat4("model", gridSquare.ToMatrix());
 
             bool lightSquare = ((x + z) % 2) == 0;
-            _shaderManager.GetShader("SolidColor")->SetVec3("color", lightSquare ? LIGHT_SQUARE : DARK_SQUARE);
+            shader->SetVec3("color", lightSquare ? LIGHT_SQUARE : DARK_SQUARE);
 
-            _quadMesh->Draw();
+            if (_quadMesh) {
+                _quadMesh->Draw();
+            }
         }
     }
 
@@ -177,47 +189,47 @@ void Renderer::RenderFrame() {
 
     DrawWalls();
 
+    // Draw scene objects
     Scene* currentScene = _sceneManager.GetCurrentScene();
-    if (!currentScene) return;
+    if (currentScene) {
+        int objectCount = static_cast<int>(currentScene->GetObjectCount());
 
-    int objectCount = static_cast<int>(currentScene->GetObjectCount());
-    auto* shader = _shaderManager.GetShader("SolidColor");
+        shader->Bind();
+        shader->SetBool("useTexture", true);
+        shader->SetVec3("color", glm::vec3(0.2f, 0.8f, 0.3f));
 
-    if (!shader) return;
+        for (int i = 0; i < objectCount; ++i) {
+            auto* obj = currentScene->FindObject(i);
+            if (!obj) continue;
 
-    shader->Bind();
-    shader->SetBool("useTexture", true);
-    shader->SetVec3("color", glm::vec3(0.2f, 0.8f, 0.3f));
+            glm::mat4 modelMatrix = obj->GetTransform().ToMatrix();
+            shader->SetMat4("model", modelMatrix);
 
-    for (int i = 0; i < objectCount; ++i) {
-        auto* obj = currentScene->FindObject(i);
-        if (!obj) continue;
-
-        glm::mat4 modelMatrix = obj->GetTransform().ToMatrix();
-        shader->SetMat4("model", modelMatrix);
-
-        currentScene->RenderObject(i);
+            currentScene->RenderObject(i);
+        }
     }
 
-    glDisable(GL_DEPTH);
+    // Reset polygon mode for UI rendering
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     // Render ImGui
-    _engine->GetWindow()->BeginImGuiFrame();
+    if (window) {
+        window->BeginImGuiFrame();
 
-    if (_showDebugInfo) {
-        DrawImGuiHUD();
+        if (_showDebugInfo) {
+            DrawImGuiHUD();
+        }
+
+        if (_showSettingsWindow) {
+            DrawSettingsWindow();
+        }
+
+        if (_showImGuiDemo) {
+            ImGui::ShowDemoWindow(&_showImGuiDemo);
+        }
+
+        window->EndImGuiFrame();
     }
-
-    if (_showSettingsWindow) {
-        DrawSettingsWindow();
-    }
-
-    if (_showImGuiDemo) {
-        ImGui::ShowDemoWindow(&_showImGuiDemo);
-    }
-
-    _engine->GetWindow()->EndImGuiFrame();
 }
 
 void Renderer::DrawSkybox(const glm::mat4& projection, const glm::mat4& view) {

@@ -16,10 +16,8 @@
 #include "window.h"
 #include <iostream>
 
- // Static member definition
 int Window::_nextID = 0;
 
-// Window Implementation
 static void StaticFramebufferSizeCallback(GLFWwindow* glfwWindow, int width, int height) {
     Window* window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
     if (window) {
@@ -103,7 +101,6 @@ Window::Window(int width, int height, const std::string& title)
 
 Window::~Window() {
     if (_window) {
-        // Cleanup ImGui
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
@@ -114,9 +111,7 @@ Window::~Window() {
     glfwTerminate();
 }
 
-void Window::Init() {
-    // Placeholder for any future initialization code
-}
+void Window::Init() {}
 
 void Window::InitImGui() {
     IMGUI_CHECKVERSION();
@@ -147,7 +142,6 @@ void Window::InitGLAD() {
 
 void Window::Shutdown() {
     if (_window) {
-        // Cleanup ImGui before destroying window
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
