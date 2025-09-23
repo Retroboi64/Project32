@@ -362,11 +362,14 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Allow glfw/lib/Dlls/Debug and Release to be tracked
-!glfw/lib/Debug/
-!glfw/lib/Release/
+# Allow lib/DLLs Debug and Release to be tracked
+!Project32/Project32/Vendor/glfw/lib/Debug/
+!Project32/Project32/Vendor/glfw/lib/Release/
 
-!Project32/Project32/vendor/dlls/Release/
-!Project32/Project32/vendor/dlls/Debug/
+!Project32/Project32/Vendor/Jolt/lib/Debug/
+!Project32/Project32/Vendor/Jolt/lib/Release/
+
+!Project32/Project32/Vendor/dlls/Release/
+!Project32/Project32/Vendor/dlls/Debug/
 
 /Dump
