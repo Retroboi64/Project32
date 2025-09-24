@@ -39,4 +39,11 @@ extern "C" {
             g_engine.reset();
         }
     }
+
+    __declspec(dllexport) bool EngineIsRunning() {
+        if (g_engine) {
+            return true;
+        }
+        return false;
+    }
 } 
