@@ -1,103 +1,28 @@
-/*
- * This file is part of Project32 - A compact yet powerful and flexible C++ Game Engine
- * Copyright (c) 2025 Patrick Reese (Retroboi64)
- *
- * Licensed under MIT with Attribution Requirements
- * See LICENSE file for full terms
- * GitHub: https://github.com/Retroboi64/Project32
- *
- * This header must not be removed from any source file.
- */
-
-#include <windows.h>
+#include "../../Project32.API/src/Project32.API.h"
 #include <iostream>
-#include <string>
 
-typedef bool (*EngineInitFunc)(int width, int height, const char* title);
-typedef void (*EngineRunFunc)();
-typedef void (*EngineShutdownFunc)();
-typedef bool (*EngineIsRunningFunc)();
+int main() {
+    std::wcout << L"Loading engine DLL..." << std::endl;
 
-typedef bool (*KeyPressedFunc)(int key);
-typedef bool (*KeyDownFunc)(int key);
-typedef void (*GetMousePosFunc)(float* x, float* y);
-typedef void (*GetMouseDeltaFunc)(float* dx, float* dy);
+    if (P32::Engine::LoadDLL(L"Project32.Core.dll")) {
+        if (P32::Engine::Init(1024, 768, "My C++ Game")) {
+            std::cout << "Engine initialized with C++ wrapper!" << std::endl;
 
-struct EngineFunctions {
-    EngineInitFunc Init;
-    EngineRunFunc Run;
-    EngineShutdownFunc Shutdown;
-    EngineIsRunningFunc IsRunning;
-    KeyPressedFunc KeyPressed;
-    KeyDownFunc KeyDown;
-    GetMousePosFunc GetMousePos;
-    GetMouseDeltaFunc GetMouseDelta;
-} engine;
+            while (P32::Engine::IsRunning()) {
+                if (P32::Engine::KeyPressed(27)) { // ESC
+                    break;
+                }
 
-bool LoadEngineDLL(const std::wstring& dllPath) {
-    HMODULE hDll = LoadLibrary(dllPath.c_str());
-    if (!hDll) {
-        std::wcerr << L"Failed to load DLL: " << dllPath << std::endl;
-        return false;
-    }
+                float mx, my;
+                P32::Engine::GetMousePos(&mx, &my);
 
-    engine.Init = (EngineInitFunc)GetProcAddress(hDll, "EngineInit");
-    engine.Run = (EngineRunFunc)GetProcAddress(hDll, "EngineRun");
-    engine.Shutdown = (EngineShutdownFunc)GetProcAddress(hDll, "EngineShutdown");
-    engine.IsRunning = (EngineIsRunningFunc)GetProcAddress(hDll, "EngineIsRunning");
-    engine.KeyPressed = (KeyPressedFunc)GetProcAddress(hDll, "KeyPressed");
-    engine.KeyDown = (KeyDownFunc)GetProcAddress(hDll, "KeyDown");
-    engine.GetMousePos = (GetMousePosFunc)GetProcAddress(hDll, "GetMousePos");
-    engine.GetMouseDelta = (GetMouseDeltaFunc)GetProcAddress(hDll, "GetMouseDelta");
+                P32::Engine::Run();
+            }
 
-    if (!engine.Init || !engine.Run || !engine.Shutdown) {
-        std::cerr << "Failed to get required engine functions!" << std::endl;
-        FreeLibrary(hDll);
-        return false;
-    }
-
-    std::cout << "Engine DLL loaded successfully!" << std::endl;
-    return true;
-}
-
-int main(int argc, char* argv[]) {
-    std::cout << "Project32 Game Launcher" << std::endl;
-    std::cout << "======================" << std::endl;
-
-    if (!LoadEngineDLL(L"Project32.Core.dll")) {
-        std::cerr << "Engine initialization failed!" << std::endl;
-        system("pause");
-        return 1;
-    }
-
-    int width = 1920, height = 1080;
-    std::string title = "Project32 Game";
-
-    if (argc >= 3) {
-        width = std::stoi(argv[1]);
-        height = std::stoi(argv[2]);
-    }
-    if (argc >= 4) {
-        title = argv[3];
-    }
-
-    try {
-        if (!engine.Init(width, height, title.c_str())) {
-            throw std::runtime_error("Engine initialization failed!");
+            P32::Engine::Shutdown();
         }
 
-        std::cout << "Starting game loop..." << std::endl;
-
-        engine.Run();
-
-        engine.Shutdown();
-        std::cout << "Game ended successfully." << std::endl;
-
-    }
-    catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        engine.Shutdown();
-        return 1;
+        P32::Engine::UnloadDLL();
     }
 
     return 0;
