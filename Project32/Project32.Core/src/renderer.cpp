@@ -21,9 +21,9 @@
 #include "scene.h"
 #include "engine.h"
 
-Renderer::Renderer()
+Renderer::Renderer(Engine* engine)
     : _sceneManager(SceneManager::Instance())
-    , _engine(nullptr)
+    , _engine(engine)
     , _wireframeMode(false)
     , _showDebugInfo(true)
     , _showImGuiDemo(false)
@@ -31,7 +31,11 @@ Renderer::Renderer()
     , _lightPosition{ 10.0f, 10.0f, 10.0f }
     , _backgroundColor{ 0.05f, 0.05f, 0.1f }
     , _fov(90.0f)
+    , _isReady(false)
 {
+    if (!_engine) {
+        throw std::runtime_error("Renderer requires a valid Engine instance");
+    }
 }
 
 Renderer::~Renderer() {
@@ -39,18 +43,36 @@ Renderer::~Renderer() {
 }
 
 void Renderer::Init() {
-    _engine = Engine::GetInstance();
+    if (!_engine) {
+        throw std::runtime_error("Engine instance not available for Renderer initialization");
+    }
 
-    LoadShaders();
-    LoadMeshes();
-    LoadTextures();
-    LoadShaders();
-    LoadSkybox();
-    LoadLevel();
-    LoadModels();
-    LoadScene(); // Testing with a scene system
+    // Make sure this engine's window context is current
+    Window* window = _engine->GetWindow();
+    if (!window) {
+        throw std::runtime_error("Window not available for Renderer initialization");
+    }
 
-    _isReady = true;
+    window->MakeContextCurrent();
+
+    try {
+        LoadShaders();
+        LoadMeshes();
+        LoadTextures();
+        LoadSkybox();
+        LoadLevel();
+        LoadModels();
+        LoadScene(); // Testing with a scene system
+
+        _isReady = true;
+        std::cout << "[Renderer::Init] Renderer initialized for engine " << _engine->GetID() << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "[Renderer::Init] Failed to initialize renderer for engine "
+            << _engine->GetID() << ": " << e.what() << std::endl;
+        _isReady = false;
+        throw;
+    }
 }
 
 void Renderer::LoadModels() {
@@ -65,17 +87,17 @@ void Renderer::LoadLevel() {
 
 void Renderer::LoadScene() {
     if (_sceneManager.LoadScene("res/scene.json")) {
-        std::cout << "Loaded scene from JSON file successfully" << std::endl;
+        std::cout << "[Engine " << _engine->GetID() << "] Loaded scene from JSON file successfully" << std::endl;
         if (auto* currentScene = _sceneManager.GetCurrentScene()) {
             currentScene->DebugPrint();
             currentScene->PrintStatistics();
         }
     }
     else {
-        std::cout << "Failed to load scene from res/scene.json" << std::endl;
+        std::cout << "[Engine " << _engine->GetID() << "] Failed to load scene from res/scene.json" << std::endl;
 
         auto* defaultScene = _sceneManager.CreateScene("Default Scene");
-        std::cout << "Created default scene: " << defaultScene->GetMetadata().name << std::endl;
+        std::cout << "[Engine " << _engine->GetID() << "] Created default scene: " << defaultScene->GetMetadata().name << std::endl;
     }
 }
 
@@ -122,6 +144,13 @@ void Renderer::DrawWalls() {
 }
 
 void Renderer::RenderFrame() {
+    if (!_isReady || !_engine) return;
+
+    Window* window = _engine->GetWindow();
+    if (!window) return;
+
+    window->MakeContextCurrent();
+
     glClearColor(_backgroundColor[0], _backgroundColor[1], _backgroundColor[2], 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -131,9 +160,6 @@ void Renderer::RenderFrame() {
     Transform playerTransform{
         .position = glm::vec3(0.0f, 1.0f, 0.0f)
     };
-
-    Window* window = _engine->GetWindow();
-    if (!window) return;
 
     glm::ivec2 windowSize = window->GetSize();
     glm::mat4 projection = glm::perspective(glm::radians(_fov),
@@ -164,7 +190,6 @@ void Renderer::RenderFrame() {
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1.0f, 1.0f);
 
-    // Draw grid
     constexpr int GRID_SIZE = 40;
     constexpr int HALF_GRID = GRID_SIZE / 2;
 
@@ -189,7 +214,6 @@ void Renderer::RenderFrame() {
 
     DrawWalls();
 
-    // Draw scene objects
     Scene* currentScene = _sceneManager.GetCurrentScene();
     if (currentScene) {
         int objectCount = static_cast<int>(currentScene->GetObjectCount());
@@ -209,10 +233,8 @@ void Renderer::RenderFrame() {
         }
     }
 
-    // Reset polygon mode for UI rendering
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    // Render ImGui
     if (window) {
         window->BeginImGuiFrame();
 
@@ -233,24 +255,30 @@ void Renderer::RenderFrame() {
 }
 
 void Renderer::DrawSkybox(const glm::mat4& projection, const glm::mat4& view) {
+    if (!_skybox) return;
+
     glm::mat4 skyboxView = glm::mat4(glm::mat3(view));
 
-    _shaderManager.GetShader("Skybox")->Bind();
-    _shaderManager.GetShader("Skybox")->SetMat4("view", skyboxView);
-    _shaderManager.GetShader("Skybox")->SetMat4("projection", projection);
-    _shaderManager.GetShader("Skybox")->SetInt("skybox", 0);
+    auto* skyboxShader = _shaderManager.GetShader("Skybox");
+    if (skyboxShader) {
+        skyboxShader->Bind();
+        skyboxShader->SetMat4("view", skyboxView);
+        skyboxShader->SetMat4("projection", projection);
+        skyboxShader->SetInt("skybox", 0);
 
-    _skybox->Draw();
+        _skybox->Draw();
+    }
 }
 
 void Renderer::DrawImGuiHUD() {
-    ImGui::Begin("Debug Info", &_showDebugInfo, ImGuiWindowFlags_AlwaysAutoResize);
+    std::string windowTitle = "Debug Info - Engine " + std::to_string(_engine->GetID());
+    ImGui::Begin(windowTitle.c_str(), &_showDebugInfo, ImGuiWindowFlags_AlwaysAutoResize);
 
+    ImGui::Text("Engine ID: %d", _engine->GetID());
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
     ImGui::Separator();
 
-    // Render settings
     if (ImGui::CollapsingHeader("Render Settings")) {
         if (ImGui::Button(_wireframeMode ? "Disable Wireframe" : "Enable Wireframe")) {
             ToggleWireframe();
@@ -266,30 +294,47 @@ void Renderer::DrawImGuiHUD() {
         }
     }
 
-    // System info
     if (ImGui::CollapsingHeader("System Info")) {
         ImGui::Text("OpenGL Version: %s", glGetString(GL_VERSION));
         ImGui::Text("GPU: %s", glGetString(GL_RENDERER));
         ImGui::Text("GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-        // TODO: Fix this
-        //glm::ivec2 windowSize = GL::GetWindowSize();
-        //ImGui::Text("Window Size: %dx%d", windowSize.x, windowSize.y);
+        Window* window = _engine->GetWindow();
+        if (window) {
+            glm::ivec2 windowSize = window->GetSize();
+            ImGui::Text("Window Size: %dx%d", windowSize.x, windowSize.y);
+        }
+    }
+
+    if (ImGui::CollapsingHeader("Engine Manager")) {
+        EngineManager* manager = EngineManager::Instance();
+        if (manager) {
+            ImGui::Text("Total Engines: %zu", manager->GetEngineCount());
+            ImGui::Text("Current Engine: %d", manager->GetCurrentEngineID());
+
+            if (ImGui::Button("Print Engine Info")) {
+                manager->PrintEngineInfo();
+            }
+        }
     }
 
     ImGui::End();
 }
 
 void Renderer::DrawSettingsWindow() {
-    ImGui::Begin("Settings", &_showSettingsWindow);
+    std::string windowTitle = "Settings - Engine " + std::to_string(_engine->GetID());
+    ImGui::Begin(windowTitle.c_str(), &_showSettingsWindow);
 
     if (ImGui::CollapsingHeader("Graphics", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::ColorEdit3("Background Color", _backgroundColor);
         ImGui::SliderFloat("FOV", &_fov, 45.0f, 120.0f);
 
-        bool vsync = _engine->GetWindow()->IsVSync();
-        if (ImGui::Checkbox("V-Sync", &vsync)) {
-            _engine->GetWindow()->SetVSync(vsync);
+        Window* window = _engine->GetWindow();
+        if (window) {
+            bool vsync = window->IsVSync();
+            if (ImGui::Checkbox("V-Sync", &vsync)) {
+                window->SetVSync(vsync);
+            }
         }
     }
 
@@ -299,7 +344,41 @@ void Renderer::DrawSettingsWindow() {
 
     if (ImGui::CollapsingHeader("Game")) {
         if (ImGui::Button("Regenerate Maze")) {
-            ImGui::Text("Maze regeneration not implemented yet");
+            if (_wallSystem) {
+                _wallSystem->CreateMaze();
+            }
+        }
+    }
+
+    if (ImGui::CollapsingHeader("Engine Controls")) {
+        if (ImGui::Button("Shutdown This Engine")) {
+            _engine->Shutdown();
+        }
+
+        ImGui::Separator();
+
+        EngineManager* manager = EngineManager::Instance();
+        if (manager) {
+            if (ImGui::Button("Create New Engine")) {
+                static int engineCounter = 1;
+                std::string title = "New Engine " + std::to_string(engineCounter++);
+                int newEngineID = manager->CreateEngine(800, 600, title);
+                if (newEngineID != -1) {
+                    std::cout << "Created new engine with ID: " << newEngineID << std::endl;
+                }
+            }
+
+            if (manager->GetEngineCount() > 1) {
+                ImGui::SameLine();
+                if (ImGui::Button("Destroy Other Engines")) {
+                    auto engines = manager->GetAllEngines();
+                    for (Engine* engine : engines) {
+                        if (engine && engine->GetID() != _engine->GetID()) {
+                            manager->DestroyEngine(engine->GetID());
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -307,6 +386,8 @@ void Renderer::DrawSettingsWindow() {
 }
 
 void Renderer::Cleanup() {
+    std::cout << "[Renderer::Cleanup] Cleaning up renderer for engine " << _engine->GetID() << std::endl;
+
     _quadMesh.reset();
     _cubeMesh.reset();
     _cylinderMesh.reset();
@@ -317,12 +398,18 @@ void Renderer::Cleanup() {
 
     _textures.Clear();
     _shaderManager.Clear();
+
+    _isReady = false;
 }
 
 void Renderer::ToggleWireframe() {
     _wireframeMode = !_wireframeMode;
+    std::cout << "[Engine " << _engine->GetID() << "] Wireframe mode: "
+        << (_wireframeMode ? "ON" : "OFF") << std::endl;
 }
 
 void Renderer::ToggleDebugInfo() {
     _showDebugInfo = !_showDebugInfo;
+    std::cout << "[Engine " << _engine->GetID() << "] Debug info: "
+        << (_showDebugInfo ? "ON" : "OFF") << std::endl;
 }

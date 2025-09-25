@@ -17,6 +17,8 @@
 #include <vector>
 #include <memory>
 
+struct ImGuiContext;
+
 enum class CursorMode {
     Normal,
     Hidden,
@@ -34,7 +36,7 @@ private:
     bool _vsync = true;
     bool _isOpen = false;
     bool _isFullscreen = false;
-    static int _nextID;  
+    static int _nextID;
     int _ID;
 
     glm::ivec2 _windowedPos{ 100, 100 };
@@ -43,6 +45,9 @@ private:
     CursorMode _cursorMode = CursorMode::Disabled;
 
     std::function<void(int, int)> _resizeCallback;
+
+    ImGuiContext* _imguiContext = nullptr;
+    bool _imguiInitialized = false;
 
 public:
     Window(int width, int height, const std::string& title);
@@ -104,6 +109,9 @@ public:
     bool WindowIsOpen() const { return _window != nullptr && _isOpen; }
     bool IsWindowValid() const { return _window != nullptr; }
     CursorMode GetCursorMode() const { return _cursorMode; }
+
+    ImGuiContext* GetImGuiContext() const { return _imguiContext; }
+    bool IsImGuiInitialized() const { return _imguiInitialized; }
 
     static constexpr int KEY_ESCAPE = GLFW_KEY_ESCAPE;
     static constexpr int KEY_W = GLFW_KEY_W;

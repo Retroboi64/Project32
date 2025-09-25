@@ -11,32 +11,79 @@
 
 #include "engine.h"
 #include <memory>
-
-static std::unique_ptr<Engine> g_engine;
-std::unique_ptr<Window> window = nullptr;
+#include <thread>
+#include <iostream>
 
 extern "C" {
+    static int g_currentEngineID = -1;
+
     __declspec(dllexport) bool EngineInit() {
         try {
-            g_engine = std::make_unique<Engine>(1920, 1080, "Project32");
-            return true;
+            g_currentEngineID = EngineManager::Instance()->CreateEngine(1920, 1080, "Project32");
+            return g_currentEngineID != -1;
         }
         catch (...) {
-            g_engine.reset();
+            g_currentEngineID = -1;
             return false;
         }
     }
 
     __declspec(dllexport) void EngineRun() {
-        if (g_engine) {
-            g_engine->Run();
+        Engine* engine = EngineManager::Instance()->GetEngineByID(g_currentEngineID);
+        if (engine) {
+            engine->Run();
         }
     }
 
     __declspec(dllexport) void EngineShutdown() {
-        if (g_engine) {
-            g_engine->Shutdown();
-            g_engine.reset();
+        if (g_currentEngineID != -1) {
+            EngineManager::Instance()->DestroyEngine(g_currentEngineID);
+            g_currentEngineID = -1;
         }
     }
-} 
+
+    __declspec(dllexport) bool EngineIsRunning() {
+        Engine* engine = EngineManager::Instance()->GetEngineByID(g_currentEngineID);
+        return engine && engine->IsRunning();
+    }
+
+    __declspec(dllexport) int CreateEngine(int width, int height, const char* title) {
+        return EngineManager::Instance()->CreateEngine(width, height, std::string(title));
+    }
+
+    __declspec(dllexport) bool DestroyEngine(int engineID) {
+        return EngineManager::Instance()->DestroyEngine(engineID);
+    }
+
+    __declspec(dllexport) void RunEngine(int engineID) {
+        Engine* engine = EngineManager::Instance()->GetEngineByID(engineID);
+        if (engine) {
+            engine->Run();
+        }
+    }
+
+    __declspec(dllexport) bool IsEngineRunning(int engineID) {
+        Engine* engine = EngineManager::Instance()->GetEngineByID(engineID);
+        return engine && engine->IsRunning();
+    }
+
+    __declspec(dllexport) int GetEngineCount() {
+        return static_cast<int>(EngineManager::Instance()->GetEngineCount());
+    }
+
+    __declspec(dllexport) void SetCurrentEngine(int engineID) {
+        EngineManager::Instance()->SetCurrentEngine(engineID);
+    }
+
+    __declspec(dllexport) int GetCurrentEngineID() {
+        return EngineManager::Instance()->GetCurrentEngineID();
+    }
+
+    __declspec(dllexport) void DestroyAllEngines() {
+        EngineManager::Instance()->DestroyAllEngines();
+    }
+
+    __declspec(dllexport) void CleanupEngineManager() {
+        EngineManager::DestroyInstance();
+    }
+}

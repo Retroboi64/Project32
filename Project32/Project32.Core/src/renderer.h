@@ -62,7 +62,7 @@ private:
     void DrawSettingsWindow();
 
 public:
-    Renderer();
+    explicit Renderer(Engine* engine);
     ~Renderer();
 
     Renderer(const Renderer&) = delete;
@@ -78,7 +78,7 @@ public:
 
     bool IsWireframeMode() const { return _wireframeMode; }
     bool IsDebugInfoVisible() const { return _showDebugInfo; }
-	bool IsReady() const { return _isReady; }
+    bool IsReady() const { return _isReady; }
     float GetFOV() const { return _fov; }
 
     void SetFOV(float fov) { _fov = fov; }
@@ -92,4 +92,6 @@ public:
         _lightPosition[1] = y;
         _lightPosition[2] = z;
     }
+
+    Engine* GetEngine() const { return _engine; }
 };
