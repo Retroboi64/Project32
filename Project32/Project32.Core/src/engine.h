@@ -30,7 +30,7 @@ public:
     bool IsRunning() const { return isRunning; }
 
     Window* GetWindow() const {
-        return _windowManager ? _windowManager->GetWindowByID(0) : nullptr;
+        return _windowManager ? _windowManager->GetWindowByID(_ID) : nullptr;
     }
     WindowManager* GetWindowManager() const { return _windowManager.get(); }
     Renderer* GetRenderer() const { return _renderer.get(); }

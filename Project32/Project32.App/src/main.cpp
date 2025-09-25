@@ -132,7 +132,7 @@ int main() {
     std::wcout << L"Loading engine DLL..." << std::endl;
 
     if (P32::Engine::LoadDLL(L"Project32.Core.dll")) {
-        SingleEngineExample();
+        EngineInstanceExample();
     }
 
     return 0;

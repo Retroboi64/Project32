@@ -39,7 +39,7 @@ Engine::~Engine() {
 
 void Engine::Init() {
     try {
-        Window* mainWindow = _windowManager->GetWindowByID(0);
+        Window* mainWindow = _windowManager->GetWindowByID(_ID);
         if (!mainWindow) {
             throw std::runtime_error("Failed to get main window");
         }
@@ -124,7 +124,7 @@ void Engine::Shutdown() {
     }
 
     if (_windowManager) {
-        Window* mainWindow = _windowManager->GetWindowByID(0);
+        Window* mainWindow = _windowManager->GetWindowByID(_ID);
         if (mainWindow) {
             // Window cleanup handled by WindowManager destructor
         }
