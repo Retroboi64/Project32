@@ -14,51 +14,50 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include <GLFW/glfw3.h>
+#include <unordered_map>
 
-Input* Input::_instance = nullptr;
+static std::unordered_map<GLFWwindow*, Input*> g_windowInputMap;
 
-Input::Input() {
+Input::Input(Engine* engine) : _engine(engine) {
     std::fill(std::begin(keyPressed), std::end(keyPressed), false);
     std::fill(std::begin(keyDown), std::end(keyDown), false);
     std::fill(std::begin(keyDownLastFrame), std::end(keyDownLastFrame), false);
 }
 
-Input* Input::GetInstance() {
-    if (_instance == nullptr) {
-        _instance = new Input();
-    }
-    return _instance;
-}
-
 void Input::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
     ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
 
-    Input* input = GetInstance();
-    input->mouseX = xpos;
-    input->mouseY = ypos;
+    auto it = g_windowInputMap.find(window);
+    if (it != g_windowInputMap.end()) {
+        Input* input = it->second;
+        input->mouseX = xpos;
+        input->mouseY = ypos;
+    }
 }
 
 void Input::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
 
-    Input* input = GetInstance();
+    auto it = g_windowInputMap.find(window);
+    if (it != g_windowInputMap.end()) {
+        Input* input = it->second;
 
-    if (action == GLFW_PRESS) {
-        if (key == GLFW_KEY_F11) {
-            if (input->_engine && input->_engine->GetWindow()) {
-                input->_engine->GetWindow()->ToggleFullscreen();
+        if (action == GLFW_PRESS) {
+            if (key == GLFW_KEY_F11) {
+                if (input->_engine && input->_engine->GetWindow()) {
+                    input->_engine->GetWindow()->ToggleFullscreen();
+                }
             }
-        }
-        else if (key == GLFW_KEY_F1) {
-            input->_mouseLocked = !input->_mouseLocked;
-            glfwSetInputMode(window, GLFW_CURSOR,
-                input->_mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+            else if (key == GLFW_KEY_F1) {
+                input->_mouseLocked = !input->_mouseLocked;
+                glfwSetInputMode(window, GLFW_CURSOR,
+                    input->_mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+            }
         }
     }
 }
 
 void Input::Init() {
-    _engine = Engine::GetInstance();
     if (!_engine) {
         throw std::runtime_error("Engine instance not available for Input initialization");
     }
@@ -73,13 +72,16 @@ void Input::Init() {
         throw std::runtime_error("GLFW window not available for Input initialization");
     }
 
+    // Register this Input instance with the window
+    g_windowInputMap[_window] = this;
+
     glfwSetCursorPosCallback(_window, MouseCallback);
     glfwSetKeyCallback(_window, KeyCallback);
 
     glfwSetInputMode(_window, GLFW_CURSOR,
         _mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 
-    std::cout << "[Input::Init] Input system initialized" << std::endl;
+    std::cout << "[Input::Init] Input system initialized for engine " << _engine->GetID() << std::endl;
 }
 
 void Input::Update() {
@@ -136,8 +138,11 @@ glm::vec2 Input::GetMouseDelta() {
 
 Input::~Input() {
     if (_window) {
+        g_windowInputMap.erase(_window);
+
         glfwSetCursorPosCallback(_window, nullptr);
         glfwSetKeyCallback(_window, nullptr);
     }
-    std::cout << "[Input::~Input] Input system cleaned up" << std::endl;
+    std::cout << "[Input::~Input] Input system cleaned up for engine "
+        << (_engine ? std::to_string(_engine->GetID()) : "unknown") << std::endl;
 }

@@ -32,14 +32,14 @@ private:
     double lastMouseX = 0.0;
     double lastMouseY = 0.0;
     bool _firstMouse = true;
-    bool _mouseLocked = false; 
-
-    static Input* _instance;
-
-    Input();
+    bool _mouseLocked = false;
 
 public:
-    static Input* GetInstance();
+    explicit Input(Engine* engine);
+    ~Input();
+
+    Input(const Input&) = delete;
+    Input& operator=(const Input&) = delete;
 
     static void MouseCallback(GLFWwindow* window, double xpos, double ypos);
     static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -54,8 +54,5 @@ public:
     glm::vec2 GetMousePosition() const;
     glm::vec2 GetMouseDelta();
 
-    ~Input();
-
-    Input(const Input&) = delete;
-    Input& operator=(const Input&) = delete;
+    Engine* GetEngine() const { return _engine; }
 };
