@@ -20,6 +20,7 @@ private:
 
     void CreateCube();
     unsigned int LoadCubemap(const std::vector<std::string>& faces);
+
 public:
     ~Skybox();
     void Load(const std::vector<std::string>& faces);
