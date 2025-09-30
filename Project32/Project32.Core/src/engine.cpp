@@ -51,7 +51,7 @@ void Engine::Init() {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
 
-        _renderer->Init();
+        _renderer->Init(mainWindow);
 
         while (!_renderer->IsReady()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -101,7 +101,7 @@ void Engine::Run() {
         }
 
         if (_renderer) {
-            _renderer->RenderFrame();
+            _renderer->RenderFrame(mainWindow);
         }
 
         mainWindow->SwapBuffers();

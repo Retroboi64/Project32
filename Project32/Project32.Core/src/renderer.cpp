@@ -20,20 +20,15 @@
 #include "model.h"
 #include "scene.h"
 #include "engine.h"
+#include <iostream>
+#include <stdexcept>
 
 Renderer::Renderer(Engine* engine)
-    : _sceneManager(SceneManager::Instance())
-    , _engine(engine)
-    , _wireframeMode(false)
-    , _showDebugInfo(true)
-    , _showImGuiDemo(false)
-    , _showSettingsWindow(true)
-    , _lightPosition{ 10.0f, 10.0f, 10.0f }
-    , _backgroundColor{ 0.05f, 0.05f, 0.1f }
-    , _fov(90.0f)
-    , _isReady(false)
+    : m_engine(engine)
+    , m_sceneManager(SceneManager::Instance())
+    , m_isReady(false)
 {
-    if (!_engine) {
+    if (!m_engine) {
         throw std::runtime_error("Renderer requires a valid Engine instance");
     }
 }
@@ -42,13 +37,11 @@ Renderer::~Renderer() {
     Cleanup();
 }
 
-void Renderer::Init() {
-    if (!_engine) {
+void Renderer::Init(Window* window) {
+    if (!m_engine) {
         throw std::runtime_error("Engine instance not available for Renderer initialization");
     }
 
-    // Make sure this engine's window context is current
-    Window* window = _engine->GetWindow();
     if (!window) {
         throw std::runtime_error("Window not available for Renderer initialization");
     }
@@ -62,135 +55,165 @@ void Renderer::Init() {
         LoadSkybox();
         LoadLevel();
         LoadModels();
-        LoadScene(); // Testing with a scene system
+        LoadScene();
 
-        _isReady = true;
-        std::cout << "[Renderer::Init] Renderer initialized for engine " << _engine->GetID() << std::endl;
+        m_isReady = true;
+        std::cout << "[Renderer] Initialized for Engine " << m_engine->GetID() << std::endl;
     }
     catch (const std::exception& e) {
-        std::cerr << "[Renderer::Init] Failed to initialize renderer for engine "
-            << _engine->GetID() << ": " << e.what() << std::endl;
-        _isReady = false;
+        std::cerr << "[Renderer] Failed to initialize for Engine "
+            << m_engine->GetID() << ": " << e.what() << std::endl;
+        m_isReady = false;
         throw;
     }
 }
 
-void Renderer::LoadModels() {
-    _loadedModels.emplace_back(ModelImporter::LoadFromFile("res/models/Sphere.obj"));
+void Renderer::LoadShaders() {
+    m_shaderManager.LoadShader("SolidColor", "solidcolor.vert", "solidcolor.frag");
+    m_shaderManager.LoadShader("Wireframe", "solidcolor.vert", "wireframe.frag");
+    m_shaderManager.LoadShader("Skybox", "skybox.vert", "skybox.frag");
 }
 
-// TODO: Improve this
+void Renderer::LoadMeshes() {
+    m_quadMesh = StaticMeshes::GetQuad();
+    m_cubeMesh = StaticMeshes::GetCube();
+    m_cylinderMesh = StaticMeshes::GetCylinder(16, 2.0f, 0.5f);
+    m_sphereMesh = StaticMeshes::GetSphere(16, 16, 0.5f);
+    m_capsuleMesh = StaticMeshes::GetCapsule(16, 8, 2.0f, 0.5f);
+}
+
+void Renderer::LoadTextures() {
+    m_textures.LoadTexture("Wall", "res/textures/wall.jpg", true);
+}
+
+void Renderer::LoadSkybox() {
+    m_skybox = std::make_unique<Skybox>();
+    std::vector<std::string> faces = {
+        "res/skybox/right.jpg", "res/skybox/left.jpg", "res/skybox/top.jpg",
+        "res/skybox/bottom.jpg", "res/skybox/front.jpg", "res/skybox/back.jpg"
+    };
+    m_skybox->Load(faces);
+}
+
+void Renderer::LoadModels() {
+    m_loadedModels.emplace_back(ModelImporter::LoadFromFile("res/models/Sphere.obj"));
+}
+
 void Renderer::LoadLevel() {
-    _wallSystem = std::make_unique<WallSystem>();
-    _wallSystem->CreateMaze();
+    m_wallSystem = std::make_unique<WallSystem>();
+    m_wallSystem->CreateMaze();
 }
 
 void Renderer::LoadScene() {
-    if (_sceneManager.LoadScene("res/scene.json")) {
-        std::cout << "[Engine " << _engine->GetID() << "] Loaded scene from JSON file successfully" << std::endl;
-        if (auto* currentScene = _sceneManager.GetCurrentScene()) {
+    if (m_sceneManager.LoadScene("res/scene.json")) {
+        std::cout << "[Engine " << m_engine->GetID() << "] Loaded scene successfully" << std::endl;
+        if (auto* currentScene = m_sceneManager.GetCurrentScene()) {
             currentScene->DebugPrint();
             currentScene->PrintStatistics();
         }
     }
     else {
-        std::cout << "[Engine " << _engine->GetID() << "] Failed to load scene from res/scene.json" << std::endl;
-
-        auto* defaultScene = _sceneManager.CreateScene("Default Scene");
-        std::cout << "[Engine " << _engine->GetID() << "] Created default scene: " << defaultScene->GetMetadata().name << std::endl;
+        std::cout << "[Engine " << m_engine->GetID() << "] Failed to load scene, creating default" << std::endl;
+        auto* defaultScene = m_sceneManager.CreateScene("Default Scene");
+        std::cout << "[Engine " << m_engine->GetID() << "] Created default scene: "
+            << defaultScene->GetMetadata().name << std::endl;
     }
 }
 
-void Renderer::LoadShaders() {
-    _shaderManager.LoadShader("SolidColor", "solidcolor.vert", "solidcolor.frag");
-    _shaderManager.LoadShader("Wireframe", "solidcolor.vert", "wireframe.frag");
-    _shaderManager.LoadShader("Skybox", "skybox.vert", "skybox.frag");
+void Renderer::SetupRenderState() {
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 }
 
-void Renderer::LoadSkybox() {
-    _skybox = std::make_unique<Skybox>();
-    std::vector<std::string> faces = {
-        "res/skybox/right.jpg", "res/skybox/left.jpg", "res/skybox/top.jpg",
-        "res/skybox/bottom.jpg", "res/skybox/front.jpg", "res/skybox/back.jpg"
-    };
-    _skybox->Load(faces);
+glm::mat4 Renderer::CalculateProjectionMatrix(const glm::ivec2& windowSize) const {
+    float aspect = static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
+    return glm::perspective(glm::radians(m_settings.fov), aspect, NEAR_PLANE, FAR_PLANE);
 }
 
-void Renderer::LoadMeshes() {
-    _quadMesh = StaticMeshes::GetQuad();
-    _cubeMesh = StaticMeshes::GetCube();
-    _cylinderMesh = StaticMeshes::GetCylinder(16, 2.0f, 0.5f);
-    _sphereMesh = StaticMeshes::GetSphere(16, 16, 0.5f);
-    _capsuleMesh = StaticMeshes::GetCapsule(16, 8, 2.0f, 0.5f);
+glm::mat4 Renderer::CalculateViewMatrix(const glm::vec3& position) const {
+    Transform transform{ .position = position };
+    return transform.ToMatrix();
 }
 
-void Renderer::LoadTextures() {
-    _textures.LoadTexture("Wall", "res/textures/wall.jpg", true);
-}
-
-void Renderer::DrawWalls() {
-    if (!_wallSystem) return;
-
-    _shaderManager.GetShader("SolidColor")->SetBool("useTexture", true);
-    _textures.BindTexture(_textures.FindTextureByName("Wall"), GL_TEXTURE0);
-
-    const auto& walls = _wallSystem->GetWalls();
-    for (const auto& wall : walls) {
-        Transform wallTransform = wall.GetTransform();
-        _shaderManager.GetShader("SolidColor")->SetMat4("model", wallTransform.ToMatrix());
-        _shaderManager.GetShader("SolidColor")->SetVec3("color", wall.color);
-        _cubeMesh->Draw();
+void Renderer::RenderFrame(Window* window) {
+    if (!m_isReady || !m_engine || !window) {
+        return;
     }
-}
 
-void Renderer::RenderFrame() {
-    if (!_isReady || !_engine) return;
-
-    Window* window = _engine->GetWindow();
-    if (!window) return;
-
-    window->MakeContextCurrent();
-
-    glClearColor(_backgroundColor[0], _backgroundColor[1], _backgroundColor[2], 1.0f);
+    glClearColor(m_settings.backgroundColor.r, m_settings.backgroundColor.g,
+        m_settings.backgroundColor.b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Ensure depth testing is enabled
-    glEnable(GL_DEPTH_TEST);
-
-    Transform playerTransform{
-        .position = glm::vec3(0.0f, 1.0f, 0.0f)
-    };
+    SetupRenderState();
 
     glm::ivec2 windowSize = window->GetSize();
-    glm::mat4 projection = glm::perspective(glm::radians(_fov),
-        static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y), NEAR_PLANE, FAR_PLANE);
-    glm::mat4 view = playerTransform.ToMatrix();
-    glm::vec3 playerPos = playerTransform.position;
-    glm::vec3 lightPos = glm::vec3(_lightPosition[0], _lightPosition[1], _lightPosition[2]);
+    glm::mat4 projection = CalculateProjectionMatrix(windowSize);
+
+    glm::vec3 playerPos(0.0f, 1.0f, 0.0f);
+    glm::mat4 view = CalculateViewMatrix(playerPos);
 
     DrawSkybox(projection, view);
 
-    auto* shader = _shaderManager.GetShader("SolidColor");
-    if (!shader) return;
+    auto* shader = m_shaderManager.GetShader("SolidColor");
+    if (!shader) {
+        return;
+    }
 
     shader->Bind();
     shader->SetMat4("projection", projection);
     shader->SetMat4("view", view);
-    shader->SetVec3("lightPos", lightPos);
+    shader->SetVec3("lightPos", m_settings.lightPosition);
     shader->SetVec3("viewPos", playerPos);
-
-    _textures.BindTexture(_textures.FindTextureByName("Wall"), GL_TEXTURE0);
     shader->SetInt("uTexture", 0);
-    shader->SetBool("useTexture", false);
 
-    if (_wireframeMode) {
+    if (m_settings.wireframeMode) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
+
+    DrawGrid(projection, view, playerPos);
+    DrawWalls();
+    DrawSceneObjects(projection, view, playerPos);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    RenderUI(window);
+}
+
+void Renderer::DrawSkybox(const glm::mat4& projection, const glm::mat4& view) {
+    if (!m_skybox) {
+        return;
+    }
+
+    glm::mat4 skyboxView = glm::mat4(glm::mat3(view));
+
+    auto* skyboxShader = m_shaderManager.GetShader("Skybox");
+    if (!skyboxShader) {
+        return;
+    }
+
+    skyboxShader->Bind();
+    skyboxShader->SetMat4("view", skyboxView);
+    skyboxShader->SetMat4("projection", projection);
+    skyboxShader->SetInt("skybox", 0);
+
+    m_skybox->Draw();
+}
+
+void Renderer::DrawGrid(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& playerPos) {
+    auto* shader = m_shaderManager.GetShader("SolidColor");
+    if (!shader) {
+        return;
+    }
+
+    shader->Bind();
+    shader->SetBool("useTexture", false);
 
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1.0f, 1.0f);
 
-    constexpr int GRID_SIZE = 40;
     constexpr int HALF_GRID = GRID_SIZE / 2;
 
     for (int x = -HALF_GRID; x < HALF_GRID; x++) {
@@ -201,108 +224,128 @@ void Renderer::RenderFrame() {
 
             shader->SetMat4("model", gridSquare.ToMatrix());
 
-            bool lightSquare = ((x + z) % 2) == 0;
-            shader->SetVec3("color", lightSquare ? LIGHT_SQUARE : DARK_SQUARE);
+            bool isLight = ((x + z) % 2) == 0;
+            shader->SetVec3("color", isLight ? LIGHT_SQUARE : DARK_SQUARE);
 
-            if (_quadMesh) {
-                _quadMesh->Draw();
+            if (m_quadMesh) {
+                m_quadMesh->Draw();
             }
         }
     }
 
     glDisable(GL_POLYGON_OFFSET_FILL);
+}
 
-    DrawWalls();
-
-    Scene* currentScene = _sceneManager.GetCurrentScene();
-    if (currentScene) {
-        int objectCount = static_cast<int>(currentScene->GetObjectCount());
-
-        shader->Bind();
-        shader->SetBool("useTexture", true);
-        shader->SetVec3("color", glm::vec3(0.2f, 0.8f, 0.3f));
-
-        for (int i = 0; i < objectCount; ++i) {
-            auto* obj = currentScene->FindObject(i);
-            if (!obj) continue;
-
-            glm::mat4 modelMatrix = obj->GetTransform().ToMatrix();
-            shader->SetMat4("model", modelMatrix);
-
-            currentScene->RenderObject(i);
-        }
+void Renderer::DrawWalls() {
+    if (!m_wallSystem) {
+        return;
     }
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    auto* shader = m_shaderManager.GetShader("SolidColor");
+    if (!shader) {
+        return;
+    }
 
-    if (window) {
-        window->BeginImGuiFrame();
+    shader->Bind();
+    shader->SetBool("useTexture", true);
+    m_textures.BindTexture(m_textures.FindTextureByName("Wall"), GL_TEXTURE0);
 
-        if (_showDebugInfo) {
-            DrawImGuiHUD();
+    const auto& walls = m_wallSystem->GetWalls();
+    for (const auto& wall : walls) {
+        Transform wallTransform = wall.GetTransform();
+        shader->SetMat4("model", wallTransform.ToMatrix());
+        shader->SetVec3("color", wall.color);
+
+        if (m_cubeMesh) {
+            m_cubeMesh->Draw();
         }
-
-        if (_showSettingsWindow) {
-            DrawSettingsWindow();
-        }
-
-        if (_showImGuiDemo) {
-            ImGui::ShowDemoWindow(&_showImGuiDemo);
-        }
-
-        window->EndImGuiFrame();
     }
 }
 
-void Renderer::DrawSkybox(const glm::mat4& projection, const glm::mat4& view) {
-    if (!_skybox) return;
-
-    glm::mat4 skyboxView = glm::mat4(glm::mat3(view));
-
-    auto* skyboxShader = _shaderManager.GetShader("Skybox");
-    if (skyboxShader) {
-        skyboxShader->Bind();
-        skyboxShader->SetMat4("view", skyboxView);
-        skyboxShader->SetMat4("projection", projection);
-        skyboxShader->SetInt("skybox", 0);
-
-        _skybox->Draw();
+void Renderer::DrawSceneObjects(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& playerPos) {
+    Scene* currentScene = m_sceneManager.GetCurrentScene();
+    if (!currentScene) {
+        return;
     }
+
+    auto* shader = m_shaderManager.GetShader("SolidColor");
+    if (!shader) {
+        return;
+    }
+
+    shader->Bind();
+    shader->SetBool("useTexture", true);
+    shader->SetVec3("color", glm::vec3(0.2f, 0.8f, 0.3f));
+
+    int objectCount = static_cast<int>(currentScene->GetObjectCount());
+    for (int i = 0; i < objectCount; ++i) {
+        auto* obj = currentScene->FindObject(i);
+        if (!obj) {
+            continue;
+        }
+
+        glm::mat4 modelMatrix = obj->GetTransform().ToMatrix();
+        shader->SetMat4("model", modelMatrix);
+        currentScene->RenderObject(i);
+    }
+}
+
+void Renderer::RenderUI(Window* window) {
+    if (!window) {
+        return;
+    }
+
+    window->BeginImGuiFrame();
+
+    if (m_settings.showDebugInfo) {
+        DrawImGuiHUD();
+    }
+
+    if (m_settings.showSettingsWindow) {
+        DrawSettingsWindow();
+    }
+
+    if (m_settings.showImGuiDemo) {
+        ImGui::ShowDemoWindow(&m_settings.showImGuiDemo);
+    }
+
+    window->EndImGuiFrame();
 }
 
 void Renderer::DrawImGuiHUD() {
-    std::string windowTitle = "Debug Info - Engine " + std::to_string(_engine->GetID());
-    ImGui::Begin(windowTitle.c_str(), &_showDebugInfo, ImGuiWindowFlags_AlwaysAutoResize);
+    std::string windowTitle = "Debug Info - Engine " + std::to_string(m_engine->GetID());
+    ImGui::Begin(windowTitle.c_str(), &m_settings.showDebugInfo, ImGuiWindowFlags_AlwaysAutoResize);
 
-    ImGui::Text("Engine ID: %d", _engine->GetID());
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::Text("Engine ID: %d", m_engine->GetID());
+    ImGui::Text("FPS: %.1f (%.3f ms/frame)", ImGui::GetIO().Framerate,
+        1000.0f / ImGui::GetIO().Framerate);
 
     ImGui::Separator();
 
     if (ImGui::CollapsingHeader("Render Settings")) {
-        if (ImGui::Button(_wireframeMode ? "Disable Wireframe" : "Enable Wireframe")) {
+        if (ImGui::Button(m_settings.wireframeMode ? "Disable Wireframe" : "Enable Wireframe")) {
             ToggleWireframe();
         }
 
         ImGui::SameLine();
         if (ImGui::Button("Toggle Settings")) {
-            _showSettingsWindow = !_showSettingsWindow;
+            ToggleSettingsWindow();
         }
 
         if (ImGui::Button("Show ImGui Demo")) {
-            _showImGuiDemo = true;
+            ToggleImGuiDemo();
         }
     }
 
     if (ImGui::CollapsingHeader("System Info")) {
-        ImGui::Text("OpenGL Version: %s", glGetString(GL_VERSION));
+        ImGui::Text("OpenGL: %s", glGetString(GL_VERSION));
         ImGui::Text("GPU: %s", glGetString(GL_RENDERER));
-        ImGui::Text("GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+        ImGui::Text("GLSL: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-        Window* window = _engine->GetWindow();
+        Window* window = m_engine->GetWindow();
         if (window) {
             glm::ivec2 windowSize = window->GetSize();
-            ImGui::Text("Window Size: %dx%d", windowSize.x, windowSize.y);
+            ImGui::Text("Window: %dx%d", windowSize.x, windowSize.y);
         }
     }
 
@@ -322,14 +365,21 @@ void Renderer::DrawImGuiHUD() {
 }
 
 void Renderer::DrawSettingsWindow() {
-    std::string windowTitle = "Settings - Engine " + std::to_string(_engine->GetID());
-    ImGui::Begin(windowTitle.c_str(), &_showSettingsWindow);
+    std::string windowTitle = "Settings - Engine " + std::to_string(m_engine->GetID());
+    ImGui::Begin(windowTitle.c_str(), &m_settings.showSettingsWindow);
 
     if (ImGui::CollapsingHeader("Graphics", ImGuiTreeNodeFlags_DefaultOpen)) {
-        ImGui::ColorEdit3("Background Color", _backgroundColor);
-        ImGui::SliderFloat("FOV", &_fov, 45.0f, 120.0f);
+        glm::vec3 bgColor = m_settings.backgroundColor;
+        if (ImGui::ColorEdit3("Background Color", &bgColor.r)) {
+            SetBackgroundColor(bgColor);
+        }
 
-        Window* window = _engine->GetWindow();
+        float fov = m_settings.fov;
+        if (ImGui::SliderFloat("FOV", &fov, 45.0f, 120.0f)) {
+            SetFOV(fov);
+        }
+
+        Window* window = m_engine->GetWindow();
         if (window) {
             bool vsync = window->IsVSync();
             if (ImGui::Checkbox("V-Sync", &vsync)) {
@@ -339,20 +389,23 @@ void Renderer::DrawSettingsWindow() {
     }
 
     if (ImGui::CollapsingHeader("Lighting")) {
-        ImGui::SliderFloat3("Light Position", _lightPosition, -20.0f, 20.0f);
+        glm::vec3 lightPos = m_settings.lightPosition;
+        if (ImGui::SliderFloat3("Light Position", &lightPos.x, -20.0f, 20.0f)) {
+            SetLightPosition(lightPos);
+        }
     }
 
     if (ImGui::CollapsingHeader("Game")) {
         if (ImGui::Button("Regenerate Maze")) {
-            if (_wallSystem) {
-                _wallSystem->CreateMaze();
+            if (m_wallSystem) {
+                m_wallSystem->CreateMaze();
             }
         }
     }
 
     if (ImGui::CollapsingHeader("Engine Controls")) {
         if (ImGui::Button("Shutdown This Engine")) {
-            _engine->Shutdown();
+            m_engine->Shutdown();
         }
 
         ImGui::Separator();
@@ -373,7 +426,7 @@ void Renderer::DrawSettingsWindow() {
                 if (ImGui::Button("Destroy Other Engines")) {
                     auto engines = manager->GetAllEngines();
                     for (Engine* engine : engines) {
-                        if (engine && engine->GetID() != _engine->GetID()) {
+                        if (engine && engine->GetID() != m_engine->GetID()) {
                             manager->DestroyEngine(engine->GetID());
                         }
                     }
@@ -386,30 +439,51 @@ void Renderer::DrawSettingsWindow() {
 }
 
 void Renderer::Cleanup() {
-    std::cout << "[Renderer::Cleanup] Cleaning up renderer for engine " << _engine->GetID() << std::endl;
+    std::cout << "[Renderer] Cleaning up for Engine " << m_engine->GetID() << std::endl;
 
-    _quadMesh.reset();
-    _cubeMesh.reset();
-    _cylinderMesh.reset();
-    _sphereMesh.reset();
-    _capsuleMesh.reset();
-    _skybox.reset();
-    _wallSystem.reset();
+    m_quadMesh.reset();
+    m_cubeMesh.reset();
+    m_cylinderMesh.reset();
+    m_sphereMesh.reset();
+    m_capsuleMesh.reset();
+    m_skybox.reset();
+    m_wallSystem.reset();
+    m_loadedModels.clear();
 
-    _textures.Clear();
-    _shaderManager.Clear();
+    m_textures.Clear();
+    m_shaderManager.Clear();
 
-    _isReady = false;
+    m_isReady = false;
 }
 
 void Renderer::ToggleWireframe() {
-    _wireframeMode = !_wireframeMode;
-    std::cout << "[Engine " << _engine->GetID() << "] Wireframe mode: "
-        << (_wireframeMode ? "ON" : "OFF") << std::endl;
+    m_settings.wireframeMode = !m_settings.wireframeMode;
+    std::cout << "[Engine " << m_engine->GetID() << "] Wireframe: "
+        << (m_settings.wireframeMode ? "ON" : "OFF") << std::endl;
 }
 
 void Renderer::ToggleDebugInfo() {
-    _showDebugInfo = !_showDebugInfo;
-    std::cout << "[Engine " << _engine->GetID() << "] Debug info: "
-        << (_showDebugInfo ? "ON" : "OFF") << std::endl;
+    m_settings.showDebugInfo = !m_settings.showDebugInfo;
+    std::cout << "[Engine " << m_engine->GetID() << "] Debug Info: "
+        << (m_settings.showDebugInfo ? "ON" : "OFF") << std::endl;
+}
+
+void Renderer::ToggleSettingsWindow() {
+    m_settings.showSettingsWindow = !m_settings.showSettingsWindow;
+}
+
+void Renderer::ToggleImGuiDemo() {
+    m_settings.showImGuiDemo = !m_settings.showImGuiDemo;
+}
+
+void Renderer::SetFOV(float fov) {
+    m_settings.fov = glm::clamp(fov, 45.0f, 120.0f);
+}
+
+void Renderer::SetBackgroundColor(const glm::vec3& color) {
+    m_settings.backgroundColor = glm::clamp(color, glm::vec3(0.0f), glm::vec3(1.0f));
+}
+
+void Renderer::SetLightPosition(const glm::vec3& position) {
+    m_settings.lightPosition = position;
 }
