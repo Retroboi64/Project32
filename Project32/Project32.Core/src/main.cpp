@@ -9,8 +9,6 @@
  * This header must not be removed from any source file.
  */
 
-
-
 #include "engine.h"
 #include <memory>
 #include <thread>

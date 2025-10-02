@@ -13,32 +13,13 @@
 #include <iostream>
 #include <vector>
 
-#include "pak.h"
+#include "../../Project32.Editor/Editor.h"
 
-typedef void (*InitFunc)();
-typedef void (*ShutdownFunc)();
-typedef std::vector<uint8_t>(*LoadFunc)(const char*);
-typedef void (*SetConfigFunc)(const char*, const char*);
-typedef void (*TickFunc)(float);
-typedef void (*RenderFunc)();
+#define EDITORMODULE_EXPORTS
 
 int main() {
-    HMODULE dll = LoadLibraryA("Project32.Editor.dll");
-    if (!dll) {
-        std::cerr << "Failed to load EditorModule.dll\n";
-        return -1;
-    }
-
-    InitFunc InitializeEditor = (InitFunc)GetProcAddress(dll, "InitializeEditor");
-    ShutdownFunc ShutdownEditor = (ShutdownFunc)GetProcAddress(dll, "ShutdownEditor");
-    LoadFunc LoadResource = (LoadFunc)GetProcAddress(dll, "LoadResource");
-    SetConfigFunc SetEditorConfig = (SetConfigFunc)GetProcAddress(dll, "SetEditorConfig");
-    TickFunc EditorTick = (TickFunc)GetProcAddress(dll, "EditorTick");
-    RenderFunc RenderEditor = (RenderFunc)GetProcAddress(dll, "RenderEditor");
-
     InitializeEditor();
     ShutdownEditor();
 
-    FreeLibrary(dll);
     return 0;
 }
