@@ -23,25 +23,6 @@ typedef void (*TickFunc)(float);
 typedef void (*RenderFunc)();
 
 int main() {
-    // Testing RBPak lib
-    rbpak::Package pak;
-
-    // Try to load non-existent package
-    if (auto result = pak.Load("nonexistent.pak"); !result) {
-        std::cout << "Expected error: " << result.message << std::endl;
-        std::cout << "Error code: " << rbpak::pak_utils::GetErrorMessage(result.error) << std::endl;
-    }
-
-    // Try to add invalid data
-    if (auto result = pak.Add("", rbpak::ByteArray{}); !result) {
-        std::cout << "Expected error: " << result.message << std::endl;
-    }
-
-    // Check last error
-    if (pak.GetLastError() != rbpak::PackageError::None) {
-        std::cout << "Last error: " << rbpak::pak_utils::GetErrorMessage(pak.GetLastError()) << std::endl;
-    }
-
     HMODULE dll = LoadLibraryA("Project32.Editor.dll");
     if (!dll) {
         std::cerr << "Failed to load EditorModule.dll\n";

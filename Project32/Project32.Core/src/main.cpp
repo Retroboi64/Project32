@@ -9,10 +9,15 @@
  * This header must not be removed from any source file.
  */
 
+
+
 #include "engine.h"
 #include <memory>
 #include <thread>
 #include <iostream>
+#include "UIX.h"
+#define UIEXPORT
+
 
 extern "C" {
     static int g_currentEngineID = -1;

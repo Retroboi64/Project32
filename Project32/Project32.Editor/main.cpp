@@ -1,3 +1,5 @@
+#define UIEXPORT 
+
 #include "Editor.h"
 #include "../Project32.API/src/Project32.API.h"
 #include <iostream>
