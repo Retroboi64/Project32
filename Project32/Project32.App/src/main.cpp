@@ -9,12 +9,7 @@
  * This header must not be removed from any source file.
  */
 
-#include <windows.h>
-#include <iostream>
-#include <vector>
-
 #include "../../Project32.Editor/Editor.h"
-
 #define EDITORMODULE_EXPORTS
 
 int main() {

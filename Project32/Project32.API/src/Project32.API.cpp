@@ -19,6 +19,12 @@ static HMODULE g_hDllModule = nullptr;
 bool LoadEngineDLL(const std::wstring& dllPath) {
     UnloadEngineDLL();
 
+    DWORD fileAttr = GetFileAttributesW(dllPath.c_str());
+    if (fileAttr == INVALID_FILE_ATTRIBUTES) {
+        std::wcerr << L"DLL file not found: " << dllPath << std::endl;
+        return false;
+    }
+
     g_hDllModule = LoadLibraryW(dllPath.c_str());
     if (!g_hDllModule) {
         std::wcerr << L"Failed to load DLL: " << dllPath << L" (Error: " << GetLastError() << L")" << std::endl;

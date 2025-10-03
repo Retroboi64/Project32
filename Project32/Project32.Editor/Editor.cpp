@@ -13,9 +13,20 @@
 #include "../Project32.API/src/Project32.API.h"
 #include <iostream>
 #include <unordered_map>
+#include <filesystem>
 
 static bool editor_initialized = false;
 static bool engine_ready = false;
+
+std::wstring GetDLLPath() {
+    wchar_t exePath[MAX_PATH];
+    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+
+    auto exeDir = std::filesystem::path(exePath).parent_path();
+    auto dllPath = exeDir / L"Project32.Core.dll";
+
+    return dllPath.wstring();
+}
 
 extern "C" {
     void InitializeEditor() {
@@ -23,7 +34,7 @@ extern "C" {
 
         std::cout << "[Editor] Initializing editor...\n";
 
-        if (P32::Engine::LoadDLL(L"Project32.Core.dll")) {
+        if (P32::Engine::LoadDLL(GetDLLPath())) {
             engine_ready = true;
         }
 

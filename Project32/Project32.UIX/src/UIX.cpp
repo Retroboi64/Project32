@@ -13,6 +13,9 @@
 #include <algorithm>
 
 namespace UIX {
+	UIManager::UIManager() {}
+	UIManager::~UIManager() {}
+
 	UIManager& UIManager::Instance() {
 		static UIManager instance;
 		return instance;

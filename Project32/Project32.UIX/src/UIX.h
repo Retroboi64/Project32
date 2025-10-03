@@ -45,6 +45,8 @@ namespace UIX {
 
 	class UILIB_API UIManager {
 	public:
+		~UIManager();
+
 		static UIManager& Instance();
 
 		void Initialize();
@@ -101,7 +103,7 @@ namespace UIX {
 		float GetTextWidth(const char* text);
 
 	private:
-		UIManager() = default;
+		UIManager();
 		Theme currentTheme;
 
 		struct Notification {
