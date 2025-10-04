@@ -27,6 +27,7 @@ enum class CursorMode {
 
 class Window {
 private:
+    // UIX::UIManager& _ui;
     GLFWwindow* _window = nullptr;
     int _width;
     int _height;

@@ -14,10 +14,6 @@
 #include <thread>
 #include <iostream>
 
-#include "UIX.h"
-#define UIEXPORT
-
-
 extern "C" {
     static int g_currentEngineID = -1;
 

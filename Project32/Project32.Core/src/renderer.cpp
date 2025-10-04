@@ -9,7 +9,6 @@
  * This header must not be removed from any source file.
  */
 
-#include "UIX.h"
 #include "renderer.h"
 #include "common.h"
 #include "shader.h"
@@ -314,18 +313,8 @@ void Renderer::RenderUI(Window* window) {
 }
 
 void Renderer::DrawImGuiHUD() {
-    auto& ui = UIX::UIManager::Instance();
-    ui.Initialize();
-
-    ui.BeginFrame();
-    if (ui.BeginStyledWindow("My Window")) {
-        ui.HeaderText("Welcome!");
-        if (ui.Button("Click Me", ImVec2(120, 40), true)) {
-            ui.ShowNotification("Button clicked!");
-        }
-        ui.EndStyledWindow();
-    }
-    ui.EndFrame();
+    //auto& ui = UIX::UIManager::Instance();
+    //ui.Initialize();
 
     std::string windowTitle = "Debug Info - Engine " + std::to_string(m_engine->GetID());
     ImGui::Begin(windowTitle.c_str(), &m_settings.showDebugInfo, ImGuiWindowFlags_AlwaysAutoResize);
