@@ -12,10 +12,7 @@
 #pragma once
 
 #include "common.h"
-#include <functional>
-#include <string>
-#include <vector>
-#include <memory>
+#include "ui.h"
 
 struct ImGuiContext;
 
@@ -27,7 +24,7 @@ enum class CursorMode {
 
 class Window {
 private:
-    // UIX::UIManager& _ui;
+    std::unique_ptr<UIX> _ui;
     GLFWwindow* _window = nullptr;
     int _width;
     int _height;
@@ -59,7 +56,6 @@ public:
 
     void Init();
     void InitGLAD();
-    void InitImGui();
     void Shutdown();
 
     void PollEvents();
@@ -139,6 +135,9 @@ public:
     int GetCurrentWindowID() const { return currentWindow; }
     int AddWindow(int width, int height, const std::string& name);
     int RemoveWindow(int index);
+
+    void RemoveAllWindows();
+    void Cleanup();
 
     void SetCurrentWindow(int index);
     std::string GetWindowTitle(int index);

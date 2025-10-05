@@ -100,6 +100,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\ui.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\camera.h" />
@@ -118,6 +121,7 @@
     <ClInclude Include="src\util.hpp" />
     <ClInclude Include="src\wall.h" />
     <ClInclude Include="src\window.h" />
+    <ClInclude Include="src\ui.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Project32.UIX\Project32.UIX.vcxproj">

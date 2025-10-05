@@ -12,7 +12,6 @@
 // TODO: Move all OpenGL/GLAD and Imgui To A Better Place
 
 #include "window.h"
-#include <iostream>
 
 int Window::_nextID = 0;
 
@@ -24,7 +23,7 @@ static void StaticFramebufferSizeCallback(GLFWwindow* glfwWindow, int width, int
 }
 
 Window::Window(int width, int height, const std::string& title)
-    : _width(width), _height(height), _title(title), _ID(_nextID++), _imguiContext(nullptr), _imguiInitialized(false)
+    : _width(width), _height(height), _title(title), _ID(_nextID++) //, _imguiContext(nullptr), _imguiInitialized(false)
 {
     std::cout << "[Window " << _ID << "] Constructor called: " << width << "x" << height << " '" << title << "'" << std::endl;
     std::cout.flush();
@@ -96,7 +95,9 @@ Window::Window(int width, int height, const std::string& title)
     std::cout << "[Window " << _ID << "] Step W8: Initializing ImGui..." << std::endl;
     std::cout.flush();
 
-    InitImGui();
+    _ui = std::make_unique<UIX>(_window);
+    //_imguiContext = _ui->GetContext();
+    //_imguiInitialized = _ui->IsInitialized();
 
     std::cout << "[Window " << _ID << "] Created successfully: " << width << "x" << height << " '" << title << "'" << std::endl;
     std::cout << "[Window " << _ID << "] OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
@@ -108,20 +109,6 @@ Window::~Window() {
     std::cout << "[Window " << _ID << "] Destructor called" << std::endl;
 
     if (_window) {
-        if (_imguiInitialized && _imguiContext) {
-            std::cout << "[Window " << _ID << "] Cleaning up ImGui context" << std::endl;
-
-            ImGui::SetCurrentContext(_imguiContext);
-            glfwMakeContextCurrent(_window);
-
-            ImGui_ImplOpenGL3_Shutdown();
-            ImGui_ImplGlfw_Shutdown();
-
-            ImGui::DestroyContext(_imguiContext);
-            _imguiContext = nullptr;
-            _imguiInitialized = false;
-        }
-
         glfwDestroyWindow(_window);
         _window = nullptr;
         std::cout << "[Window " << _ID << "] GLFW window destroyed" << std::endl;
@@ -131,43 +118,6 @@ Window::~Window() {
 }
 
 void Window::Init() {}
-
-void Window::InitImGui() {
-    try {
-        glfwMakeContextCurrent(_window);
-
-        IMGUI_CHECKVERSION();
-        _imguiContext = ImGui::CreateContext();
-        ImGui::SetCurrentContext(_imguiContext);
-
-        std::cout << "[Window " << _ID << "] Created ImGui context: " << _imguiContext << std::endl;
-
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-
-        ImGui::StyleColorsDark();
-
-        float xscale, yscale;
-        glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
-        float main_scale = (xscale + yscale) * 0.5f;
-        ImGuiStyle& style = ImGui::GetStyle();
-        style.ScaleAllSizes(main_scale);
-        style.FontScaleDpi = main_scale;
-
-        ImGui_ImplGlfw_InitForOpenGL(_window, true);
-        ImGui_ImplOpenGL3_Init("#version 460");
-
-        _imguiInitialized = true;
-        std::cout << "[Window " << _ID << "] ImGui initialized successfully with isolated context" << std::endl;
-    }
-    catch (const std::exception& e) {
-        std::cerr << "[Window " << _ID << "] Failed to initialize ImGui: " << e.what() << std::endl;
-        _imguiInitialized = false;
-        _imguiContext = nullptr;
-        throw;
-    }
-}
 
 void Window::InitGLAD() {
     glfwMakeContextCurrent(_window);
@@ -181,17 +131,7 @@ void Window::Shutdown() {
     std::cout << "[Window " << _ID << "] Shutdown called" << std::endl;
 
     if (_window) {
-        if (_imguiInitialized && _imguiContext) {
-            ImGui::SetCurrentContext(_imguiContext);
-            glfwMakeContextCurrent(_window);
-
-            ImGui_ImplOpenGL3_Shutdown();
-            ImGui_ImplGlfw_Shutdown();
-
-            ImGui::DestroyContext(_imguiContext);
-            _imguiContext = nullptr;
-            _imguiInitialized = false;
-        }
+        _ui->Cleanup(_window);
 
         glfwDestroyWindow(_window);
         _window = nullptr;
@@ -310,9 +250,8 @@ void Window::MakeContextCurrent() {
     if (_window) {
         glfwMakeContextCurrent(_window);
 
-        // Also switch ImGui context if this window has one
-        if (_imguiContext) {
-            ImGui::SetCurrentContext(_imguiContext);
+        if (_ui && _ui->IsInitialized()) {
+            ImGui::SetCurrentContext(_ui->GetContext());
         }
     }
 }
@@ -395,31 +334,25 @@ void Window::FramebufferSizeCallback(GLFWwindow* window, int width, int height) 
 }
 
 void Window::BeginImGuiFrame() {
-    if (!_window || !_imguiInitialized || !_imguiContext) {
+    if (!_window || !_ui || !_ui->IsInitialized()) {
         std::cerr << "[Window " << _ID << "] Warning: BeginImGuiFrame called but ImGui not properly initialized!" << std::endl;
         return;
     }
 
-    ImGui::SetCurrentContext(_imguiContext);
     glfwMakeContextCurrent(_window);
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
+    _ui->BeginImgui();
 }
 
 void Window::EndImGuiFrame() {
-    if (!_window || !_imguiInitialized || !_imguiContext) {
+    if (!_window || !_ui || !_ui->IsInitialized()) {
         std::cerr << "[Window " << _ID << "] Warning: EndImGuiFrame called but ImGui not properly initialized!" << std::endl;
         return;
     }
 
-    ImGui::SetCurrentContext(_imguiContext);
     glfwMakeContextCurrent(_window);
-
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    _ui->EndImgui();
 }
+
 
 int WindowManager::Count() {
     return static_cast<int>(_windows.size());
@@ -452,6 +385,14 @@ int WindowManager::RemoveWindow(int index) {
     }
     std::cerr << "[WindowManager] Window with ID " << index << " not found for removal" << std::endl;
     return -1;
+}
+
+void WindowManager::RemoveAllWindows() {
+    _windows.clear();
+}
+
+void WindowManager::Cleanup() {
+    RemoveAllWindows();
 }
 
 void WindowManager::SetCurrentWindow(int index) {

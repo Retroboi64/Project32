@@ -22,7 +22,7 @@ Engine::Engine(int width, int height, const std::string& title)
 {
     try {
         _windowManager = std::make_unique<WindowManager>();
-        int windowID = _windowManager->AddWindow(width, height, title);
+        _windowManager->AddWindow(width, height, title);
         _renderer = std::make_unique<Renderer>(this);
         _input = std::make_unique<Input>(this); 
         Init();
@@ -124,10 +124,8 @@ void Engine::Shutdown() {
     }
 
     if (_windowManager) {
-        Window* mainWindow = _windowManager->GetWindowByID(_ID);
-        if (mainWindow) {
-            // Window cleanup handled by WindowManager destructor
-        }
+        _windowManager->RemoveAllWindows();
+        _windowManager.reset();
     }
 
     isRunning = false;
