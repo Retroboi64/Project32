@@ -96,8 +96,6 @@ Window::Window(int width, int height, const std::string& title)
     std::cout.flush();
 
     _ui = std::make_unique<UIX>(_window);
-    //_imguiContext = _ui->GetContext();
-    //_imguiInitialized = _ui->IsInitialized();
 
     std::cout << "[Window " << _ID << "] Created successfully: " << width << "x" << height << " '" << title << "'" << std::endl;
     std::cout << "[Window " << _ID << "] OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
