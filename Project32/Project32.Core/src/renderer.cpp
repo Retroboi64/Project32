@@ -57,6 +57,9 @@ void Renderer::Init(Window* window) {
         LoadModels();
         LoadScene();
 
+        // **MOVE THIS**
+        m_cameraManager.CreateCamera("main", glm::vec3(0.0f));
+
         m_isReady = true;
         std::cout << "[Renderer] Initialized for Engine " << m_engine->GetID() << std::endl;
     }
@@ -152,8 +155,8 @@ void Renderer::RenderFrame(Window* window) {
     glm::ivec2 windowSize = window->GetSize();
     glm::mat4 projection = CalculateProjectionMatrix(windowSize);
 
-    glm::vec3 playerPos(0.0f, 1.0f, 0.0f);
-    glm::mat4 view = CalculateViewMatrix(playerPos);
+    glm::vec3 mainCameraPos = m_cameraManager.GetActiveCamera()->GetTransform().position;
+    glm::mat4 view = CalculateViewMatrix(mainCameraPos);
 
     DrawSkybox(projection, view);
 
@@ -166,16 +169,19 @@ void Renderer::RenderFrame(Window* window) {
     shader->SetMat4("projection", projection);
     shader->SetMat4("view", view);
     shader->SetVec3("lightPos", m_settings.lightPosition);
-    shader->SetVec3("viewPos", playerPos);
+    shader->SetVec3("viewPos", mainCameraPos);
     shader->SetInt("uTexture", 0);
 
     if (m_settings.wireframeMode) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
-    DrawGrid(projection, view, playerPos);
-    DrawWalls();
-    DrawSceneObjects(projection, view, playerPos);
+    if (m_settings.renderScene)
+    {
+        DrawGrid(projection, view, mainCameraPos);
+        DrawWalls();
+        DrawSceneObjects(projection, view, mainCameraPos);
+    }
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -313,9 +319,6 @@ void Renderer::RenderUI(Window* window) {
 }
 
 void Renderer::DrawImGuiHUD() {
-    //auto& ui = UIX::UIManager::Instance();
-    //ui.Initialize();
-
     std::string windowTitle = "Debug Info - Engine " + std::to_string(m_engine->GetID());
     ImGui::Begin(windowTitle.c_str(), &m_settings.showDebugInfo, ImGuiWindowFlags_AlwaysAutoResize);
 
@@ -457,6 +460,12 @@ void Renderer::Cleanup() {
     m_shaderManager.Clear();
 
     m_isReady = false;
+}
+
+void Renderer::ToggleRenderScene() {
+    m_settings.renderScene = !m_settings.renderScene;
+    std::cout << "[Engine " << m_engine->GetID() << "] Debug Info: "
+        << (m_settings.renderScene ? "ON" : "OFF") << std::endl;
 }
 
 void Renderer::ToggleWireframe() {

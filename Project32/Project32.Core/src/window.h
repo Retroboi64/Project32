@@ -12,6 +12,7 @@
 #pragma once
 
 #include "common.h"
+#include "renderer.h"
 #include "ui.h"
 
 struct ImGuiContext;
@@ -26,6 +27,7 @@ class Window {
 private:
     std::unique_ptr<UIX> _ui;
     GLFWwindow* _window = nullptr;
+    // TODO: std::unique_ptr<Renderer> _renderer;
     int _width;
     int _height;
 

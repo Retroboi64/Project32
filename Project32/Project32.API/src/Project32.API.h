@@ -56,6 +56,7 @@ extern "C" {
 
     typedef void (*SetEngineBackgroundColorFunc)(int engineID, float r, float g, float b);
     typedef void (*SetEngineFOVFunc)(int engineID, float fov);
+    typedef void (*ToggleEngineRenderSceneFunc)(int engineID);
     typedef void (*ToggleEngineWireframeFunc)(int engineID);
     typedef void (*ToggleEngineDebugInfoFunc)(int engineID);
 
@@ -92,6 +93,7 @@ extern "C" {
 
         SetEngineBackgroundColorFunc SetEngineBackgroundColor;
         SetEngineFOVFunc SetEngineFOV;
+        ToggleEngineRenderSceneFunc ToggleEngineRenderScene;
         ToggleEngineWireframeFunc ToggleEngineWireframe;
         ToggleEngineDebugInfoFunc ToggleEngineDebugInfo;
 
@@ -162,6 +164,7 @@ namespace P32 {
 
         static void SetEngineBackgroundColor(int engineID, float r, float g, float b);
         static void SetEngineFOV(int engineID, float fov);
+        static void ToggleEngineRenderScene(int engineID);
         static void ToggleEngineWireframe(int engineID);
         static void ToggleEngineDebugInfo(int engineID);
 

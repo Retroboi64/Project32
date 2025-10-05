@@ -86,4 +86,8 @@ extern "C" {
     __declspec(dllexport) void CleanupEngineManager() {
         EngineManager::DestroyInstance();
     }
+
+    __declspec(dllexport) void ToggleEngineRenderScene(int engineID) {
+        EngineManager::Instance()->GetCurrentEngine()->GetRenderer()->ToggleRenderScene();
+    }
 }

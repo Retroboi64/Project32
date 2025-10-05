@@ -10,6 +10,9 @@
  */
 
 #pragma once
+
+#include "common.h"
+
 #include "mesh.h"
 #include "shader.h"
 #include "textures.h"
@@ -17,9 +20,7 @@
 #include "wall.h"
 #include "model.h"
 #include "scene.h"
-#include <memory>
-#include <vector>
-#include <glm/glm.hpp>
+#include "camera.h"
 
 class WallSystem;
 class Engine;
@@ -30,6 +31,9 @@ public:
     struct RenderSettings {
         glm::vec3 backgroundColor{ 0.05f, 0.05f, 0.1f };
         glm::vec3 lightPosition{ 10.0f, 10.0f, 10.0f };
+
+        bool renderScene{ true };
+
         float fov{ 90.0f };
         bool wireframeMode{ false };
         bool showDebugInfo{ true };
@@ -53,6 +57,8 @@ public:
     void DrawWalls();
     void DrawGrid(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& playerPos);
     void DrawSceneObjects(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& playerPos);
+
+    void ToggleRenderScene();
 
     void ToggleWireframe();
     void ToggleDebugInfo();
@@ -91,6 +97,7 @@ private:
 
     TextureManager m_textures;
     ShaderManager m_shaderManager;
+    CameraManager m_cameraManager;
     SceneManager& m_sceneManager;
 
     std::unique_ptr<Mesh> m_quadMesh;

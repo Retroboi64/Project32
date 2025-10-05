@@ -44,8 +44,7 @@ extern "C" {
             if (engineID != -1) {
                 std::cout << "Created engine with ID: " << engineID << std::endl;
 
-                P32::Engine::SetEngineBackgroundColor(engineID, 0.1f, 0.2f, 0.3f);
-                P32::Engine::SetEngineFOV(engineID, 75.0f);
+                P32::Engine::ToggleEngineRenderScene(engineID);
 
                 P32::Engine::RunEngine(engineID);
 

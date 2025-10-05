@@ -59,6 +59,7 @@ bool LoadEngineDLL(const std::wstring& dllPath) {
     engine.SetEngineFOV = (SetEngineFOVFunc)GetProcAddress(g_hDllModule, "SetEngineFOV");
     engine.ToggleEngineWireframe = (ToggleEngineWireframeFunc)GetProcAddress(g_hDllModule, "ToggleEngineWireframe");
     engine.ToggleEngineDebugInfo = (ToggleEngineDebugInfoFunc)GetProcAddress(g_hDllModule, "ToggleEngineDebugInfo");
+    engine.ToggleEngineRenderScene = (ToggleEngineRenderSceneFunc)GetProcAddress(g_hDllModule, "ToggleEngineRenderScene");
 
     engine.SetEngineWindowSize = (SetEngineWindowSizeFunc)GetProcAddress(g_hDllModule, "SetEngineWindowSize");
     engine.GetEngineWindowSize = (GetEngineWindowSizeFunc)GetProcAddress(g_hDllModule, "GetEngineWindowSize");
@@ -300,6 +301,14 @@ namespace P32 {
             return;
         }
         engine.SetEngineFOV(engineID, fov);
+    }
+
+    void Engine::ToggleEngineRenderScene(int engineID) {
+        if (!isLoaded || !engine.ToggleEngineRenderScene) {
+            std::cerr << "Engine not loaded or ToggleEngineRenderScene function not available!" << std::endl;
+            return;
+        }
+        engine.ToggleEngineRenderScene(engineID);
     }
 
     void Engine::ToggleEngineWireframe(int engineID) {
