@@ -19,79 +19,92 @@
 #include "scene.h"
 #include <memory>
 #include <vector>
+#include <glm/glm.hpp>
 
 class WallSystem;
 class Engine;
+class Window;
 
 class Renderer {
-private:
-    TextureManager _textures;
-    ShaderManager _shaderManager;
-    std::unique_ptr<WallSystem> _wallSystem;
-    SceneManager& _sceneManager;
-    Engine* _engine;
-
-    std::unique_ptr<Mesh> _quadMesh;
-    std::unique_ptr<Mesh> _cubeMesh;
-    std::unique_ptr<Mesh> _cylinderMesh;
-    std::unique_ptr<Mesh> _sphereMesh;
-    std::unique_ptr<Mesh> _capsuleMesh;
-
-    std::vector<std::unique_ptr<ModelImporter::LoadedModel>> _loadedModels;
-    std::unique_ptr<Skybox> _skybox;
-
-    bool _wireframeMode;
-    bool _showDebugInfo;
-    bool _showImGuiDemo;
-    bool _showSettingsWindow;
-    bool _isReady;
-
-    float _lightPosition[3];
-    float _backgroundColor[3];
-    float _fov;
-
-    void LoadModels();
-    void LoadLevel();
-    void LoadScene();
-    void LoadShaders();
-    void LoadSkybox();
-    void LoadMeshes();
-    void LoadTextures();
-    void DrawWalls();
-    void DrawImGuiHUD();
-    void DrawSettingsWindow();
-
 public:
+    struct RenderSettings {
+        glm::vec3 backgroundColor{ 0.05f, 0.05f, 0.1f };
+        glm::vec3 lightPosition{ 10.0f, 10.0f, 10.0f };
+        float fov{ 90.0f };
+        bool wireframeMode{ false };
+        bool showDebugInfo{ true };
+        bool showImGuiDemo{ false };
+        bool showSettingsWindow{ true };
+    };
+
     explicit Renderer(Engine* engine);
     ~Renderer();
 
     Renderer(const Renderer&) = delete;
     Renderer& operator=(const Renderer&) = delete;
+    Renderer(Renderer&&) noexcept = default;
+    Renderer& operator=(Renderer&&) noexcept = default;
 
-    void Init();
-    void RenderFrame();
-    void DrawSkybox(const glm::mat4& projection, const glm::mat4& view);
+    void Init(Window* window);
+    void RenderFrame(Window* window);
     void Cleanup();
+
+    void DrawSkybox(const glm::mat4& projection, const glm::mat4& view);
+    void DrawWalls();
+    void DrawGrid(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& playerPos);
+    void DrawSceneObjects(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& playerPos);
 
     void ToggleWireframe();
     void ToggleDebugInfo();
+    void ToggleSettingsWindow();
+    void ToggleImGuiDemo();
 
-    bool IsWireframeMode() const { return _wireframeMode; }
-    bool IsDebugInfoVisible() const { return _showDebugInfo; }
-    bool IsReady() const { return _isReady; }
-    float GetFOV() const { return _fov; }
+    bool IsReady() const { return m_isReady; }
+    bool IsWireframeMode() const { return m_settings.wireframeMode; }
+    bool IsDebugInfoVisible() const { return m_settings.showDebugInfo; }
+    float GetFOV() const { return m_settings.fov; }
+    const RenderSettings& GetSettings() const { return m_settings; }
+    Engine* GetEngine() const { return m_engine; }
 
-    void SetFOV(float fov) { _fov = fov; }
-    void SetBackgroundColor(float r, float g, float b) {
-        _backgroundColor[0] = r;
-        _backgroundColor[1] = g;
-        _backgroundColor[2] = b;
-    }
-    void SetLightPosition(float x, float y, float z) {
-        _lightPosition[0] = x;
-        _lightPosition[1] = y;
-        _lightPosition[2] = z;
-    }
+    void SetFOV(float fov);
+    void SetBackgroundColor(const glm::vec3& color);
+    void SetLightPosition(const glm::vec3& position);
 
-    Engine* GetEngine() const { return _engine; }
+private:
+    void LoadShaders();
+    void LoadMeshes();
+    void LoadTextures();
+    void LoadSkybox();
+    void LoadModels();
+    void LoadLevel();
+    void LoadScene();
+
+    void RenderUI(Window* window);
+    void DrawImGuiHUD();
+    void DrawSettingsWindow();
+
+    void SetupRenderState();
+    glm::mat4 CalculateProjectionMatrix(const glm::ivec2& windowSize) const;
+    glm::mat4 CalculateViewMatrix(const glm::vec3& position) const;
+
+    Engine* m_engine;
+
+    TextureManager m_textures;
+    ShaderManager m_shaderManager;
+    SceneManager& m_sceneManager;
+
+    std::unique_ptr<Mesh> m_quadMesh;
+    std::unique_ptr<Mesh> m_cubeMesh;
+    std::unique_ptr<Mesh> m_cylinderMesh;
+    std::unique_ptr<Mesh> m_sphereMesh;
+    std::unique_ptr<Mesh> m_capsuleMesh;
+
+    std::vector<std::unique_ptr<ModelImporter::LoadedModel>> m_loadedModels;
+    std::unique_ptr<Skybox> m_skybox;
+    std::unique_ptr<WallSystem> m_wallSystem;
+
+    RenderSettings m_settings;
+    bool m_isReady;
+
+    static constexpr int GRID_SIZE = 40;
 };

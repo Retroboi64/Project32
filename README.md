@@ -29,7 +29,7 @@ start Project32.sln
 1. Open **Visual Studio 2022**
 2. **File** → **Open** → **Project/Solution**
 3. Navigate to `Project32/Project32/Project32.sln`
-4. **Build** → **Build Solution (Debug/Release)** (or press **Ctrl+Shift+B**)
+4. **Build** → **Build Solution (Debug/Release — Only x64 is supported)** (or press **Ctrl+Shift+B**)
 ## 📚 Documentation *(coming soon)*
 For detailed documentation, examples, and API reference:
 - 📖 [Documentation Site](link-to-docs) *(coming soon)*

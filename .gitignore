@@ -372,4 +372,7 @@ FodyWeavers.xsd
 !Project32/Project32/Vendor/dlls/Release/
 !Project32/Project32/Vendor/dlls/Debug/
 
+!Project32/Project32/Vendor/RBPak/lib/Debug/
+!Project32/Project32/Vendor/RBPak/lib/Release/
+
 /Dump

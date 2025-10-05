@@ -1,0 +1,1 @@
+This is only x64 so we need to compile the library for x86 too

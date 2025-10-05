@@ -22,7 +22,7 @@ Engine::Engine(int width, int height, const std::string& title)
 {
     try {
         _windowManager = std::make_unique<WindowManager>();
-        int windowID = _windowManager->AddWindow(width, height, title);
+        _windowManager->AddWindow(width, height, title);
         _renderer = std::make_unique<Renderer>(this);
         _input = std::make_unique<Input>(this); 
         Init();
@@ -51,7 +51,7 @@ void Engine::Init() {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
 
-        _renderer->Init();
+        _renderer->Init(mainWindow);
 
         while (!_renderer->IsReady()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -101,7 +101,7 @@ void Engine::Run() {
         }
 
         if (_renderer) {
-            _renderer->RenderFrame();
+            _renderer->RenderFrame(mainWindow);
         }
 
         mainWindow->SwapBuffers();
@@ -124,10 +124,8 @@ void Engine::Shutdown() {
     }
 
     if (_windowManager) {
-        Window* mainWindow = _windowManager->GetWindowByID(_ID);
-        if (mainWindow) {
-            // Window cleanup handled by WindowManager destructor
-        }
+        _windowManager->RemoveAllWindows();
+        _windowManager.reset();
     }
 
     isRunning = false;
