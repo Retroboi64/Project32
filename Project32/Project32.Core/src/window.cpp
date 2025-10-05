@@ -23,7 +23,7 @@ static void StaticFramebufferSizeCallback(GLFWwindow* glfwWindow, int width, int
 }
 
 Window::Window(int width, int height, const std::string& title)
-    : _width(width), _height(height), _title(title), _ID(_nextID++) //, _imguiContext(nullptr), _imguiInitialized(false)
+    : _width(width), _height(height), _title(title), _ID(_nextID++)
 {
     std::cout << "[Window " << _ID << "] Constructor called: " << width << "x" << height << " '" << title << "'" << std::endl;
     std::cout.flush();

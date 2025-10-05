@@ -19,11 +19,14 @@ UIX::UIX(GLFWwindow* window)
     : _imguiContext(nullptr), _imguiInitialized(false)
 {
     try {
+        std::cout << "[UIX] Initializing ImGui..." << std::endl;
+
         glfwMakeContextCurrent(window);
 
         IMGUI_CHECKVERSION();
         _imguiContext = ImGui::CreateContext();
         ImGui::SetCurrentContext(_imguiContext);
+        std::cout << "[UIX] ImGui context created: " << _imguiContext << std::endl;
 
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -44,8 +47,10 @@ UIX::UIX(GLFWwindow* window)
         _imguiInitialized = true;
 
         SetTheme(ThemePreset::Dark);
+        std::cout << "[UIX] Initialization complete!" << std::endl;
     }
     catch (const std::exception& e) {
+        std::cerr << "[UIX ERROR] Initialization failed: " << e.what() << std::endl;
         throw;
     }
 }
