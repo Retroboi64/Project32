@@ -22,9 +22,6 @@ Engine::Engine(int width, int height, const std::string& title)
 {
     try {
         _windowManager = std::make_unique<WindowManager>();
-        _windowManager->AddWindow(width, height, title);
-        _renderer = std::make_unique<Renderer>(this);
-        _input = std::make_unique<Input>(this); 
         Init();
     }
     catch (const std::exception& e) {
@@ -39,25 +36,7 @@ Engine::~Engine() {
 
 void Engine::Init() {
     try {
-        Window* mainWindow = _windowManager->GetWindowByID(_ID);
-        if (!mainWindow) {
-            throw std::runtime_error("Failed to get main window");
-        }
-
-        mainWindow->Init();
-
-        while (!mainWindow->WindowIsOpen()) {
-            glfwPollEvents();
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }
-
-        _renderer->Init(mainWindow);
-
-        while (!_renderer->IsReady()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }
-
-        _input->Init();
+        _windowManager->AddWindow(450, 320, "Testing");
 
         isRunning = true;
         std::cout << "[Engine::Init] Engine " << _ID << " initialized successfully" << std::endl;
@@ -76,36 +55,26 @@ void Engine::Run() {
     }
 
     FrameTimer timer;
-    Window* mainWindow = GetWindow();
-
-    if (!mainWindow) {
-        std::cerr << "[Engine::Run] No main window available for engine " << _ID << std::endl;
-        return;
-    }
 
     std::cout << "[Engine::Run] Starting main loop for engine " << _ID << std::endl;
 
-    EngineManager::Instance()->SetCurrentEngine(_ID);
-
-    while (isRunning && mainWindow->WindowIsOpen()) {
+    // TODO: Improve this
+    while (isRunning) {
         timer.Update();
         float dt = timer.GetDeltaTime();
 
-        mainWindow->PollEvents();
+        for (int i = 0; i < _windowManager->Size(); i++) {
+            Window* window = _windowManager->GetWindowByID(i);
 
-        _input->Update();
+            window->PollEvents();
 
-        if (_input->KeyPressed(GLFW_KEY_ESCAPE)) {
-            std::cout << "[Engine::Run] Escape key pressed, shutting down engine " << _ID << std::endl;
-            break;
+            window->Render();
+
+            window->SwapBuffers();
         }
-
-        if (_renderer) {
-            _renderer->RenderFrame(mainWindow);
-        }
-
-        mainWindow->SwapBuffers();
     }
+
+    EngineManager::Instance()->SetCurrentEngine(_ID);
 
     Shutdown();
 }
@@ -114,14 +83,6 @@ void Engine::Shutdown() {
     if (!isRunning) return;
 
     std::cout << "[Engine::Shutdown] Shutting down engine " << _ID << std::endl;
-
-    if (_renderer) {
-        _renderer->Cleanup();
-    }
-
-    if (_input) {
-        _input.reset(); 
-    }
 
     if (_windowManager) {
         _windowManager->RemoveAllWindows();

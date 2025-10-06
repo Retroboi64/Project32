@@ -14,8 +14,11 @@
 #include "common.h"
 #include "renderer.h"
 #include "ui.h"
+#include "input.h"
 
 struct ImGuiContext;
+class Renderer;
+class UIX;
 
 enum class CursorMode {
     Normal,
@@ -25,9 +28,12 @@ enum class CursorMode {
 
 class Window {
 private:
-    std::unique_ptr<UIX> _ui;
     GLFWwindow* _window = nullptr;
-    // TODO: std::unique_ptr<Renderer> _renderer;
+
+    std::unique_ptr<UIX> _ui;
+    std::unique_ptr<Renderer> _renderer;
+    std::unique_ptr<Input> _input;
+
     int _width;
     int _height;
 
@@ -60,6 +66,7 @@ public:
     void InitGLAD();
     void Shutdown();
 
+    void Render();  // New method to trigger rendering
     void PollEvents();
     void SwapBuffers();
     void Clear(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 1.0f);
@@ -98,6 +105,9 @@ public:
 
     static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 
+    Renderer* GetRenderer() const;
+    UIX* GetUI() const;
+
     GLFWwindow* GetGLFWwindow() const { return _window; }
     int GetWidth() const { return _width; }
     int GetHeight() const { return _height; }
@@ -133,7 +143,7 @@ private:
     int currentWindow = -1;
 
 public:
-    int Count();
+    int Size();
     int GetCurrentWindowID() const { return currentWindow; }
     int AddWindow(int width, int height, const std::string& name);
     int RemoveWindow(int index);

@@ -23,13 +23,13 @@
 #include <iostream>
 #include <stdexcept>
 
-Renderer::Renderer(Engine* engine)
-    : m_engine(engine)
+Renderer::Renderer(Window* window)
+    : m_window(window)
     , m_sceneManager(SceneManager::Instance())
     , m_isReady(false)
 {
-    if (!m_engine) {
-        throw std::runtime_error("Renderer requires a valid Engine instance");
+    if (!m_window) {
+        throw std::runtime_error("Renderer requires a valid Window instance");
     }
 }
 
@@ -37,16 +37,12 @@ Renderer::~Renderer() {
     Cleanup();
 }
 
-void Renderer::Init(Window* window) {
-    if (!m_engine) {
-        throw std::runtime_error("Engine instance not available for Renderer initialization");
+void Renderer::Init() {
+    if (!m_window) {
+        throw std::runtime_error("Window instance not available for Renderer initialization");
     }
 
-    if (!window) {
-        throw std::runtime_error("Window not available for Renderer initialization");
-    }
-
-    window->MakeContextCurrent();
+    m_window->MakeContextCurrent();
 
     try {
         LoadShaders();
@@ -61,11 +57,8 @@ void Renderer::Init(Window* window) {
         m_cameraManager.CreateCamera("main", glm::vec3(0.0f));
 
         m_isReady = true;
-        std::cout << "[Renderer] Initialized for Engine " << m_engine->GetID() << std::endl;
     }
     catch (const std::exception& e) {
-        std::cerr << "[Renderer] Failed to initialize for Engine "
-            << m_engine->GetID() << ": " << e.what() << std::endl;
         m_isReady = false;
         throw;
     }
@@ -109,17 +102,13 @@ void Renderer::LoadLevel() {
 
 void Renderer::LoadScene() {
     if (m_sceneManager.LoadScene("res/scene.json")) {
-        std::cout << "[Engine " << m_engine->GetID() << "] Loaded scene successfully" << std::endl;
         if (auto* currentScene = m_sceneManager.GetCurrentScene()) {
             currentScene->DebugPrint();
             currentScene->PrintStatistics();
         }
     }
     else {
-        std::cout << "[Engine " << m_engine->GetID() << "] Failed to load scene, creating default" << std::endl;
         auto* defaultScene = m_sceneManager.CreateScene("Default Scene");
-        std::cout << "[Engine " << m_engine->GetID() << "] Created default scene: "
-            << defaultScene->GetMetadata().name << std::endl;
     }
 }
 
@@ -141,8 +130,8 @@ glm::mat4 Renderer::CalculateViewMatrix(const glm::vec3& position) const {
     return transform.ToMatrix();
 }
 
-void Renderer::RenderFrame(Window* window) {
-    if (!m_isReady || !m_engine || !window) {
+void Renderer::RenderFrame() {
+    if (!m_isReady || !m_window) {
         return;
     }
 
@@ -152,7 +141,7 @@ void Renderer::RenderFrame(Window* window) {
 
     SetupRenderState();
 
-    glm::ivec2 windowSize = window->GetSize();
+    glm::ivec2 windowSize = m_window->GetSize();
     glm::mat4 projection = CalculateProjectionMatrix(windowSize);
 
     glm::vec3 mainCameraPos = m_cameraManager.GetActiveCamera()->GetTransform().position;
@@ -185,7 +174,7 @@ void Renderer::RenderFrame(Window* window) {
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    RenderUI(window);
+    RenderUI(m_window);
 }
 
 void Renderer::DrawSkybox(const glm::mat4& projection, const glm::mat4& view) {
@@ -319,10 +308,9 @@ void Renderer::RenderUI(Window* window) {
 }
 
 void Renderer::DrawImGuiHUD() {
-    std::string windowTitle = "Debug Info - Engine " + std::to_string(m_engine->GetID());
+    std::string windowTitle = "Debug Info - Engine " + std::to_string(m_window->GetID());
     ImGui::Begin(windowTitle.c_str(), &m_settings.showDebugInfo, ImGuiWindowFlags_AlwaysAutoResize);
 
-    ImGui::Text("Engine ID: %d", m_engine->GetID());
     ImGui::Text("FPS: %.1f (%.3f ms/frame)", ImGui::GetIO().Framerate,
         1000.0f / ImGui::GetIO().Framerate);
 
@@ -348,9 +336,8 @@ void Renderer::DrawImGuiHUD() {
         ImGui::Text("GPU: %s", glGetString(GL_RENDERER));
         ImGui::Text("GLSL: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-        Window* window = m_engine->GetWindow();
-        if (window) {
-            glm::ivec2 windowSize = window->GetSize();
+        if (m_window) {
+            glm::ivec2 windowSize = m_window->GetSize();
             ImGui::Text("Window: %dx%d", windowSize.x, windowSize.y);
         }
     }
@@ -371,7 +358,7 @@ void Renderer::DrawImGuiHUD() {
 }
 
 void Renderer::DrawSettingsWindow() {
-    std::string windowTitle = "Settings - Engine " + std::to_string(m_engine->GetID());
+    std::string windowTitle = "Settings - Engine " + std::to_string(m_window->GetID());
     ImGui::Begin(windowTitle.c_str(), &m_settings.showSettingsWindow);
 
     if (ImGui::CollapsingHeader("Graphics", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -385,11 +372,10 @@ void Renderer::DrawSettingsWindow() {
             SetFOV(fov);
         }
 
-        Window* window = m_engine->GetWindow();
-        if (window) {
-            bool vsync = window->IsVSync();
+        if (m_window) {
+            bool vsync = m_window->IsVSync();
             if (ImGui::Checkbox("V-Sync", &vsync)) {
-                window->SetVSync(vsync);
+                m_window->SetVSync(vsync);
             }
         }
     }
@@ -411,7 +397,7 @@ void Renderer::DrawSettingsWindow() {
 
     if (ImGui::CollapsingHeader("Engine Controls")) {
         if (ImGui::Button("Shutdown This Engine")) {
-            m_engine->Shutdown();
+            m_window->Shutdown();
         }
 
         ImGui::Separator();
@@ -432,7 +418,7 @@ void Renderer::DrawSettingsWindow() {
                 if (ImGui::Button("Destroy Other Engines")) {
                     auto engines = manager->GetAllEngines();
                     for (Engine* engine : engines) {
-                        if (engine && engine->GetID() != m_engine->GetID()) {
+                        if (engine && engine->GetID() != m_window->GetID()) {
                             manager->DestroyEngine(engine->GetID());
                         }
                     }
@@ -445,7 +431,7 @@ void Renderer::DrawSettingsWindow() {
 }
 
 void Renderer::Cleanup() {
-    std::cout << "[Renderer] Cleaning up for Engine " << m_engine->GetID() << std::endl;
+    std::cout << "[Renderer] Cleaning up for Engine " << m_window->GetID() << std::endl;
 
     m_quadMesh.reset();
     m_cubeMesh.reset();
@@ -464,20 +450,14 @@ void Renderer::Cleanup() {
 
 void Renderer::ToggleRenderScene() {
     m_settings.renderScene = !m_settings.renderScene;
-    std::cout << "[Engine " << m_engine->GetID() << "] Debug Info: "
-        << (m_settings.renderScene ? "ON" : "OFF") << std::endl;
 }
 
 void Renderer::ToggleWireframe() {
     m_settings.wireframeMode = !m_settings.wireframeMode;
-    std::cout << "[Engine " << m_engine->GetID() << "] Wireframe: "
-        << (m_settings.wireframeMode ? "ON" : "OFF") << std::endl;
 }
 
 void Renderer::ToggleDebugInfo() {
     m_settings.showDebugInfo = !m_settings.showDebugInfo;
-    std::cout << "[Engine " << m_engine->GetID() << "] Debug Info: "
-        << (m_settings.showDebugInfo ? "ON" : "OFF") << std::endl;
 }
 
 void Renderer::ToggleSettingsWindow() {
