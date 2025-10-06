@@ -9,8 +9,6 @@ class Input;
 class Engine {
 private:
     std::unique_ptr<WindowManager> _windowManager;
-    std::unique_ptr<Renderer> _renderer;
-    std::unique_ptr<Input> _input;
     bool isRunning = false;
     int width, height;
     std::string title;
@@ -29,12 +27,8 @@ public:
 
     bool IsRunning() const { return isRunning; }
 
-    Window* GetWindow() const {
-        return _windowManager ? _windowManager->GetWindowByID(_ID) : nullptr;
-    }
+    Window* GetWindow() const { return _windowManager ? _windowManager->GetWindowByID(_ID) : nullptr; }
     WindowManager* GetWindowManager() const { return _windowManager.get(); }
-    Renderer* GetRenderer() const { return _renderer.get(); }
-    Input* GetInput() const { return _input.get(); }
 
     int GetID() const { return _ID; }
 };

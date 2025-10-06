@@ -41,7 +41,7 @@ public:
         bool showSettingsWindow{ true };
     };
 
-    explicit Renderer(Engine* engine);
+    explicit Renderer(Window* window);
     ~Renderer();
 
     Renderer(const Renderer&) = delete;
@@ -49,8 +49,8 @@ public:
     Renderer(Renderer&&) noexcept = default;
     Renderer& operator=(Renderer&&) noexcept = default;
 
-    void Init(Window* window);
-    void RenderFrame(Window* window);
+    void Init();
+    void RenderFrame();
     void Cleanup();
 
     void DrawSkybox(const glm::mat4& projection, const glm::mat4& view);
@@ -70,7 +70,6 @@ public:
     bool IsDebugInfoVisible() const { return m_settings.showDebugInfo; }
     float GetFOV() const { return m_settings.fov; }
     const RenderSettings& GetSettings() const { return m_settings; }
-    Engine* GetEngine() const { return m_engine; }
 
     void SetFOV(float fov);
     void SetBackgroundColor(const glm::vec3& color);
@@ -93,7 +92,7 @@ private:
     glm::mat4 CalculateProjectionMatrix(const glm::ivec2& windowSize) const;
     glm::mat4 CalculateViewMatrix(const glm::vec3& position) const;
 
-    Engine* m_engine;
+    Window* m_window;
 
     TextureManager m_textures;
     ShaderManager m_shaderManager;
