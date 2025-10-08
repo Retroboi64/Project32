@@ -10,7 +10,6 @@ class Engine {
 private:
     std::unique_ptr<WindowManager> _windowManager;
     bool isRunning = false;
-    int width, height;
     std::string title;
     int _mainWindowID = -1;  
 
@@ -28,7 +27,10 @@ public:
 
     bool IsRunning() const { return isRunning; }
 
-    Window* GetWindow() const { return _windowManager ? _windowManager->GetWindowByID(_mainWindowID) : nullptr; }
+    void SetMainWindow(int index) { _mainWindowID = index; }
+    int GetMainWindowID() { return _mainWindowID; }
+
+    Window* GetMainWindow() const { return _windowManager ? _windowManager->GetWindowByID(_mainWindowID) : nullptr; }
     WindowManager* GetWindowManager() const { return _windowManager.get(); }
 
     int GetID() const { return _ID; }
@@ -48,6 +50,8 @@ public:
 
     static EngineManager* Instance();
     static void DestroyInstance();
+
+    void RunAllEngines();
 
     int CreateEngine(const std::string& title);
     bool DestroyEngine(int engineID);

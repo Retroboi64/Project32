@@ -39,24 +39,28 @@ extern "C" {
         }
 
         if (engine_ready) {
-            int engineID = P32::Engine::CreateEngine("Editor - Project32");
-            // int engine2ID = P32::Engine::CreateEngine("Testing");
+            P32::EngineInstance engine("My Game", 1280, 720);
+            P32::EngineInstance engine2("Test", 1280, 720);
 
-            if (engineID != -1) {
-                std::cout << "Created engine with ID: " << engineID << std::endl;
-
-                P32::Engine::ToggleEngineRenderScene(engineID);
-
-                P32::Engine::RunEngine(engineID);
-
-                P32::Engine::DestroyEngine(engineID);
-            }
-            else {
+            if (!engine.IsValid()) {
                 std::cerr << "Failed to create engine!" << std::endl;
+                return;
             }
 
-            editor_initialized = true;
-            std::cout << "[Editor] Editor initialized!\n";
+            if (!engine.IsValid()) {
+                std::cerr << "Failed to create engine2!" << std::endl;
+                return;
+            }
+
+            engine.CreateNewWindow(323, 323, "Main Window || Engine: 1");
+            engine.CreateNewWindow(323, 323, "Second Window || Engine: 1"); 
+            engine2.CreateNewWindow(323, 323, "Main Window || Engine: 2");
+            engine2.CreateNewWindow(323, 323, "Second Window || Engine: 2");
+            
+            engine.SetVSync(true);
+            engine2.SetVSync(true);
+
+            P32::Engine::RunAllEngines(); 
         }
     }
 

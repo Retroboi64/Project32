@@ -36,9 +36,6 @@ Engine::~Engine() {
 
 void Engine::Init() {
 	try {
-		_mainWindowID = _windowManager->AddWindow(450, 320, "Main");
-		// _windowManager->AddWindow(450, 320, "Testing");
-
 		if (_windowManager->Count() == 0) {
 			std::cout << "[Engine::Init] Engine " << _ID << " - Warning: No windows in manager" << std::endl;
 		}
@@ -101,7 +98,6 @@ void Engine::Run() {
 	Shutdown();
 }
 
-
 void Engine::Shutdown() {
 	if (!isRunning) return;
 
@@ -151,6 +147,94 @@ int EngineManager::CreateEngine(const std::string& title) {
 		std::cerr << "[EngineManager] Failed to create engine: " << e.what() << std::endl;
 		return -1;
 	}
+}
+
+void EngineManager::RunAllEngines() {
+	std::cout << "[EngineManager] Starting main loop for all engines" << std::endl;
+
+	if (_engines.empty()) {
+		std::cerr << "[EngineManager] No engines to run!" << std::endl;
+		return;
+	}
+
+	bool hasWindows = false;
+	for (const auto& enginePtr : _engines) {
+		if (enginePtr && enginePtr->GetWindowManager() && enginePtr->GetWindowManager()->Count() > 0) {
+			hasWindows = true;
+			break;
+		}
+	}
+
+	if (!hasWindows) {
+		std::cerr << "[EngineManager] No windows in any engine, cannot run!" << std::endl;
+		return;
+	}
+
+	FrameTimer timer;
+
+	while (true) {
+		timer.Update();
+		float dt = timer.GetDeltaTime();
+
+		glfwPollEvents();
+
+		bool anyRunning = false;
+
+		for (auto& enginePtr : _engines) {
+			Engine* engine = enginePtr.get();
+			if (!engine || !engine->IsRunning()) continue;
+
+			anyRunning = true;
+
+			WindowManager* wm = engine->GetWindowManager();
+			if (!wm) continue;
+
+			int windowCount = wm->Count();
+			bool engineHasOpenWindow = false;
+
+			for (int i = 0; i < windowCount; i++) {
+				Window* window = wm->GetWindowAt(i);
+
+				if (!window) {
+					std::cerr << "[EngineManager::RunAllEngines] Warning: null window at index " << i << std::endl;
+					continue;
+				}
+
+				window->PollEvents();
+
+				if (!window->IsOpen()) {
+					std::cout << "[EngineManager::RunAllEngines] Window " << window->GetID()
+						<< " in engine " << engine->GetID() << " closed" << std::endl;
+					continue;
+				}
+
+				engineHasOpenWindow = true;
+				window->Render();
+				window->SwapBuffers();
+			}
+
+			if (!engineHasOpenWindow) {
+				std::cout << "[EngineManager::RunAllEngines] Engine " << engine->GetID()
+					<< " has no open windows, shutting down" << std::endl;
+				engine->Shutdown();
+			}
+		}
+
+		if (!anyRunning) {
+			std::cout << "[EngineManager] No running engines, exiting main loop" << std::endl;
+			break;
+		}
+	}
+
+	std::cout << "[EngineManager] Main loop exited, ensuring all engines are shut down" << std::endl;
+
+	for (auto& engine : _engines) {
+		if (engine && engine->IsRunning()) {
+			engine->Shutdown();
+		}
+	}
+
+	glfwTerminate();
 }
 
 bool EngineManager::DestroyEngine(int engineID) {

@@ -13,6 +13,9 @@
 #include <Windows.h>
 #include <string>
 #include <iostream>
+#include <memory>
+#include <vector>
+#include <algorithm>
 
 #ifdef _WIN32
 #ifdef PROJECT32_API_EXPORTS
@@ -42,6 +45,7 @@ extern "C" {
     typedef int (*CreateEngineFunc)(const char* title);
     typedef bool (*DestroyEngineFunc)(int engineID);
     typedef void (*RunEngineFunc)(int engineID);
+    typedef void (*RunAllEnginesFunc)();
     typedef bool (*IsEngineRunningFunc)(int engineID);
     typedef int (*GetEngineCountFunc)();
     typedef void (*SetCurrentEngineFunc)(int engineID);
@@ -66,6 +70,15 @@ extern "C" {
     typedef void (*SetEngineVSyncFunc)(int engineID, bool enabled);
     typedef bool (*GetEngineVSyncFunc)(int engineID);
 
+    typedef int (*CreateEngineWindowFunc)(int engineID, int width, int height, const char* title);
+    typedef bool (*DestroyEngineWindowFunc)(int engineID, int windowID);
+    typedef int (*GetEngineWindowCountFunc)(int engineID);
+    typedef void (*SetEngineMainWindowFunc)(int engineID, int windowID);
+    typedef int (*GetEngineMainWindowIDFunc)(int engineID);
+    typedef void (*GetWindowPositionFunc)(int engineID, int windowID, int* x, int* y);
+    typedef void (*SetWindowPositionFunc)(int engineID, int windowID, int x, int y);
+    typedef bool (*IsWindowOpenFunc)(int engineID, int windowID);
+
     struct EngineFunctions {
         EngineInitFunc Init;
         EngineRunFunc Run;
@@ -79,6 +92,7 @@ extern "C" {
         CreateEngineFunc CreateEngine;
         DestroyEngineFunc DestroyEngine;
         RunEngineFunc RunEngine;
+        RunAllEnginesFunc RunAllEngines;
         IsEngineRunningFunc IsEngineRunning;
         GetEngineCountFunc GetEngineCount;
         SetCurrentEngineFunc SetCurrentEngine;
@@ -102,6 +116,15 @@ extern "C" {
         SetEngineWindowTitleFunc SetEngineWindowTitle;
         SetEngineVSyncFunc SetEngineVSync;
         GetEngineVSyncFunc GetEngineVSync;
+
+        CreateEngineWindowFunc CreateEngineWindow;
+        DestroyEngineWindowFunc DestroyEngineWindow;
+        GetEngineWindowCountFunc GetEngineWindowCount;
+        SetEngineMainWindowFunc SetEngineMainWindow;
+        GetEngineMainWindowIDFunc GetEngineMainWindowID;
+        GetWindowPositionFunc GetWindowPosition;
+        SetWindowPositionFunc SetWindowPosition;
+        IsWindowOpenFunc IsWindowOpen;
     };
 
     extern EngineFunctions engine;
@@ -115,7 +138,9 @@ extern "C" {
         P32_ERROR_DLL_LOAD_FAILED = -5,
         P32_ERROR_FUNCTION_NOT_FOUND = -6,
         P32_ERROR_ENGINE_NOT_FOUND = -7,
-        P32_ERROR_INVALID_ENGINE_ID = -8
+        P32_ERROR_INVALID_ENGINE_ID = -8,
+        P32_ERROR_WINDOW_NOT_FOUND = -9,
+        P32_ERROR_INVALID_WINDOW_ID = -10
     } P32_Result;
 
     P32_API bool P32_CALL LoadEngineDLL(const std::wstring& dllPath);
@@ -128,6 +153,9 @@ extern "C" {
 
 #ifdef __cplusplus
 namespace P32 {
+    class EngineInstance;
+    class WindowInstance;
+
     class Engine {
     private:
         static HMODULE hDllModule;
@@ -150,6 +178,7 @@ namespace P32 {
         static int CreateEngine(const std::string& title);
         static bool DestroyEngine(int engineID);
         static void RunEngine(int engineID);
+        static void RunAllEngines();
         static bool IsEngineRunning(int engineID);
         static int GetEngineCount();
         static void SetCurrentEngine(int engineID);
@@ -173,15 +202,55 @@ namespace P32 {
         static void SetEngineWindowTitle(int engineID, const std::string& title);
         static void SetEngineVSync(int engineID, bool enabled);
         static bool GetEngineVSync(int engineID);
+
+        static int CreateEngineWindow(int engineID, int width, int height, const std::string& title);
+        static bool DestroyEngineWindow(int engineID, int windowID);
+        static int GetEngineWindowCount(int engineID);
+        static void SetEngineMainWindow(int engineID, int windowID);
+        static int GetEngineMainWindowID(int engineID);
+        static void GetWindowPosition(int engineID, int windowID, int* x, int* y);
+        static void SetWindowPosition(int engineID, int windowID, int x, int y);
+        static bool IsWindowOpen(int engineID, int windowID);
+    };
+
+    class WindowInstance {
+    private:
+        int _engineID;
+        int _windowID;
+        bool _valid;
+
+    public:
+        WindowInstance(int engineID, int windowID);
+        ~WindowInstance() = default;
+
+        bool IsValid() const { return _valid; }
+        int GetWindowID() const { return _windowID; }
+        int GetEngineID() const { return _engineID; }
+
+        bool SetSize(int width, int height);
+        void GetSize(int* width, int* height) const;
+        void SetPosition(int x, int y);
+        void GetPosition(int* x, int* y) const;
+        void SetTitle(const std::string& title);
+        bool IsOpen() const;
+        bool Close();
+
+        void SetBackgroundColor(float r, float g, float b);
+        void SetFOV(float fov);
+        void SetVSync(bool enabled);
+        bool GetVSync() const;
+
+        void MakeMain();
     };
 
     class EngineInstance {
     private:
         int _engineID;
         bool _valid;
+        std::vector<std::shared_ptr<WindowInstance>> _windows;
 
     public:
-        EngineInstance(const std::string& title);
+        EngineInstance(const std::string& title, int width = 800, int height = 600);
         ~EngineInstance();
 
         void Run();
@@ -189,6 +258,15 @@ namespace P32 {
         bool IsRunning() const;
         int GetID() const { return _engineID; }
         bool IsValid() const { return _valid; }
+
+        std::shared_ptr<WindowInstance> CreateNewWindow(int width, int height, const std::string& title);
+        bool DestroyWindow(int windowID);
+        std::shared_ptr<WindowInstance> GetWindow(int windowID) const;
+        std::shared_ptr<WindowInstance> GetMainWindow() const;
+        int GetWindowCount() const;
+        std::vector<std::shared_ptr<WindowInstance>> GetAllWindows() const;
+        void SetMainWindow(int windowID);
+        void SetMainWindow(std::shared_ptr<WindowInstance> window);
 
         bool KeyPressed(int key) const;
         bool KeyDown(int key) const;
@@ -199,7 +277,6 @@ namespace P32 {
         void SetFOV(float fov);
         void ToggleWireframe();
         void ToggleDebugInfo();
-
         bool SetWindowSize(int width, int height);
         void GetWindowSize(int* width, int* height) const;
         void SetWindowTitle(const std::string& title);
@@ -207,6 +284,28 @@ namespace P32 {
         bool GetVSync() const;
 
         void MakeCurrent();
+    };
+
+    class EngineManager {
+    private:
+        std::vector<std::shared_ptr<EngineInstance>> _instances;
+        std::shared_ptr<EngineInstance> _currentInstance;
+
+    public:
+        EngineManager() = default;
+        ~EngineManager();
+
+        std::shared_ptr<EngineInstance> CreateEngine(const std::string& title, int width = 800, int height = 600);
+        bool DestroyEngine(int engineID);
+        void DestroyAllEngines();
+
+        std::shared_ptr<EngineInstance> GetEngine(int engineID) const;
+        std::shared_ptr<EngineInstance> GetCurrentEngine() const { return _currentInstance; }
+        void SetCurrentEngine(int engineID);
+        void SetCurrentEngine(std::shared_ptr<EngineInstance> instance);
+
+        int GetEngineCount() const { return static_cast<int>(_instances.size()); }
+        std::vector<std::shared_ptr<EngineInstance>> GetAllEngines() const;
     };
 }
 #endif

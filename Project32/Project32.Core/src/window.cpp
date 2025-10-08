@@ -20,7 +20,7 @@ static void StaticFramebufferSizeCallback(GLFWwindow* glfwWindow, int width, int
     }
 }
 
-Window::Window(int width, int height, const std::string& title)
+Window::Window(int width, int height, const std::string& title, GLFWwindow* shareContext = nullptr)
     : _width(width), _height(height), _title(title), _ID(_nextID++)
 {
     std::cout << "[Window " << _ID << "] Constructor called: " << width << "x" << height << " '" << title << "'" << std::endl;
@@ -55,7 +55,7 @@ Window::Window(int width, int height, const std::string& title)
     std::cout << "[Window " << _ID << "] Step W3: Creating GLFW window..." << std::endl;
     std::cout.flush();
 
-    _window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+    _window = glfwCreateWindow(width, height, title.c_str(), nullptr, shareContext);
     if (!_window) {
         std::cerr << "[Window " << _ID << "] Failed to create GLFW window" << std::endl;
         throw std::runtime_error("Failed to create GLFW window");
@@ -76,7 +76,14 @@ Window::Window(int width, int height, const std::string& title)
     std::cout << "[Window " << _ID << "] Step W6: Initializing GLAD..." << std::endl;
     std::cout.flush();
 
-    InitGLAD();
+    static bool gladInitialized = false;
+    if (!gladInitialized) {
+        InitGLAD();
+        gladInitialized = true;
+    }
+    else {
+        std::cout << "[Window " << _ID << "] GLAD already initialized" << std::endl;
+    }
 
     std::cout << "[Window " << _ID << "] Step W7: Setting OpenGL state..." << std::endl;
     std::cout.flush();
@@ -436,7 +443,13 @@ Window* WindowManager::GetWindowByID(int windowID) {
 
 int WindowManager::AddWindow(int width, int height, const std::string& name) {
     try {
-        auto window = std::make_unique<Window>(width, height, name);
+        GLFWwindow* shareContext = nullptr;
+
+        if (!_windows.empty()) {
+            shareContext = _windows.front()->GetGLFWwindow();
+        }
+
+        auto window = std::make_unique<Window>(width, height, name, shareContext);
         int windowID = window->GetID();
         _windows.push_back(std::move(window));
         std::cout << "[WindowManager] Added window with ID: " << windowID << " at index: " << (_windows.size() - 1) << std::endl;

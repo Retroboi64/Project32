@@ -57,7 +57,7 @@ private:
     bool _imguiInitialized = false;
 
 public:
-    Window(int width, int height, const std::string& title);
+    Window(int width, int height, const std::string& title, GLFWwindow* shareContext);
     ~Window();
 
     Window(const Window&) = delete;

@@ -12,7 +12,6 @@
 #pragma once
 
 #include "common.h"
-#include <glm/glm.hpp>
 
 class Engine;
 class Window;

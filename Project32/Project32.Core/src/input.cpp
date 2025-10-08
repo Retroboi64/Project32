@@ -88,12 +88,11 @@ void Input::KeyCallback(GLFWwindow* window, int key, int scancode, int action, i
 
 void Input::Init() {
     if (_engine) {
-        Window* mainWindow = _engine->GetWindow();
-        if (!mainWindow) {
-            throw std::runtime_error("Main window not available for Input initialization");
+        if (!_window) {
+            throw std::runtime_error("window not available for Input initialization");
         }
 
-        _glfwWindow = mainWindow->GetGLFWwindow();
+        _glfwWindow = _window->GetGLFWwindow();
         if (!_glfwWindow) {
             throw std::runtime_error("GLFW window not available for Input initialization");
         }
