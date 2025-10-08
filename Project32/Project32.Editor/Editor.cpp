@@ -39,7 +39,8 @@ extern "C" {
         }
 
         if (engine_ready) {
-            int engineID = P32::Engine::CreateEngine(1024, 768, "Editor - Project32");
+            int engineID = P32::Engine::CreateEngine("Editor - Project32");
+            // int engine2ID = P32::Engine::CreateEngine("Testing");
 
             if (engineID != -1) {
                 std::cout << "Created engine with ID: " << engineID << std::endl;

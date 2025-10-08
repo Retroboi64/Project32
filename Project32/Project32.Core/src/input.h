@@ -15,12 +15,14 @@
 #include <glm/glm.hpp>
 
 class Engine;
+class Window;
 struct GLFWwindow;
 
 class Input {
 private:
     Engine* _engine = nullptr;
-    GLFWwindow* _window = nullptr;
+    Window* _window = nullptr;
+    GLFWwindow* _glfwWindow = nullptr;
 
     static constexpr int MAX_KEYS = 512;
     bool keyPressed[MAX_KEYS];
@@ -35,7 +37,7 @@ private:
     bool _mouseLocked = false;
 
 public:
-    explicit Input(Engine* engine);
+    explicit Input(Window* window);
     ~Input();
 
     Input(const Input&) = delete;
@@ -55,4 +57,5 @@ public:
     glm::vec2 GetMouseDelta();
 
     Engine* GetEngine() const { return _engine; }
+    Window* GetWindow() const { return _window; }
 };

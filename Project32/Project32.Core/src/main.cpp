@@ -19,7 +19,7 @@ extern "C" {
 
     __declspec(dllexport) bool EngineInit() {
         try {
-            g_currentEngineID = EngineManager::Instance()->CreateEngine(1920, 1080, "Project32");
+            g_currentEngineID = EngineManager::Instance()->CreateEngine("Project32");
             return g_currentEngineID != -1;
         }
         catch (...) {
@@ -47,8 +47,8 @@ extern "C" {
         return engine && engine->IsRunning();
     }
 
-    __declspec(dllexport) int CreateEngine(int width, int height, const char* title) {
-        return EngineManager::Instance()->CreateEngine(width, height, std::string(title));
+    __declspec(dllexport) int CreateEngine(const char* title) {
+        return EngineManager::Instance()->CreateEngine(std::string(title));
     }
 
     __declspec(dllexport) bool DestroyEngine(int engineID) {

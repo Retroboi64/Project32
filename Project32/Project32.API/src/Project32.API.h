@@ -39,7 +39,7 @@ extern "C" {
     typedef void (*GetMousePosFunc)(float* x, float* y);
     typedef void (*GetMouseDeltaFunc)(float* dx, float* dy);
 
-    typedef int (*CreateEngineFunc)(int width, int height, const char* title);
+    typedef int (*CreateEngineFunc)(const char* title);
     typedef bool (*DestroyEngineFunc)(int engineID);
     typedef void (*RunEngineFunc)(int engineID);
     typedef bool (*IsEngineRunningFunc)(int engineID);
@@ -147,7 +147,7 @@ namespace P32 {
         static void GetMousePos(float* x, float* y);
         static void GetMouseDelta(float* dx, float* dy);
 
-        static int CreateEngine(int width, int height, const std::string& title);
+        static int CreateEngine(const std::string& title);
         static bool DestroyEngine(int engineID);
         static void RunEngine(int engineID);
         static bool IsEngineRunning(int engineID);
@@ -181,7 +181,7 @@ namespace P32 {
         bool _valid;
 
     public:
-        EngineInstance(int width, int height, const std::string& title);
+        EngineInstance(const std::string& title);
         ~EngineInstance();
 
         void Run();

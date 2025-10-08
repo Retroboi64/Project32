@@ -90,8 +90,12 @@ Window::Window(int width, int height, const std::string& title)
     SetVSync(_vsync);
     _isOpen = true;
 
-    std::cout << "[Window " << _ID << "] Step W8: Initializing UI and Renderer..." << std::endl;
+    std::cout << "[Window " << _ID << "] Step W8: Initializing Input, UI and Renderer..." << std::endl;
     std::cout.flush();
+
+    _input = std::make_unique<Input>(this);
+    _input->Init();
+    std::cout << "[Window " << _ID << "] Input initialized successfully" << std::endl;
 
     _ui = std::make_unique<UIX>(_window);
     std::cout << "[Window " << _ID << "] UI initialized successfully" << std::endl;
@@ -109,14 +113,17 @@ Window::Window(int width, int height, const std::string& title)
 Window::~Window() {
     std::cout << "[Window " << _ID << "] Destructor called" << std::endl;
 
-    // Clean up renderer first
+    if (_input) {
+        _input.reset();
+        std::cout << "[Window " << _ID << "] Input cleaned up" << std::endl;
+    }
+
     if (_renderer) {
         _renderer->Cleanup();
         _renderer.reset();
         std::cout << "[Window " << _ID << "] Renderer cleaned up" << std::endl;
     }
 
-    // Clean up UI
     if (_ui && _window) {
         _ui->Cleanup(_window);
         _ui.reset();
@@ -133,8 +140,6 @@ Window::~Window() {
 }
 
 void Window::Init() {
-    // This method is now mostly handled in constructor
-    // Keep it for compatibility but log that it's called
     std::cout << "[Window " << _ID << "] Init() called (initialization already done in constructor)" << std::endl;
 }
 
@@ -148,6 +153,10 @@ void Window::InitGLAD() {
 
 void Window::Shutdown() {
     std::cout << "[Window " << _ID << "] Shutdown called" << std::endl;
+
+    if (_input) {
+        _input.reset();
+    }
 
     if (_renderer) {
         _renderer->Cleanup();
@@ -179,6 +188,10 @@ void Window::Render() {
 void Window::PollEvents() {
     glfwPollEvents();
     _isOpen = !glfwWindowShouldClose(_window);
+
+    if (_input) {
+        _input->Update();
+    }
 }
 
 void Window::SwapBuffers() {
@@ -397,9 +410,28 @@ UIX* Window::GetUI() const {
     return _ui.get();
 }
 
+Input* Window::GetInput() const {
+    return _input.get();
+}
 
-int WindowManager::Size() {
+int WindowManager::Count() {
     return static_cast<int>(_windows.size());
+}
+
+Window* WindowManager::GetWindowAt(int index) {
+    if (index >= 0 && index < static_cast<int>(_windows.size())) {
+        return _windows[index].get();
+    }
+    return nullptr;
+}
+
+Window* WindowManager::GetWindowByID(int windowID) {
+    for (const auto& window : _windows) {
+        if (window->GetID() == windowID) {
+            return window.get();
+        }
+    }
+    return nullptr;
 }
 
 int WindowManager::AddWindow(int width, int height, const std::string& name) {
@@ -407,7 +439,7 @@ int WindowManager::AddWindow(int width, int height, const std::string& name) {
         auto window = std::make_unique<Window>(width, height, name);
         int windowID = window->GetID();
         _windows.push_back(std::move(window));
-        std::cout << "[WindowManager] Added window with ID: " << windowID << std::endl;
+        std::cout << "[WindowManager] Added window with ID: " << windowID << " at index: " << (_windows.size() - 1) << std::endl;
         return windowID;
     }
     catch (const std::exception& e) {
@@ -416,54 +448,47 @@ int WindowManager::AddWindow(int width, int height, const std::string& name) {
     }
 }
 
-int WindowManager::RemoveWindow(int index) {
+int WindowManager::RemoveWindow(int windowID) {
     for (auto it = _windows.begin(); it != _windows.end(); ++it) {
-        if ((*it)->GetID() == index) {
-            std::cout << "[WindowManager] Removing window with ID: " << index << std::endl;
+        if ((*it)->GetID() == windowID) {
+            std::cout << "[WindowManager] Removing window with ID: " << windowID << std::endl;
             _windows.erase(it);
-            if (currentWindow == index) {
+            if (currentWindow == windowID) {
                 currentWindow = -1;
             }
             return currentWindow;
         }
     }
-    std::cerr << "[WindowManager] Window with ID " << index << " not found for removal" << std::endl;
+    std::cerr << "[WindowManager] Window with ID " << windowID << " not found for removal" << std::endl;
     return -1;
 }
 
 void WindowManager::RemoveAllWindows() {
+    std::cout << "[WindowManager] Removing all windows (" << _windows.size() << ")" << std::endl;
     _windows.clear();
+    currentWindow = -1;
 }
 
 void WindowManager::Cleanup() {
     RemoveAllWindows();
 }
 
-void WindowManager::SetCurrentWindow(int index) {
-    for (int i = 0; i < Size(); i++) {
-        if (_windows[i]->GetID() == index) {
-            currentWindow = index;
-            _windows[i]->MakeContextCurrent();
-            std::cout << "[WindowManager] Set current window to ID: " << index << std::endl;
-            return;
-        }
+void WindowManager::SetCurrentWindow(int windowID) {
+    Window* window = GetWindowByID(windowID);
+    if (window) {
+        currentWindow = windowID;
+        window->MakeContextCurrent();
+        std::cout << "[WindowManager] Set current window to ID: " << windowID << std::endl;
     }
-    throw std::runtime_error("Window with ID " + std::to_string(index) + " not found.");
-}
-
-Window* WindowManager::GetWindowByID(int index) {
-    for (int i = 0; i < Size(); i++) {
-        if (_windows[i]->GetID() == index) {
-            return _windows[i].get();
-        }
+    else {
+        throw std::runtime_error("Window with ID " + std::to_string(windowID) + " not found.");
     }
-    return nullptr;
 }
 
 Window* WindowManager::GetWindowByTitle(const std::string& title) {
-    for (int i = 0; i < Size(); i++) {
-        if (_windows[i]->GetTitle() == title) {
-            return _windows[i].get();
+    for (const auto& window : _windows) {
+        if (window->GetTitle() == title) {
+            return window.get();
         }
     }
     return nullptr;
@@ -473,11 +498,7 @@ Window* WindowManager::GetCurrentWindow() {
     return GetWindowByID(currentWindow);
 }
 
-std::string WindowManager::GetWindowTitle(int index) {
-    for (int i = 0; i < Size(); i++) {
-        if (_windows[i]->GetID() == index) {
-            return _windows[i]->GetTitle();
-        }
-    }
-    return "";
+std::string WindowManager::GetWindowTitle(int windowID) {
+    Window* window = GetWindowByID(windowID);
+    return window ? window->GetTitle() : "";
 }

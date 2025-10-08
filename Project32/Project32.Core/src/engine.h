@@ -12,6 +12,7 @@ private:
     bool isRunning = false;
     int width, height;
     std::string title;
+    int _mainWindowID = -1;  
 
     static int s_nextID;
     int _ID;
@@ -19,7 +20,7 @@ private:
     void Init();
 
 public:
-    Engine(int width, int height, const std::string& title);
+    Engine(const std::string& title);
     ~Engine();
 
     void Run();
@@ -27,10 +28,11 @@ public:
 
     bool IsRunning() const { return isRunning; }
 
-    Window* GetWindow() const { return _windowManager ? _windowManager->GetWindowByID(_ID) : nullptr; }
+    Window* GetWindow() const { return _windowManager ? _windowManager->GetWindowByID(_mainWindowID) : nullptr; }
     WindowManager* GetWindowManager() const { return _windowManager.get(); }
 
     int GetID() const { return _ID; }
+    int GetMainWindowID() const { return _mainWindowID; }
 };
 
 class EngineManager {
@@ -47,7 +49,7 @@ public:
     static EngineManager* Instance();
     static void DestroyInstance();
 
-    int CreateEngine(int width, int height, const std::string& title);
+    int CreateEngine(const std::string& title);
     bool DestroyEngine(int engineID);
     void DestroyAllEngines();
 

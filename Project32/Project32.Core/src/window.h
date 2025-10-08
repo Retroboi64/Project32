@@ -19,6 +19,7 @@
 struct ImGuiContext;
 class Renderer;
 class UIX;
+class Input;
 
 enum class CursorMode {
     Normal,
@@ -66,7 +67,7 @@ public:
     void InitGLAD();
     void Shutdown();
 
-    void Render();  // New method to trigger rendering
+    void Render(); 
     void PollEvents();
     void SwapBuffers();
     void Clear(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 1.0f);
@@ -107,6 +108,7 @@ public:
 
     Renderer* GetRenderer() const;
     UIX* GetUI() const;
+    Input* GetInput() const;
 
     GLFWwindow* GetGLFWwindow() const { return _window; }
     int GetWidth() const { return _width; }
@@ -143,18 +145,19 @@ private:
     int currentWindow = -1;
 
 public:
-    int Size();
+    int Count();
     int GetCurrentWindowID() const { return currentWindow; }
-    int AddWindow(int width, int height, const std::string& name);
-    int RemoveWindow(int index);
 
+    Window* GetWindowAt(int index);      
+    Window* GetWindowByID(int windowID);   
+    Window* GetWindowByTitle(const std::string& title);
+    Window* GetCurrentWindow();
+
+    int AddWindow(int width, int height, const std::string& name);
+    int RemoveWindow(int windowID);  
     void RemoveAllWindows();
     void Cleanup();
 
-    void SetCurrentWindow(int index);
-    std::string GetWindowTitle(int index);
-
-    Window* GetWindowByID(int index);
-    Window* GetWindowByTitle(const std::string& title);
-    Window* GetCurrentWindow();
+    void SetCurrentWindow(int windowID);
+    std::string GetWindowTitle(int windowID);
 };

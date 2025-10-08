@@ -60,7 +60,7 @@ void Renderer::Init() {
     }
     catch (const std::exception& e) {
         m_isReady = false;
-        throw;
+        throw e;
     }
 }
 
@@ -407,7 +407,7 @@ void Renderer::DrawSettingsWindow() {
             if (ImGui::Button("Create New Engine")) {
                 static int engineCounter = 1;
                 std::string title = "New Engine " + std::to_string(engineCounter++);
-                int newEngineID = manager->CreateEngine(800, 600, title);
+                int newEngineID = manager->CreateEngine(title);
                 if (newEngineID != -1) {
                     std::cout << "Created new engine with ID: " << newEngineID << std::endl;
                 }

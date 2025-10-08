@@ -186,12 +186,12 @@ namespace P32 {
         engine.GetMouseDelta(dx, dy);
     }
 
-    int Engine::CreateEngine(int width, int height, const std::string& title) {
+    int Engine::CreateEngine(const std::string& title) {
         if (!isLoaded || !engine.CreateEngine) {
             std::cerr << "Engine not loaded or CreateEngine function not available!" << std::endl;
             return -1;
         }
-        return engine.CreateEngine(width, height, title.c_str());
+        return engine.CreateEngine(title.c_str());
     }
 
     bool Engine::DestroyEngine(int engineID) {
@@ -368,9 +368,9 @@ namespace P32 {
     }
 
     // EngineInstance implementation
-    EngineInstance::EngineInstance(int width, int height, const std::string& title)
+    EngineInstance::EngineInstance(const std::string& title)
         : _engineID(-1), _valid(false) {
-        _engineID = Engine::CreateEngine(width, height, title);
+        _engineID = Engine::CreateEngine(title);
         _valid = (_engineID != -1);
         if (!_valid) {
             std::cerr << "Failed to create engine instance" << std::endl;
