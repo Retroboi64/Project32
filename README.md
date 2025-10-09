@@ -1,19 +1,24 @@
 # Project32
-> A compact yet powerful and flexible C++ Game Engine designed for modern development needs.
+> A compact yet powerful and flexible C++ Game Engine designed for modern development needs with multi-engine and multi-window support.
 
 ## ⚠️ UNDER CONSTRUCTION
 > **This project is currently under active development.** Many features are incomplete or subject to change. Use at your own risk for production applications.
 
 ## 🚀 Features
+- **Multi-Engine Architecture**: Run multiple independent engine instances simultaneously
+- **Multi-Window Support**: Each engine can manage multiple windows with independent rendering contexts
 - **Easy Integration**: Simple API and comprehensive documentation *(Work in Progress)*
+- **Hot-Reload Ready**: DLL-based architecture enables dynamic loading and reloading
 - **Extensible**: Modular design allows for easy customization
 - **Well-Tested**: Comprehensive test suite ensures reliability
 - **Self-Contained**: All dependencies included in the repository
+- 
 ## 📋 Requirements
 - **Operating System**: Windows *(macOS and Linux support coming soon)*
 - **IDE**: Visual Studio 2022 with C++ development tools
 - **C++ Standard**: C++20 or later
 - **Dependencies**: Everything is included in the repository - no external setup required!
+
 ## 🛠️ Installation and Building
 ### Quick Method
 ```bash
