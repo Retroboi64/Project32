@@ -9,8 +9,8 @@
  * This header must not be removed from any source file.
  */
 
-#include "renderer.h"
 #include "common.h"
+#include "renderer.h"
 #include "shader.h"
 #include "skybox.h"
 #include "mesh.h"
@@ -20,8 +20,6 @@
 #include "model.h"
 #include "scene.h"
 #include "engine.h"
-#include <iostream>
-#include <stdexcept>
 
 Renderer::Renderer(Window* window)
     : m_window(window)

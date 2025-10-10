@@ -236,12 +236,14 @@ glm::ivec2 Window::GetSize() const {
     return glm::ivec2(width, height);
 }
 
-void Window::SetSize(int width, int height) {
+int Window::SetSize(int width, int height) {
     if (_window) {
         glfwSetWindowSize(_window, width, height);
     }
     _width = width;
     _height = height;
+
+    return (width, height);
 }
 
 void Window::GetPosition(int& x, int& y) const {

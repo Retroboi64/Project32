@@ -131,7 +131,7 @@ extern "C" {
         Engine* engine = GetCurrentEngine();
         if (!engine) return false;
         Window* window = engine->GetMainWindow();
-        // TODO: Implement IsKeyDown in Window class
+        window->GetInput()->KeyDown(key);
         return false;
     }
 
@@ -146,8 +146,10 @@ extern "C" {
 
         Window* window = engine->GetMainWindow();
         if (window) {
-            // TODO: Implement GetMousePos in Window class
-            // window->GetMousePos(x, y);
+            glm::ivec2 pos = window->GetInput()->GetMousePosition();
+
+            *x = pos.x;
+            *y = pos.y;
         }
     }
 
@@ -162,8 +164,10 @@ extern "C" {
 
         Window* window = engine->GetMainWindow();
         if (window) {
-            // TODO: Implement GetMouseDelta in Window class
-            // window->GetMouseDelta(dx, dy);
+            glm::ivec2 md = window->GetInput()->GetMouseDelta();
+
+            *dx = md.x;
+            *dy = md.y;
         }
     }
 
@@ -178,7 +182,7 @@ extern "C" {
         Engine* engine = EngineManager::Instance()->GetEngineByID(engineID);
         if (!engine) return false;
         Window* window = engine->GetMainWindow();
-        // TODO: Implement IsKeyDown in Window class
+        window->GetInput()->KeyDown(key);
         return false;
     }
 
@@ -193,8 +197,10 @@ extern "C" {
 
         Window* window = engine->GetMainWindow();
         if (window) {
-            // TODO: Implement GetMousePos in Window/Input class
-            // window->GetInput()->GetMousePos(x, y);
+            glm::ivec2 pos = window->GetInput()->GetMousePosition();
+
+            *x = pos.x;
+            *y = pos.y;
         }
     }
 
@@ -209,8 +215,10 @@ extern "C" {
 
         Window* window = engine->GetMainWindow();
         if (window && window->GetInput()) {
-            // TODO: Fix GetMouseDelta to return values via parameters
-            // window->GetInput()->GetMouseDelta(dx, dy);
+            glm::ivec2 md = window->GetInput()->GetMouseDelta();
+            
+            *dx = md.x;
+            *dy = md.y;
         }
     }
 
@@ -219,10 +227,7 @@ extern "C" {
         Engine* engine = EngineManager::Instance()->GetEngineByID(engineID);
         if (!engine) return;
         Window* window = engine->GetMainWindow();
-        if (window && window->GetRenderer()) {
-            // TODO: Implement SetBackgroundColor in Renderer class
-            // window->GetRenderer()->SetBackgroundColor(r, g, b);
-        }
+        if (window && window->GetRenderer()) {}
     }
 
     __declspec(dllexport) void SetEngineFOV(int engineID, float fov) {
@@ -247,10 +252,7 @@ extern "C" {
         Engine* engine = EngineManager::Instance()->GetEngineByID(engineID);
         if (!engine) return;
         Window* window = engine->GetMainWindow();
-        if (window) {
-            // TODO: Implement ToggleDebugInfo in Window class
-            // window->ToggleDebugInfo();
-        }
+        if (window) {}
     }
 
     __declspec(dllexport) void ToggleEngineRenderScene(int engineID) {
@@ -258,8 +260,7 @@ extern "C" {
         if (!engine) return;
         Window* window = engine->GetMainWindow();
         if (window && window->GetRenderer()) {
-            // TODO: Implement ToggleRenderScene in Renderer class
-            // window->GetRenderer()->ToggleRenderScene();
+             window->GetRenderer()->ToggleRenderScene();
         }
     }
 
@@ -268,8 +269,7 @@ extern "C" {
         if (!engine) return false;
         Window* window = engine->GetMainWindow();
         if (window) {
-            // TODO: Implement SetSize in Window class
-            // return window->SetSize(width, height);
+            return window->SetSize(width, height);
         }
         return false;
     }

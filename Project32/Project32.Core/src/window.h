@@ -81,7 +81,7 @@ public:
 
     void GetSize(int& width, int& height) const;
     glm::ivec2 GetSize() const;
-    void SetSize(int width, int height);
+    int SetSize(int width, int height);
 
     void GetPosition(int& x, int& y) const;
     glm::ivec2 GetPosition() const;
