@@ -45,13 +45,13 @@ start Project32.sln
 - Multi-Monitor Setups: Leverage multiple displays effectively
 
 ## 🏗️ Architecture
-Multi-Engine System
+### Multi-Engine System
 Project32's unique multi-engine architecture allows you to:
 
-Run multiple independent engines in the same process
-Each engine has its own window manager and render context
-Engines can run simultaneously or be controlled individually
-Perfect for complex editor scenarios or multi-view applications
+- Run multiple independent engines in the same process
+-  Each engine has its own window manager and render context
+- Engines can run simultaneously or be controlled individually
+- Perfect for complex editor scenarios or multi-view applications
 
 ### API Layers
 - C API: Core exported functions for DLL interaction
