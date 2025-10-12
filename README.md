@@ -47,7 +47,6 @@ start Project32.sln
 ## 🏗️ Architecture
 ### Multi-Engine System
 Project32's unique multi-engine architecture allows you to:
-
 - Run multiple independent engines in the same process
 -  Each engine has its own window manager and render context
 - Engines can run simultaneously or be controlled individually
