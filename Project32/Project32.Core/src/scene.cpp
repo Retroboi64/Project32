@@ -11,12 +11,8 @@
 
 #define _CRT_SECURE_NO_WARNINGS 
 
+#include "common.h"
 #include "scene.h"
-#include <sstream>
-#include <iomanip>
-#include <fstream>
-#include <iostream>
-#include <map>
 
 uint32_t SceneObject::_nextId = 1;
 

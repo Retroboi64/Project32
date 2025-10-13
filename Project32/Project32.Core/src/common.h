@@ -59,6 +59,8 @@
 
 #include "stb_image.h"
 
+#include "math.h"
+
 #include "util.hpp"
 #include "timer.hpp"
 

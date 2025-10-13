@@ -9,13 +9,27 @@
  * This header must not be removed from any source file.
  */
 
+#include "common.h"
 #include "camera.h"
-#include <iostream>
 
 glm::mat4 Camera::GetViewMatrix() const {
-    glm::vec3 forward = GetForward();
-    glm::vec3 target = _transform.position + forward;
-    return glm::lookAt(_transform.position, target, _up);
+    glm::vec3 f = GetForward();              
+    glm::vec3 r = glm::normalize(glm::cross(f, _up)); 
+    glm::vec3 u = glm::cross(r, f);          
+
+    glm::mat4 view(1.0f);
+
+    view[0] = glm::vec4(r, 0.0f);
+    view[1] = glm::vec4(u, 0.0f);
+    view[2] = glm::vec4(-f, 0.0f);
+    view[3] = glm::vec4(
+        -glm::dot(r, _transform.position),
+        -glm::dot(u, _transform.position),
+        glm::dot(f, _transform.position),
+        1.0f
+    );
+
+    return view;
 }
 
 glm::mat4 Camera::GetProjectionMatrix(float aspect) const {
@@ -34,10 +48,7 @@ glm::mat4 Camera::GetProjectionMatrix(float fov, float aspect, float nearPlane, 
 }
 
 glm::vec3 Camera::GetForward() const {
-    float x = cos(glm::radians(_transform.rotation.y)) * cos(glm::radians(_transform.rotation.x));
-    float y = sin(glm::radians(_transform.rotation.x));
-    float z = sin(glm::radians(_transform.rotation.y)) * cos(glm::radians(_transform.rotation.x));
-    return glm::normalize(glm::vec3(x, y, z));
+    return Math::GetForward(_transform.rotation.x, _transform.rotation.y);;
 }
 
 glm::vec3 Camera::GetRight() const {
@@ -122,10 +133,12 @@ int CameraManager::CreateCamera(const std::string& name,
     const glm::vec3& position,
     const glm::vec3& rotation,
     const glm::vec3& scale) {
-    Transform transform;
-    transform.position = position;
-    transform.rotation = rotation;
-    transform.scale = scale;
+
+    Transform transform{
+        .position = position,
+        .rotation = rotation,
+        .scale = scale,
+    };
 
     return AddCamera(name, transform);
 }

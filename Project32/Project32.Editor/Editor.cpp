@@ -47,7 +47,7 @@ extern "C" {
                 return;
             }
 
-            if (!engine.IsValid()) {
+            if (!engine2.IsValid()) {
                 std::cerr << "Failed to create engine2!" << std::endl;
                 return;
             }
