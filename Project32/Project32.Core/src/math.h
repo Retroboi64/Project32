@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "glm/glm.hpp"
+#include "common.h"
 
 // TODO: Add more math utilities as needed
 namespace Math {

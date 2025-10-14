@@ -9,6 +9,7 @@
  * This header must not be removed from any source file.
  */
 
+#include "common.h"
 #include "engine.h"
 #include "renderer.h"
 #include "input.h"

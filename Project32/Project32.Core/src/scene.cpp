@@ -9,8 +9,6 @@
  * This header must not be removed from any source file.
  */
 
-#define _CRT_SECURE_NO_WARNINGS 
-
 #include "common.h"
 #include "scene.h"
 
@@ -509,11 +507,15 @@ json Scene::MetadataToJSON(const Metadata& metadata) {
     metadataJson["author"] = metadata.author;
 
     auto timeToString = [](const std::chrono::system_clock::time_point& tp) -> std::string {
-        auto time_t = std::chrono::system_clock::to_time_t(tp);
+        std::time_t t = std::chrono::system_clock::to_time_t(tp);
+
+        std::tm timeinfo;
+        gmtime_s(&timeinfo, &t);
+
         std::stringstream ss;
-        ss << std::put_time(std::gmtime(&time_t), "%Y-%m-%dT%H:%M:%SZ");
+        ss << std::put_time(&timeinfo, "%Y-%m-%dT%H:%M:%SZ");
         return ss.str();
-        };
+    };
 
     metadataJson["created"] = timeToString(metadata.created);
     metadataJson["modified"] = timeToString(metadata.modified);

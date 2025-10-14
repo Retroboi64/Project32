@@ -20,6 +20,7 @@
 #include "model.h"
 #include "scene.h"
 #include "engine.h"
+#include "window.h"
 
 Renderer::Renderer(Window* window)
     : m_window(window)

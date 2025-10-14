@@ -10,7 +10,6 @@
  */
 
 #include "common.h"
-
 #include "input.h"
 #include "engine.h"
 #include "window.h"

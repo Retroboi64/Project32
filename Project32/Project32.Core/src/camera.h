@@ -12,11 +12,6 @@
 #pragma once
 
 #include "common.h"
-#include <string>
-#include <vector>
-#include <memory>
-#include <stdexcept>
-#include <optional>
 
 enum class CameraProjectionType {
     Perspective,

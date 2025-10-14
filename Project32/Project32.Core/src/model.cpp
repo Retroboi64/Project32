@@ -9,10 +9,11 @@
  * This header must not be removed from any source file.
  */
 
+#include "common.h"
+
 #define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
 #include "model.h"
-#include <algorithm>
-#include <unordered_map>
 
 void ModelImporter::LoadedModel::CalculateBounds() {
     minBounds = glm::vec3(FLT_MAX);

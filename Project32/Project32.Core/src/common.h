@@ -14,14 +14,7 @@
 #define WIN32_LEAN_AND_MEAN             
 #include <windows.h>
 
-#define GLM_FORCE_SILENT_WARNINGS
-#define GLM_ENABLE_EXPERIMENTAL
-
-#define NEAR_PLANE 0.1f
-#define FAR_PLANE 1000.0f
-#define DARK_SQUARE glm::vec3(0.3984375f, 0.265625f, 0.2265625f)
-#define LIGHT_SQUARE glm::vec3(0.95703125f, 0.8984375f, 0.74609375f)
-#define MAX_BONE_INFLUENCE 4
+#include "constants.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -54,6 +47,10 @@
 #include <algorithm>
 #include <iomanip>
 #include <functional>
+#include <format>
+#include <string_view>
+#include <mutex>
+#include <limits>
 
 #include <tiny_obj_loader.h>
 

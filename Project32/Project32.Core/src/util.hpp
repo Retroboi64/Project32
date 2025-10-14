@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "common.h"
+
 namespace Util {
     inline std::string ReadTextFromFile(const std::string& path) {
         std::ifstream file(path);

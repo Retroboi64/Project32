@@ -9,6 +9,7 @@
  * This header must not be removed from any source file.
  */
 
+#include "common.h"
 #include "ui.h"
 
 ImVec4 ColorWithAlpha(const ImVec4& color, float alpha) {
