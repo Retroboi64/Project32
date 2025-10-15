@@ -163,6 +163,7 @@
   <ItemGroup>
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\common.h" />
+    <ClInclude Include="src\constants.h" />
     <ClInclude Include="src\engine.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\math.h" />
