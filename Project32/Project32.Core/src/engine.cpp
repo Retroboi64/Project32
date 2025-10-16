@@ -22,7 +22,6 @@ Engine::Engine(const std::string& title)
 	: title(title), _ID(s_nextID++)
 {
 	try {
-		_windowManager = std::make_unique<WindowManager>();
 		Init();
 	}
 	catch (const std::exception& e) {
@@ -37,6 +36,8 @@ Engine::~Engine() {
 
 void Engine::Init() {
 	try {
+		_windowManager = std::make_unique<WindowManager>();
+
 		if (_windowManager->Count() == 0) {
 			std::cout << "[Engine::Init] Engine " << _ID << " - Warning: No windows in manager" << std::endl;
 		}

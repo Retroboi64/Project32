@@ -33,9 +33,6 @@
     <ClCompile Include="src\scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\skybox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -90,6 +87,15 @@
     <ClCompile Include="src\common.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\BackEnd\OpenGL\GL_backEnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BackEnd\backend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\camera.h">
@@ -114,9 +120,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\skybox.h">
@@ -147,6 +150,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BackEnd\OpenGL\GL_backEnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BackEnd\backend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BackEnd\OpenGL\Renderer\GL_renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

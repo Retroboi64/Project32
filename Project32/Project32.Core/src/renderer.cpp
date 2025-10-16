@@ -11,6 +11,7 @@
 
 #include "common.h"
 #include "renderer.h"
+#include "BackEnd/backend.h"
 #include "shader.h"
 #include "skybox.h"
 #include "mesh.h"
@@ -24,6 +25,8 @@
 
 Renderer::Renderer(Window* window)
     : m_window(window)
+    , m_backend(nullptr)
+    , m_backendType(BackendType::UNDEFINED)
     , m_sceneManager(SceneManager::Instance())
     , m_isReady(false)
 {
@@ -36,7 +39,7 @@ Renderer::~Renderer() {
     Cleanup();
 }
 
-void Renderer::Init() {
+void Renderer::Init(BackendType backendType) {
     if (!m_window) {
         throw std::runtime_error("Window instance not available for Renderer initialization");
     }
@@ -44,6 +47,13 @@ void Renderer::Init() {
     m_window->MakeContextCurrent();
 
     try {
+        m_backend = GraphicsBackend::Get();
+        m_backendType = GraphicsBackend::GetCurrentType();
+
+        if (!m_backend) {
+            throw std::runtime_error("Failed to get graphics backend instance");
+        }
+
         LoadShaders();
         LoadMeshes();
         LoadTextures();
@@ -112,11 +122,8 @@ void Renderer::LoadScene() {
 }
 
 void Renderer::SetupRenderState() {
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+    m_backend->SetDepthTest(true);
+    m_backend->SetCullFace(true);
 }
 
 glm::mat4 Renderer::CalculateProjectionMatrix(const glm::ivec2& windowSize) const {
@@ -134,13 +141,22 @@ void Renderer::RenderFrame() {
         return;
     }
 
-    glClearColor(m_settings.backgroundColor.r, m_settings.backgroundColor.g,
-        m_settings.backgroundColor.b, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // Safety check for backend
+    if (!m_backend) {
+        std::cerr << "[Renderer] Backend is null, cannot render!" << std::endl;
+        return;
+    }
+
+    m_backend->BeginFrame();
+
+    glm::vec4 bgColor(m_settings.backgroundColor, 1.0f);
+    m_backend->Clear(bgColor);
 
     SetupRenderState();
 
     glm::ivec2 windowSize = m_window->GetSize();
+    m_backend->SetViewport(0, 0, windowSize.x, windowSize.y);
+
     glm::mat4 projection = CalculateProjectionMatrix(windowSize);
 
     glm::vec3 mainCameraPos = m_cameraManager.GetActiveCamera()->GetTransform().position;
@@ -160,20 +176,20 @@ void Renderer::RenderFrame() {
     shader->SetVec3("viewPos", mainCameraPos);
     shader->SetInt("uTexture", 0);
 
-    if (m_settings.wireframeMode) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    }
+    m_backend->SetWireframe(m_settings.wireframeMode);
 
     if (m_settings.renderScene)
     {
-        DrawGrid(projection, view, mainCameraPos);
-        DrawWalls();
+        DrawGrid(projection, view, mainCameraPos, shader);
+        DrawWalls(shader);
         DrawSceneObjects(projection, view, mainCameraPos);
     }
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    m_backend->SetWireframe(false);
 
     RenderUI(m_window);
+
+    m_backend->EndFrame();
 }
 
 void Renderer::DrawSkybox(const glm::mat4& projection, const glm::mat4& view) {
@@ -196,8 +212,7 @@ void Renderer::DrawSkybox(const glm::mat4& projection, const glm::mat4& view) {
     m_skybox->Draw();
 }
 
-void Renderer::DrawGrid(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& playerPos) {
-    auto* shader = m_shaderManager.GetShader("SolidColor");
+void Renderer::DrawGrid(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& playerPos, Shader* shader) {
     if (!shader) {
         return;
     }
@@ -222,7 +237,7 @@ void Renderer::DrawGrid(const glm::mat4& projection, const glm::mat4& view, cons
             shader->SetVec3("color", isLight ? LIGHT_SQUARE : DARK_SQUARE);
 
             if (m_quadMesh) {
-                m_quadMesh->Draw();
+                m_backend->DrawMesh(m_quadMesh.get());
             }
         }
     }
@@ -230,19 +245,13 @@ void Renderer::DrawGrid(const glm::mat4& projection, const glm::mat4& view, cons
     glDisable(GL_POLYGON_OFFSET_FILL);
 }
 
-void Renderer::DrawWalls() {
-    if (!m_wallSystem) {
+void Renderer::DrawWalls(Shader* shader) {
+    if (!m_wallSystem || !shader) {
         return;
     }
 
-    auto* shader = m_shaderManager.GetShader("SolidColor");
-    if (!shader) {
-        return;
-    }
-
-    shader->Bind();
     shader->SetBool("useTexture", true);
-    m_textures.BindTexture(m_textures.FindTextureByName("Wall"), GL_TEXTURE0);
+    m_backend->BindTexture(m_textures.FindTextureByName("Wall"), 0);
 
     const auto& walls = m_wallSystem->GetWalls();
     for (const auto& wall : walls) {
@@ -251,7 +260,7 @@ void Renderer::DrawWalls() {
         shader->SetVec3("color", wall.color);
 
         if (m_cubeMesh) {
-            m_cubeMesh->Draw();
+            m_backend->DrawMesh(m_cubeMesh.get());
         }
     }
 }
@@ -331,9 +340,19 @@ void Renderer::DrawImGuiHUD() {
     }
 
     if (ImGui::CollapsingHeader("System Info")) {
-        ImGui::Text("OpenGL: %s", glGetString(GL_VERSION));
-        ImGui::Text("GPU: %s", glGetString(GL_RENDERER));
-        ImGui::Text("GLSL: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+        // Display backend-agnostic info
+        const char* backendName = "Unknown";
+        switch (m_backendType) {
+        case BackendType::OPENGL: backendName = "OpenGL"; break;
+        case BackendType::VULKAN: backendName = "Vulkan"; break;
+        case BackendType::DX11: backendName = "DirectX 11"; break;
+        case BackendType::DX12: backendName = "DirectX 12"; break;
+        default: backendName = "Undefined"; break;
+        }
+
+        ImGui::Text("Backend: %s", backendName);
+        ImGui::Text("API Version: %s", m_backend->GetAPIVersion().c_str());
+        ImGui::Text("Renderer: %s", m_backend->GetRendererName().c_str());
 
         if (m_window) {
             glm::ivec2 windowSize = m_window->GetSize();
@@ -443,6 +462,10 @@ void Renderer::Cleanup() {
 
     m_textures.Clear();
     m_shaderManager.Clear();
+
+    // Backend is managed globally, don't delete it here
+    m_backend = nullptr;
+    m_backendType = BackendType::UNDEFINED;
 
     m_isReady = false;
 }

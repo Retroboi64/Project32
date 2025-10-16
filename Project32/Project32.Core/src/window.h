@@ -95,6 +95,8 @@ public:
     void SetVSync(bool enabled);
     void ToggleFullscreen();
 
+    void SetMSAASamples(UINT count);
+
     void SetCursorMode(CursorMode mode);
     bool IsKeyPressed(int key) const;
     bool IsMouseButtonPressed(int button) const;

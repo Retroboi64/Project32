@@ -9,8 +9,8 @@
  * This header must not be removed from any source file.
  */
 
-#include "common.h"
-#include "shader.h"
+#include "../../../common.h"
+#include "GL_shader.h"
 
 // Shader implementation
 bool Shader::CheckErrors(unsigned int shader, const std::string& type) {

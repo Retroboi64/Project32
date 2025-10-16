@@ -46,12 +46,22 @@ Window::Window(int width, int height, const std::string& title, GLFWwindow* shar
     std::cout << "[Window " << _ID << "] Step W2: Setting window hints..." << std::endl;
     std::cout.flush();
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-    glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+    if (GraphicsBackend::GetCurrentType() == BackendType::OPENGL) {
+        std::cout << "[Window " << _ID << "] Using OpenGL backend hints" << std::endl;
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+        glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+    }
+    else if (GraphicsBackend::GetCurrentType() == BackendType::UNDEFINED) {
+        std::cout << "[Window " << _ID << "] No backend selected yet, defaulting to OpenGL hints" << std::endl;
+    }
+    else {
+		std::cerr << "[Window " << _ID << "] Warning: Selected backend not supported for window creation. Defaulting to OpenGL hints." << std::endl;
+    }
 
     std::cout << "[Window " << _ID << "] Step W3: Creating GLFW window..." << std::endl;
     std::cout.flush();
@@ -89,11 +99,16 @@ Window::Window(int width, int height, const std::string& title, GLFWwindow* shar
     std::cout << "[Window " << _ID << "] Step W7: Setting OpenGL state..." << std::endl;
     std::cout.flush();
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_MULTISAMPLE);
-    glDisable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glViewport(0, 0, width, height);
+    if (GraphicsBackend::GetCurrentType() == BackendType::UNDEFINED) {
+        GraphicsBackend::Initialize(BackendType::OPENGL);
+
+        glViewport(0, 0, width, height);
+
+        std::cout << "[Renderer] Initialized graphics backend" << std::endl;
+    }
+    else {
+        std::cout << "[Renderer] Using existing graphics backend" << std::endl;
+    }
 
     SetVSync(_vsync);
     _isOpen = true;
@@ -199,6 +214,12 @@ void Window::PollEvents() {
 
     if (_input) {
         _input->Update();
+    }
+}
+
+void Window::SetMSAASamples(UINT count) {
+    if (GraphicsBackend::GetCurrentType() == BackendType::OPENGL) {
+        glfwWindowHint(GLFW_SAMPLES, count);
     }
 }
 
@@ -365,8 +386,7 @@ float Window::GetAspectRatio() const {
 void Window::Clear(float r, float g, float b, float a) {
     if (_window) {
         glfwMakeContextCurrent(_window);
-        glClearColor(r, g, b, a);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//GraphicsBackend::SetClearColor(r, g, b, a);
     }
 }
 

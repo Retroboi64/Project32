@@ -64,6 +64,14 @@
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level3</WarningLevel>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level3</WarningLevel>
     </ClCompile>
+    <ClCompile Include="src\BackEnd\backend.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="src\BackEnd\OpenGL\GL_backEnd.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../../common.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../common.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="src\camera.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
@@ -79,6 +87,10 @@
     <ClCompile Include="src\engine.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">common.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">common.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="src\shader.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">common.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">common.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -124,12 +136,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">common.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">common.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="src\shader.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">common.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">common.h</PrecompiledHeaderFile>
-    </ClCompile>
     <ClCompile Include="src\skybox.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
@@ -161,10 +167,14 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\BackEnd\backend.h" />
+    <ClInclude Include="src\BackEnd\OpenGL\GL_backEnd.h" />
+    <ClInclude Include="src\BackEnd\OpenGL\Renderer\GL_renderer.h" />
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\constants.h" />
     <ClInclude Include="src\engine.h" />
+    <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\math.h" />
     <ClInclude Include="src\mesh.h" />
@@ -172,7 +182,6 @@
     <ClInclude Include="src\object.h" />
     <ClInclude Include="src\renderer.h" />
     <ClInclude Include="src\scene.h" />
-    <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\skybox.h" />
     <ClInclude Include="src\textures.h" />
     <ClInclude Include="src\timer.hpp" />

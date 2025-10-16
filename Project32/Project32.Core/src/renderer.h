@@ -12,7 +12,7 @@
 #pragma once
 
 #include "common.h"
-
+#include "BackEnd/backend.h"
 #include "mesh.h"
 #include "shader.h"
 #include "textures.h"
@@ -49,13 +49,13 @@ public:
     Renderer(Renderer&&) noexcept = default;
     Renderer& operator=(Renderer&&) noexcept = default;
 
-    void Init();
+    void Init(BackendType backendType = BackendType::OPENGL);
     void RenderFrame();
     void Cleanup();
 
     void DrawSkybox(const glm::mat4& projection, const glm::mat4& view);
-    void DrawWalls();
-    void DrawGrid(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& playerPos);
+    void DrawWalls(Shader* shader);
+    void DrawGrid(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& playerPos, Shader* shader);
     void DrawSceneObjects(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& playerPos);
 
     void ToggleRenderScene();
@@ -70,6 +70,7 @@ public:
     bool IsDebugInfoVisible() const { return m_settings.showDebugInfo; }
     float GetFOV() const { return m_settings.fov; }
     const RenderSettings& GetSettings() const { return m_settings; }
+    BackendType GetBackendType() const { return m_backendType; }
 
     void SetFOV(float fov);
     void SetBackgroundColor(const glm::vec3& color);
@@ -93,6 +94,8 @@ private:
     glm::mat4 CalculateViewMatrix(const glm::vec3& position) const;
 
     Window* m_window;
+    IGraphicsBackend* m_backend;
+    BackendType m_backendType;
 
     TextureManager m_textures;
     ShaderManager m_shaderManager;
