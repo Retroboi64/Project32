@@ -386,7 +386,9 @@ float Window::GetAspectRatio() const {
 void Window::Clear(float r, float g, float b, float a) {
     if (_window) {
         glfwMakeContextCurrent(_window);
-		//GraphicsBackend::SetClearColor(r, g, b, a);
+
+		glm::vec4 color(r, g, b, a);
+		GraphicsBackend::Get()->Clear(color);
     }
 }
 
@@ -409,7 +411,8 @@ void Window::SetResizeCallback(std::function<void(int, int)> callback) {
 }
 
 void Window::FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
+    // glViewport(0, 0, width, height);
+    GraphicsBackend::Get()->SetViewport(0, 0, width, height);
 }
 
 void Window::BeginImGuiFrame() {

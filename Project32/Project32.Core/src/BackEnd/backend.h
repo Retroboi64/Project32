@@ -1,29 +1,17 @@
-/*
- * This file is part of Project32 - A compact yet powerful and flexible C++ Game Engine
- * Copyright (c) 2025 Patrick Reese (Retroboi64)
- *
- * Licensed under MIT with Attribution Requirements
- * See LICENSE file for full terms
- * GitHub: https://github.com/Retroboi64/Project32
- *
- * This header must not be removed from any source file.
- */
+#ifndef BACKEND_H
+#define BACKEND_H
 
-#pragma once
 #include "../common.h"
-#include "../mesh.h"
+
+class IGraphicsBackend;
 
 enum class BackendType {
+    UNDEFINED,
     OPENGL,
     VULKAN,
     DX11,
-    DX12,
-    UNDEFINED
+    DX12
 };
-
-class Mesh;
-class Shader;
-class Texture;
 
 class IGraphicsBackend {
 public:
@@ -35,6 +23,7 @@ public:
 
     virtual void BeginFrame() = 0;
     virtual void EndFrame() = 0;
+
     virtual void Clear(const glm::vec4& color) = 0;
     virtual void SetViewport(int x, int y, int width, int height) = 0;
 
@@ -53,7 +42,6 @@ public:
     virtual void BindTexture(unsigned int textureID, int slot = 0) = 0;
     virtual void UnbindTexture(int slot = 0) = 0;
 
-    virtual void DrawMesh(const Mesh* mesh) = 0;
     virtual void DrawIndexed(unsigned int vao, unsigned int indexCount) = 0;
     virtual void DrawArrays(unsigned int vao, unsigned int vertexCount) = 0;
 
@@ -66,19 +54,22 @@ public:
     virtual std::string GetRendererName() const = 0;
 };
 
-class BackendFactory {
-public:
-    static std::unique_ptr<IGraphicsBackend> Create(BackendType type);
-};
-
 class GraphicsBackend {
 public:
-    static void Initialize(BackendType type);
-    static void Shutdown();
     static IGraphicsBackend* Get();
     static BackendType GetCurrentType();
+    static bool Initialize(BackendType type);
+    static void Destroy();
 
 private:
-    static std::unique_ptr<IGraphicsBackend> s_backend;
+    GraphicsBackend() = default;
+    ~GraphicsBackend() = default;
+
+    GraphicsBackend(const GraphicsBackend&) = delete;
+    GraphicsBackend& operator=(const GraphicsBackend&) = delete;
+
+    static std::unique_ptr<IGraphicsBackend> s_instance;
     static BackendType s_currentType;
 };
+
+#endif 

@@ -9,10 +9,11 @@
  * This header must not be removed from any source file.
  */
 
-#pragma once
+#ifndef MESH_H
+#define MESH_H
 
-#include "common.h"
-#include "textures.h"
+#include "../../../common.h"
+#include "GL_textures.h"
 
 class Mesh {
 private:
@@ -44,3 +45,5 @@ namespace StaticMeshes {
     std::unique_ptr<Mesh> GetSphere(unsigned int latitudeSegments, unsigned int longitudeSegments, float radius);
     std::unique_ptr<Mesh> GetCapsule(unsigned int segments, unsigned int rings, float height, float radius);
 }
+
+#endif // MESH_H

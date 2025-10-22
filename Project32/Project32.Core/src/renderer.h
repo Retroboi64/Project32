@@ -9,22 +9,19 @@
  * This header must not be removed from any source file.
  */
 
-#pragma once
+#ifndef RENDERER_H
+#define RENDERER_H
 
 #include "common.h"
-#include "BackEnd/backend.h"
-#include "mesh.h"
-#include "shader.h"
-#include "textures.h"
-#include "skybox.h"
+#include "BackEnd/common.h"
 #include "wall.h"
 #include "model.h"
 #include "scene.h"
 #include "camera.h"
+#include "window.h"
 
-class WallSystem;
-class Engine;
 class Window;
+class Skybox;
 
 class Renderer {
 public:
@@ -117,3 +114,5 @@ private:
 
     static constexpr int GRID_SIZE = 40;
 };
+
+#endif // RENDERER_H

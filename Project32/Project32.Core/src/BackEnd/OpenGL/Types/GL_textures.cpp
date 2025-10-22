@@ -9,86 +9,87 @@
  * This header must not be removed from any source file.
  */
 
-#include "common.h"
-#include "textures.h"
+#include "../../../common.h"
+#include "GL_textures.h"
 
-// Texture functions
+ // Texture functions
 void Texture::Bind(GLenum textureUnit) const {
-	glActiveTexture(textureUnit);
-	glBindTexture(GL_TEXTURE_2D, _textureID);
+    glActiveTexture(textureUnit);
+    glBindTexture(GL_TEXTURE_2D, _textureID);
 }
 
 bool Texture::LoadFromFile(const std::string& textureName, const std::string& filepath, bool flipVertically) {
-	_name = textureName;
-	_filepath = filepath;
+    _name = textureName;
+    _filepath = filepath;
 
-	if (_textureID != 0) {
-		glDeleteTextures(1, &_textureID);
-		_textureID = 0;
-	}
-	glGenTextures(1, &_textureID);
-	glBindTexture(GL_TEXTURE_2D, _textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	if (flipVertically) {
-		stbi_set_flip_vertically_on_load(true);
-	}
-	unsigned char* data = stbi_load(filepath.c_str(), &_width, &_height, &_channels, 0);
-	if (data) {
-		GLenum format = (_channels == 4) ? GL_RGBA : GL_RGB;
-		glTexImage2D(GL_TEXTURE_2D, 0, format, _width, _height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	} else {
-		std::cerr << "Failed to load texture: " << filepath << std::endl;
-		return false;
-	}
-	stbi_image_free(data);
-	if (flipVertically) {
-		stbi_set_flip_vertically_on_load(false);
-	}
+    if (_textureID != 0) {
+        glDeleteTextures(1, &_textureID);
+        _textureID = 0;
+    }
+    glGenTextures(1, &_textureID);
+    glBindTexture(GL_TEXTURE_2D, _textureID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    if (flipVertically) {
+        stbi_set_flip_vertically_on_load(true);
+    }
+    unsigned char* data = stbi_load(filepath.c_str(), &_width, &_height, &_channels, 0);
+    if (data) {
+        GLenum format = (_channels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, _width, _height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else {
+        std::cerr << "Failed to load texture: " << filepath << std::endl;
+        return false;
+    }
+    stbi_image_free(data);
+    if (flipVertically) {
+        stbi_set_flip_vertically_on_load(false);
+    }
 
-	return true;
+    return true;
 }
 
 // TextureManager functions
 TextureManager::TextureManager() : _activeTextureIndex(0) {}
 
 int TextureManager::AddTexture(const std::string& name) {
-	int index = static_cast<int>(_textures.size());
-	_textures.push_back(std::make_unique<Texture>(name));
-	return index;
+    int index = static_cast<int>(_textures.size());
+    _textures.push_back(std::make_unique<Texture>(name));
+    return index;
 }
 
 int TextureManager::AddExistingTexture(std::unique_ptr<Texture> texture) {
-	int index = static_cast<int>(_textures.size());
-	_textures.push_back(std::move(texture));
-	return index;
+    int index = static_cast<int>(_textures.size());
+    _textures.push_back(std::move(texture));
+    return index;
 }
 
 int TextureManager::LoadTexture(const std::string& name, const std::string& filepath, bool flipVertically = true) {
-	auto texture = std::make_unique<Texture>(name);
-	if (texture->LoadFromFile(name, filepath, flipVertically)) {
-		int index = static_cast<int>(_textures.size());
-		_textures.push_back(std::move(texture));
-		return index;
-	}
-	return -1;
+    auto texture = std::make_unique<Texture>(name);
+    if (texture->LoadFromFile(name, filepath, flipVertically)) {
+        int index = static_cast<int>(_textures.size());
+        _textures.push_back(std::move(texture));
+        return index;
+    }
+    return -1;
 }
 
 Texture& TextureManager::GetTexture(int index) {
-	if (index >= _textures.size()) {
-		throw std::out_of_range("Texture index out of range");
-	}
-	return *_textures[index];
+    if (index >= _textures.size()) {
+        throw std::out_of_range("Texture index out of range");
+    }
+    return *_textures[index];
 }
 
 const Texture& TextureManager::GetTexture(int index) const {
-	if (index >= _textures.size()) {
-		throw std::out_of_range("Texture index out of range");
-	}
-	return *_textures[index];
+    if (index >= _textures.size()) {
+        throw std::out_of_range("Texture index out of range");
+    }
+    return *_textures[index];
 }
 
 Texture* TextureManager::GetTextureByName(const std::string& name) {

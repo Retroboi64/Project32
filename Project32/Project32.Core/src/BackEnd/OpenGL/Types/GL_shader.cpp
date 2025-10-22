@@ -49,12 +49,19 @@ void Shader::LoadFromString(const std::string& vertexSource, const std::string& 
     unsigned int vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vShaderCode, nullptr);
     glCompileShader(vertex);
-    if (!CheckErrors(vertex, "VERTEX")) return;
+    if (!CheckErrors(vertex, "VERTEX")) {
+        glDeleteShader(vertex);
+        return;
+    }
 
     unsigned int fragment = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment, 1, &fShaderCode, nullptr);
     glCompileShader(fragment);
-    if (!CheckErrors(fragment, "FRAGMENT")) return;
+    if (!CheckErrors(fragment, "FRAGMENT")) {
+        glDeleteShader(vertex);
+        glDeleteShader(fragment);
+        return;
+    }
 
     int tempID = glCreateProgram();
     glAttachShader(tempID, vertex);
@@ -91,9 +98,10 @@ int Shader::GetUniformLocation(const std::string& name) {
     if (it == _uniformsLocations.end()) {
         int location = glGetUniformLocation(_ID, name.c_str());
         _uniformsLocations[name] = location;
-        if (location == -1) {
-            std::cerr << "Warning: Uniform '" << name << "' not found in shader" << std::endl;
-        }
+        // Don't spam warnings for optional uniforms like ambientStrength
+        // if (location == -1) {
+        //     std::cerr << "Warning: Uniform '" << name << "' not found in shader" << std::endl;
+        // }
         return location;
     }
     return it->second;
@@ -110,6 +118,13 @@ void Shader::SetVec3(const std::string& name, const glm::vec3& value) {
     int location = GetUniformLocation(name);
     if (location != -1) {
         glUniform3fv(location, 1, glm::value_ptr(value));
+    }
+}
+
+void Shader::SetVec4(const std::string& name, const glm::vec4& value) {
+    int location = GetUniformLocation(name);
+    if (location != -1) {
+        glUniform4fv(location, 1, glm::value_ptr(value));
     }
 }
 

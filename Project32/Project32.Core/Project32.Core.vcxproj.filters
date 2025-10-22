@@ -21,9 +21,6 @@
     <ClCompile Include="src\input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -31,12 +28,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\skybox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\textures.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\wall.cpp">
@@ -93,7 +84,16 @@
     <ClCompile Include="src\BackEnd\backend.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\shader.cpp">
+    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_textures.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_skybox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -110,9 +110,6 @@
     <ClInclude Include="src\math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -120,12 +117,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\skybox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\textures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\timer.hpp">
@@ -158,10 +149,22 @@
     <ClInclude Include="src\BackEnd\backend.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\BackEnd\OpenGL\Renderer\GL_renderer.h">
+    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\shader.h">
+    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BackEnd\OpenGL\GL_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_textures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BackEnd\common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_skybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

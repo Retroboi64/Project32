@@ -9,16 +9,17 @@
  * This header must not be removed from any source file.
  */
 
-#pragma once
+#ifndef TEXTURE_H
+#define TEXTURE_H
 
-#include "common.h"
+#include "../../../common.h"
 
 class Texture {
 private:
     GLuint _textureID = 0;
     int _width = 0, _height = 0, _channels = 0;
     std::string _name;
-	std::string _filepath;
+    std::string _filepath;
 
 public:
     Texture() = default;
@@ -59,7 +60,7 @@ public:
     int GetWidth() const { return _width; }
     int GetHeight() const { return _height; }
     int GetChannels() const { return _channels; }
-	std::string GetFilepath() const { return _filepath; }
+    std::string GetFilepath() const { return _filepath; }
     GLuint GetTextureID() const { return _textureID; }
     const std::string& GetName() const { return _name; }
 
@@ -74,7 +75,7 @@ private:
 public:
     TextureManager();
 
-	// TODO: Organize functions better
+    // TODO: Organize functions better
     int AddTexture(const std::string& name);
     int AddExistingTexture(std::unique_ptr<Texture> texture);
     int LoadTexture(const std::string& name, const std::string& filepath, bool flipVertically);
@@ -102,3 +103,5 @@ public:
     auto end() const;
     bool Clear();
 };
+
+#endif // !TEXTURE_H

@@ -9,8 +9,8 @@
  * This header must not be removed from any source file.
  */
 
-#include "common.h"
-#include "skybox.h"
+#include "../../../common.h"
+#include "GL_skybox.h"
 
 Skybox::~Skybox() {
     if (_VAO) glDeleteVertexArrays(1, &_VAO);

@@ -9,11 +9,15 @@
  * This header must not be removed from any source file.
  */
 
-#pragma once
+#ifndef GL_BACKEND_H
+#define GL_BACKEND_H
+
 #include "../../common.h"
 #include "../backend.h"
-#include "../../window.h"
 
+#include "Types/GL_shader.h"
+
+ // Forward declarations
 class Mesh;
 
 class OpenGLBackend : public IGraphicsBackend {
@@ -27,6 +31,7 @@ public:
 
     void BeginFrame() override;
     void EndFrame() override;
+
     void Clear(const glm::vec4& color) override;
     void SetViewport(int x, int y, int width, int height) override;
 
@@ -49,10 +54,10 @@ public:
     void DrawIndexed(unsigned int vao, unsigned int indexCount) override;
     void DrawArrays(unsigned int vao, unsigned int vertexCount) override;
 
+    unsigned int CreateBuffer() override;
     void DeleteBuffer(unsigned int bufferID) override;
     unsigned int CreateVertexArray() override;
     void DeleteVertexArray(unsigned int vaoID) override;
-    unsigned int CreateBuffer() override;
 
     std::string GetAPIVersion() const override;
     std::string GetRendererName() const override;
@@ -64,3 +69,5 @@ private:
     int GetUniformLocation(int shaderID, const std::string& name);
     std::unordered_map<int, std::unordered_map<std::string, int>> m_uniformCache;
 };
+
+#endif // GL_BACKEND_H

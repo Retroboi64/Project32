@@ -9,9 +9,10 @@
  * This header must not be removed from any source file.
  */
 
-#pragma once
+#ifndef GL_SKYBOX_H
+#define GL_SKYBOX_H
 
-#include "common.h"
+#include "../../common.h"
 
 class Skybox {
 private:
@@ -24,7 +25,11 @@ private:
 
 public:
     ~Skybox();
+
     void Load(const std::vector<std::string>& faces);
     void Draw() const;
+
     unsigned int GetTextureID() const { return _textureID; }
 };
+
+#endif // GL_SKYBOX_H

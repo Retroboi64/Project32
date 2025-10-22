@@ -10,12 +10,8 @@
  */
 
 #include "common.h"
+#include "BackEnd/common.h"
 #include "renderer.h"
-#include "BackEnd/backend.h"
-#include "shader.h"
-#include "skybox.h"
-#include "mesh.h"
-#include "textures.h"
 #include "wall.h"
 #include "imgui.h"
 #include "model.h"
@@ -25,7 +21,7 @@
 
 Renderer::Renderer(Window* window)
     : m_window(window)
-    , m_backend(nullptr)
+    , m_backend(GraphicsBackend::Get())
     , m_backendType(BackendType::UNDEFINED)
     , m_sceneManager(SceneManager::Instance())
     , m_isReady(false)
@@ -141,7 +137,6 @@ void Renderer::RenderFrame() {
         return;
     }
 
-    // Safety check for backend
     if (!m_backend) {
         std::cerr << "[Renderer] Backend is null, cannot render!" << std::endl;
         return;
@@ -237,7 +232,7 @@ void Renderer::DrawGrid(const glm::mat4& projection, const glm::mat4& view, cons
             shader->SetVec3("color", isLight ? LIGHT_SQUARE : DARK_SQUARE);
 
             if (m_quadMesh) {
-                m_backend->DrawMesh(m_quadMesh.get());
+                m_quadMesh->Draw();
             }
         }
     }
@@ -260,7 +255,7 @@ void Renderer::DrawWalls(Shader* shader) {
         shader->SetVec3("color", wall.color);
 
         if (m_cubeMesh) {
-            m_backend->DrawMesh(m_cubeMesh.get());
+            m_cubeMesh->Draw();
         }
     }
 }
@@ -340,7 +335,6 @@ void Renderer::DrawImGuiHUD() {
     }
 
     if (ImGui::CollapsingHeader("System Info")) {
-        // Display backend-agnostic info
         const char* backendName = "Unknown";
         switch (m_backendType) {
         case BackendType::OPENGL: backendName = "OpenGL"; break;

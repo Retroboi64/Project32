@@ -9,13 +9,13 @@
  * This header must not be removed from any source file.
  */
 
-#include "common.h"
-#include "mesh.h"
+#include "../../../common.h"
+#include "GL_mesh.h"
 
 Mesh::~Mesh() {
-     if (_VAO) glDeleteVertexArrays(1, &_VAO);
-     if (_VBO) glDeleteBuffers(1, &_VBO);
-     if (_EBO) glDeleteBuffers(1, &_EBO);
+    if (_VAO) glDeleteVertexArrays(1, &_VAO);
+    if (_VBO) glDeleteBuffers(1, &_VBO);
+    if (_EBO) glDeleteBuffers(1, &_EBO);
 }
 
 void Mesh::LoadData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) {
@@ -71,7 +71,7 @@ namespace StaticMeshes
         };
         std::vector<unsigned int> indices = { 0, 1, 2, 2, 3, 0 };
 
-		auto quadMesh = std::make_unique<Mesh>();
+        auto quadMesh = std::make_unique<Mesh>();
         quadMesh->LoadData(vertices, indices);
 
         return quadMesh;
@@ -136,7 +136,7 @@ namespace StaticMeshes
             20, 21, 22,  22, 23, 20
         };
 
-		auto cubeMesh = std::make_unique<Mesh>();
+        auto cubeMesh = std::make_unique<Mesh>();
         cubeMesh->LoadData(cubeVertices, cubeIndices);
 
         return cubeMesh;
@@ -196,7 +196,7 @@ namespace StaticMeshes
             indices.push_back(next + 1);
         }
 
-		auto cylinderMesh = std::make_unique<Mesh>();
+        auto cylinderMesh = std::make_unique<Mesh>();
         cylinderMesh->LoadData(vertices, indices);
 
         return cylinderMesh;
@@ -233,8 +233,8 @@ namespace StaticMeshes
                 indices.push_back(first + 1);
             }
         }
-        
-		auto sphereMesh = std::make_unique<Mesh>();
+
+        auto sphereMesh = std::make_unique<Mesh>();
         sphereMesh->LoadData(vertices, indices);
 
         return sphereMesh;
@@ -384,7 +384,7 @@ namespace StaticMeshes
             indices.push_back(hemisphereBase);
         }
 
-		auto capsuleMesh = std::make_unique<Mesh>();
+        auto capsuleMesh = std::make_unique<Mesh>();
         capsuleMesh->LoadData(vertices, indices);
 
         return capsuleMesh;

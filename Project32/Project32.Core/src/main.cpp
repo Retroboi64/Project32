@@ -149,8 +149,11 @@ extern "C" {
         if (window) {
             glm::ivec2 pos = window->GetInput()->GetMousePosition();
 
-            *x = pos.x;
-            *y = pos.y;
+            float px = static_cast<float>(pos.x);
+            float py = static_cast<float>(pos.y);
+
+            *x = px;
+            *y = py;
         }
     }
 
@@ -167,8 +170,11 @@ extern "C" {
         if (window) {
             glm::ivec2 md = window->GetInput()->GetMouseDelta();
 
-            *dx = md.x;
-            *dy = md.y;
+            float mdx = static_cast<float>(md.x);
+            float mdy = static_cast<float>(md.y);
+
+            *dx = mdx;
+            *dy = mdy;
         }
     }
 
@@ -200,8 +206,11 @@ extern "C" {
         if (window) {
             glm::ivec2 pos = window->GetInput()->GetMousePosition();
 
-            *x = pos.x;
-            *y = pos.y;
+			float px = static_cast<float>(pos.x);
+            float py = static_cast<float>(pos.y);
+
+            *x = px;
+            *y = py;
         }
     }
 
@@ -217,9 +226,12 @@ extern "C" {
         Window* window = engine->GetMainWindow();
         if (window && window->GetInput()) {
             glm::ivec2 md = window->GetInput()->GetMouseDelta();
+
+			float mdx = static_cast<float>(md.x);
+			float mdy = static_cast<float>(md.y);
             
-            *dx = md.x;
-            *dy = md.y;
+            *dx = mdx;
+            *dy = mdy;
         }
     }
 
@@ -287,8 +299,12 @@ extern "C" {
         Window* window = engine->GetMainWindow();
         if (window) {
             glm::ivec2 size = window->GetSize();
-            *width = size.x;
-            *height = size.y;
+
+			float sx = static_cast<float>(size.x);
+			float sy = static_cast<float>(size.y);
+
+            *width = sx;
+            *height = sy;
         }
     }
 
@@ -369,8 +385,12 @@ extern "C" {
         Window* window = wm->GetWindowByID(windowID);
         if (window) {
             glm::ivec2 pos = window->GetPosition();
-            *x = pos.x;
-            *y = pos.y;
+
+			float px = static_cast<float>(pos.x);
+			float py = static_cast<float>(pos.y);
+
+            *x = px;
+            *y = py;
         }
     }
 
