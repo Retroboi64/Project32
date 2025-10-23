@@ -47,20 +47,7 @@ public:
     Renderer& operator=(Renderer&&) noexcept = default;
 
     void Init(BackendType backendType = BackendType::OPENGL);
-    void RenderFrame();
     void Cleanup();
-
-    void DrawSkybox(const glm::mat4& projection, const glm::mat4& view);
-    void DrawWalls(Shader* shader);
-    void DrawGrid(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& playerPos, Shader* shader);
-    void DrawSceneObjects(const glm::mat4& projection, const glm::mat4& view, const glm::vec3& playerPos);
-
-    void ToggleRenderScene();
-
-    void ToggleWireframe();
-    void ToggleDebugInfo();
-    void ToggleSettingsWindow();
-    void ToggleImGuiDemo();
 
     bool IsReady() const { return m_isReady; }
     bool IsWireframeMode() const { return m_settings.wireframeMode; }
@@ -70,26 +57,8 @@ public:
     BackendType GetBackendType() const { return m_backendType; }
 
     void SetFOV(float fov);
-    void SetBackgroundColor(const glm::vec3& color);
-    void SetLightPosition(const glm::vec3& position);
 
 private:
-    void LoadShaders();
-    void LoadMeshes();
-    void LoadTextures();
-    void LoadSkybox();
-    void LoadModels();
-    void LoadLevel();
-    void LoadScene();
-
-    void RenderUI(Window* window);
-    void DrawImGuiHUD();
-    void DrawSettingsWindow();
-
-    void SetupRenderState();
-    glm::mat4 CalculateProjectionMatrix(const glm::ivec2& windowSize) const;
-    glm::mat4 CalculateViewMatrix(const glm::vec3& position) const;
-
     Window* m_window;
     IGraphicsBackend* m_backend;
     BackendType m_backendType;

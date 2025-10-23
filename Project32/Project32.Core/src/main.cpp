@@ -248,7 +248,7 @@ extern "C" {
         if (!engine) return;
         Window* window = engine->GetMainWindow();
         if (window && window->GetRenderer()) {
-            window->GetRenderer()->SetFOV(fov);
+            //window->GetRenderer()->SetFOV(fov);
         }
     }
 
@@ -257,7 +257,7 @@ extern "C" {
         if (!engine) return;
         Window* window = engine->GetMainWindow();
         if (window && window->GetRenderer()) {
-            window->GetRenderer()->ToggleWireframe();
+            // window->GetRenderer()->ToggleWireframe();
         }
     }
 
@@ -273,7 +273,7 @@ extern "C" {
         if (!engine) return;
         Window* window = engine->GetMainWindow();
         if (window && window->GetRenderer()) {
-             window->GetRenderer()->ToggleRenderScene();
+             // window->GetRenderer()->ToggleRenderScene();
         }
     }
 

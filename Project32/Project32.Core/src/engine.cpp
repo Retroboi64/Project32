@@ -196,17 +196,14 @@ void EngineManager::RunAllEngines() {
 
 			for (int i = 0; i < windowCount; i++) {
 				Window* window = wm->GetWindowAt(i);
-
-				if (!window) {
-					std::cerr << "[EngineManager::RunAllEngines] Warning: null window at index " << i << std::endl;
-					continue;
-				}
+				if (!window) continue;
 
 				window->PollEvents();
 
 				if (!window->IsOpen()) {
 					std::cout << "[EngineManager::RunAllEngines] Window " << window->GetID()
-						<< " in engine " << engine->GetID() << " closed" << std::endl;
+						<< " in engine " << engine->GetID() << " closed, removing..." << std::endl;
+					wm->RemoveWindow(window->GetID());
 					continue;
 				}
 
@@ -228,7 +225,7 @@ void EngineManager::RunAllEngines() {
 		}
 	}
 
-	std::cout << "[EngineManager] Main loop exited, ensuring all engines are shut down" << std::endl;
+	std::cout << "[EngineManager] Main loop exited, ensuring all engines are shutdown" << std::endl;
 
 	for (auto& engine : _engines) {
 		if (engine && engine->IsRunning()) {

@@ -102,7 +102,7 @@ Window::Window(int width, int height, const std::string& title, GLFWwindow* shar
     if (GraphicsBackend::GetCurrentType() == BackendType::UNDEFINED) {
         GraphicsBackend::Initialize(BackendType::OPENGL);
 
-        glViewport(0, 0, width, height);
+		GraphicsBackend::Get()->SetViewport(0, 0, width, height);
 
         std::cout << "[Renderer] Initialized graphics backend" << std::endl;
     }
@@ -175,28 +175,27 @@ void Window::InitGLAD() {
 }
 
 void Window::Shutdown() {
+    if (!_isOpen || !_window) return;
+
     std::cout << "[Window " << _ID << "] Shutdown called" << std::endl;
 
-    if (_input) {
-        _input.reset();
-    }
+    _input.reset();
 
     if (_renderer) {
         _renderer->Cleanup();
         _renderer.reset();
     }
 
-    if (_ui && _window) {
+    if (_ui) {
         _ui->Cleanup(_window);
         _ui.reset();
     }
 
-    if (_window) {
-        glfwDestroyWindow(_window);
-        _window = nullptr;
-        _isOpen = false;
-        std::cout << "[Window " << _ID << "] Shutdown complete" << std::endl;
-    }
+    glfwDestroyWindow(_window);
+    _window = nullptr;
+    _isOpen = false;
+
+    std::cout << "[Window " << _ID << "] Shutdown complete" << std::endl;
 }
 
 void Window::Render() {
@@ -205,11 +204,9 @@ void Window::Render() {
     }
 
     MakeContextCurrent();
-    _renderer->RenderFrame();
 }
 
 void Window::PollEvents() {
-    glfwPollEvents();
     _isOpen = !glfwWindowShouldClose(_window);
 
     if (_input) {
@@ -411,7 +408,6 @@ void Window::SetResizeCallback(std::function<void(int, int)> callback) {
 }
 
 void Window::FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
-    // glViewport(0, 0, width, height);
     GraphicsBackend::Get()->SetViewport(0, 0, width, height);
 }
 
