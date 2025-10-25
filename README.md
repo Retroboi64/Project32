@@ -1,3 +1,39 @@
+<!-- Stats -->
+<div align="center" style="text-decoration: none;">
+
+<a href="https://github.com/Retroboi64/Project32/releases" style="text-decoration: none;">
+  <img src="https://img.shields.io/github/v/release/Retroboi64/Project32?style=for-the-badge&logo=windows&logoColor=white&color=0078D4&labelColor=1a1a1a" alt="Version">
+</a>
+<a href="https://www.microsoft.com/windows" style="text-decoration: none;">
+  <img src="https://img.shields.io/badge/Windows-Compatible-0078D4?style=for-the-badge&logo=windows&logoColor=white&labelColor=1a1a1a" alt="Platform">
+</a>
+
+<br>
+
+
+<a href="https://github.com/Retroboi64/Project32/stargazers" style="text-decoration: none;">
+  <img src="https://img.shields.io/github/stars/Retroboi64/Project32?style=for-the-badge&logo=starship&logoColor=white&color=ffd700&labelColor=1a1a1a" alt="Stars">
+</a>
+<a href="https://github.com/Retroboi64/Project32/network/members" style="text-decoration: none;">
+  <img src="https://img.shields.io/github/forks/Retroboi64/Project32?style=for-the-badge&logo=git&logoColor=white&color=00d084&labelColor=1a1a1a" alt="Forks">
+</a>
+<a href="https://github.com/Retroboi64/Project32/issues" style="text-decoration: none;">
+  <img src="https://img.shields.io/github/issues/Retroboi64/Project32?style=for-the-badge&logo=github&logoColor=white&color=ff4088&labelColor=1a1a1a" alt="Issues">
+</a>
+<a href="https://github.com/Retroboi64/Project32/commits" style="text-decoration: none;">
+  <img src="https://img.shields.io/github/last-commit/Retroboi64/Project32?style=for-the-badge&logo=git&logoColor=white&color=9d4edd&labelColor=1a1a1a" alt="Last Commit">
+</a>
+
+<br>
+
+<a href="https://www.buymeacoffee.com/Retroboi64" style="text-decoration: none;">
+  <img src="https://img.shields.io/badge/Support-Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=000000&labelColor=1a1a1a" alt="Buy Me a Coffee">
+</a>
+
+</div>
+
+<!-- End of stats -->
+
 # Project32
 > A compact yet powerful and flexible C++ Game Engine designed for modern development needs with multi-engine and multi-window support.
 
