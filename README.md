@@ -26,7 +26,7 @@
 
 <br>
 
-<a href="buymeacoffee.com/retroboi64" style="text-decoration: none;">
+<a href="https://buymeacoffee.com/retroboi64" style="text-decoration: none;">
   <img src="https://img.shields.io/badge/Support-Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=000000&labelColor=1a1a1a" alt="Buy Me a Coffee">
 </a>
 
