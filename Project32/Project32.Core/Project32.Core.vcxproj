@@ -119,8 +119,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">common.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="src\model.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">common.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">common.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -295,7 +293,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\RBPak\include;$(SolutionDir)Vendor\imgui;$(SolutionDir)Vendor\Jolt\include;$(SolutionDir)Project32.UIX\src;$(SolutionDir)Vendor\glad\include;$(SolutionDir)Vendor\tiny_obj;$(SolutionDir)Vendor\stb_image;$(SolutionDir)Vendor\nlohmann;$(SolutionDir)Vendor\GLFW\include;$(SolutionDir)Vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\spdlog\include;$(SolutionDir)Vendor\RBPak\include;$(SolutionDir)Vendor\imgui;$(SolutionDir)Vendor\Jolt\include;$(SolutionDir)Project32.UIX\src;$(SolutionDir)Vendor\glad\include;$(SolutionDir)Vendor\tiny_obj;$(SolutionDir)Vendor\stb_image;$(SolutionDir)Vendor\nlohmann;$(SolutionDir)Vendor\GLFW\include;$(SolutionDir)Vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -316,7 +315,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\RBPak\include;$(SolutionDir)Vendor\imgui;$(SolutionDir)Vendor\Jolt\include;$(SolutionDir)Project32.UIX\src;$(SolutionDir)Vendor\glad\include;$(SolutionDir)Vendor\tiny_obj;$(SolutionDir)Vendor\stb_image;$(SolutionDir)Vendor\nlohmann;$(SolutionDir)Vendor\GLFW\include;$(SolutionDir)Vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\spdlog\include;$(SolutionDir)Vendor\RBPak\include;$(SolutionDir)Vendor\imgui;$(SolutionDir)Vendor\Jolt\include;$(SolutionDir)Project32.UIX\src;$(SolutionDir)Vendor\glad\include;$(SolutionDir)Vendor\tiny_obj;$(SolutionDir)Vendor\stb_image;$(SolutionDir)Vendor\nlohmann;$(SolutionDir)Vendor\GLFW\include;$(SolutionDir)Vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

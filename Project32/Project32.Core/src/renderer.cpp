@@ -59,7 +59,7 @@ void Renderer::Init(BackendType backendType) {
 }
 
 void Renderer::Cleanup() {
-    std::cout << "[Renderer] Cleaning up for Engine " << m_window->GetID() << std::endl;
+	spdlog::info("[Renderer] Cleanup called for Engine {}", m_window->GetID());
 
     m_quadMesh.reset();
     m_cubeMesh.reset();
@@ -73,7 +73,7 @@ void Renderer::Cleanup() {
     m_textures.Clear();
     m_shaderManager.Clear();
 
-    // Backend is managed globally, don't delete it here
+    // Note: Backend is managed globally, don't delete it here
     m_backend = nullptr;
     m_backendType = BackendType::UNDEFINED;
 

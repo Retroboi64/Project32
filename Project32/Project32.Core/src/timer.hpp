@@ -11,6 +11,9 @@
 
 #pragma once
 
+#ifndef TIMER_H
+#define TIMER_H
+
 #include "common.h"
 
 struct TimerResult {
@@ -172,3 +175,5 @@ inline void PrintTimerSummary() {
     }
     std::cout << "=====================\n\n";
 }
+
+#endif // TIMER_H

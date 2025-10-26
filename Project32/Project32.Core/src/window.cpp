@@ -21,149 +21,109 @@ static void StaticFramebufferSizeCallback(GLFWwindow* glfwWindow, int width, int
     }
 }
 
-Window::Window(int width, int height, const std::string& title, GLFWwindow* shareContext = nullptr)
+Window::Window(int width, int height, const std::string& title, GLFWwindow* shareContext)
     : _width(width), _height(height), _title(title), _ID(_nextID++)
 {
-    std::cout << "[Window " << _ID << "] Constructor called: " << width << "x" << height << " '" << title << "'" << std::endl;
-    std::cout.flush();
-
-    std::cout << "[Window " << _ID << "] Step W1: Checking GLFW initialization..." << std::endl;
-    std::cout.flush();
+    spdlog::info("[Window {}] Constructor called: {}x{} '{}'", _ID, width, height, title);
 
     static bool glfwInitialized = false;
     if (!glfwInitialized) {
         if (!glfwInit()) {
-            std::cerr << "[Window " << _ID << "] Failed to initialize GLFW" << std::endl;
+            spdlog::error("[Window {}] Failed to initialize GLFW", _ID);
             throw std::runtime_error("Failed to initialize GLFW");
         }
         glfwInitialized = true;
-        std::cout << "[Window " << _ID << "] GLFW initialized successfully" << std::endl;
+        spdlog::info("[Window {}] GLFW initialized successfully", _ID);
     }
-    else {
-        std::cout << "[Window " << _ID << "] GLFW already initialized" << std::endl;
-    }
-
-    std::cout << "[Window " << _ID << "] Step W2: Setting window hints..." << std::endl;
-    std::cout.flush();
 
     if (GraphicsBackend::GetCurrentType() == BackendType::OPENGL) {
-        std::cout << "[Window " << _ID << "] Using OpenGL backend hints" << std::endl;
-
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-        glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA
+        glfwWindowHint(GLFW_SAMPLES, 4);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     }
     else if (GraphicsBackend::GetCurrentType() == BackendType::UNDEFINED) {
-        std::cout << "[Window " << _ID << "] No backend selected yet, defaulting to OpenGL hints" << std::endl;
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+        glfwWindowHint(GLFW_SAMPLES, 4);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     }
-    else {
-		std::cerr << "[Window " << _ID << "] Warning: Selected backend not supported for window creation. Defaulting to OpenGL hints." << std::endl;
-    }
-
-    std::cout << "[Window " << _ID << "] Step W3: Creating GLFW window..." << std::endl;
-    std::cout.flush();
 
     _window = glfwCreateWindow(width, height, title.c_str(), nullptr, shareContext);
     if (!_window) {
-        std::cerr << "[Window " << _ID << "] Failed to create GLFW window" << std::endl;
+        spdlog::error("[Window {}] Failed to create GLFW window", _ID);
         throw std::runtime_error("Failed to create GLFW window");
     }
 
-    std::cout << "[Window " << _ID << "] Step W4: GLFW window created at: " << _window << std::endl;
-    std::cout.flush();
+    spdlog::info("[Window {}] GLFW window created at: {}", _ID, static_cast<void*>(_window));
 
     glfwSetWindowUserPointer(_window, this);
-
-    std::cout << "[Window " << _ID << "] Step W5: Making context current..." << std::endl;
-    std::cout.flush();
-
     glfwMakeContextCurrent(_window);
     glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetFramebufferSizeCallback(_window, StaticFramebufferSizeCallback);
-
-    std::cout << "[Window " << _ID << "] Step W6: Initializing GLAD..." << std::endl;
-    std::cout.flush();
 
     static bool gladInitialized = false;
     if (!gladInitialized) {
         InitGLAD();
         gladInitialized = true;
     }
-    else {
-        std::cout << "[Window " << _ID << "] GLAD already initialized" << std::endl;
-    }
-
-    std::cout << "[Window " << _ID << "] Step W7: Setting OpenGL state..." << std::endl;
-    std::cout.flush();
 
     if (GraphicsBackend::GetCurrentType() == BackendType::UNDEFINED) {
         GraphicsBackend::Initialize(BackendType::OPENGL);
-
-		GraphicsBackend::Get()->SetViewport(0, 0, width, height);
-
-        std::cout << "[Renderer] Initialized graphics backend" << std::endl;
-    }
-    else {
-        std::cout << "[Renderer] Using existing graphics backend" << std::endl;
+        GraphicsBackend::Get()->SetViewport(0, 0, width, height);
+        spdlog::info("[Renderer] Initialized graphics backend");
     }
 
     SetVSync(_vsync);
     _isOpen = true;
 
-    std::cout << "[Window " << _ID << "] Step W8: Initializing Input, UI and Renderer..." << std::endl;
-    std::cout.flush();
-
     _input = std::make_unique<Input>(this);
     _input->Init();
-    std::cout << "[Window " << _ID << "] Input initialized successfully" << std::endl;
+    spdlog::info("[Window {}] Input initialized successfully", _ID);
 
     _ui = std::make_unique<UIX>(_window);
-    std::cout << "[Window " << _ID << "] UI initialized successfully" << std::endl;
+    spdlog::info("[Window {}] UI initialized successfully", _ID);
 
     _renderer = std::make_unique<Renderer>(this);
     _renderer->Init();
-    std::cout << "[Window " << _ID << "] Renderer initialized successfully" << std::endl;
+    spdlog::info("[Window {}] Renderer initialized successfully", _ID);
 
-    std::cout << "[Window " << _ID << "] Created successfully: " << width << "x" << height << " '" << title << "'" << std::endl;
-    std::cout << "[Window " << _ID << "] OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
-    std::cout << "[Window " << _ID << "] GPU: " << glGetString(GL_RENDERER) << std::endl;
-    std::cout.flush();
+    spdlog::info("[Window {}] Created successfully", _ID);
+    spdlog::info("[Window {}] OpenGL Version: {}", _ID, reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+    spdlog::info("[Window {}] GPU: {}", _ID, reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
 }
 
 Window::~Window() {
-    std::cout << "[Window " << _ID << "] Destructor called" << std::endl;
+    spdlog::info("[Window {}] Destructor called", _ID);
 
     if (_input) {
         _input.reset();
-        std::cout << "[Window " << _ID << "] Input cleaned up" << std::endl;
     }
 
     if (_renderer) {
         _renderer->Cleanup();
         _renderer.reset();
-        std::cout << "[Window " << _ID << "] Renderer cleaned up" << std::endl;
     }
 
     if (_ui && _window) {
         _ui->Cleanup(_window);
         _ui.reset();
-        std::cout << "[Window " << _ID << "] UI cleaned up" << std::endl;
     }
 
     if (_window) {
         glfwDestroyWindow(_window);
         _window = nullptr;
-        std::cout << "[Window " << _ID << "] GLFW window destroyed" << std::endl;
     }
 
-    std::cout << "[Window " << _ID << "] Destructor completed" << std::endl;
+    spdlog::info("[Window {}] Destructor completed", _ID);
 }
 
 void Window::Init() {
-    std::cout << "[Window " << _ID << "] Init() called (initialization already done in constructor)" << std::endl;
+    spdlog::info("[Window {}] Init() called (initialization already done in constructor)", _ID);
 }
 
 void Window::InitGLAD() {
@@ -171,31 +131,38 @@ void Window::InitGLAD() {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         throw std::runtime_error("Failed to initialize GLAD for Window " + std::to_string(_ID));
     }
-    std::cout << "[Window " << _ID << "] GLAD initialized successfully" << std::endl;
+    spdlog::info("[Window {}] GLAD initialized successfully", _ID);
 }
 
 void Window::Shutdown() {
-    if (!_isOpen || !_window) return;
+    if (!_window) return;
 
-    std::cout << "[Window " << _ID << "] Shutdown called" << std::endl;
+    spdlog::info("[Window {}] Shutdown called", _ID);
 
-    _input.reset();
+    _isOpen = false;
+
+    if (_input) {
+        _input.reset();
+    }
 
     if (_renderer) {
+        MakeContextCurrent();
         _renderer->Cleanup();
         _renderer.reset();
     }
 
     if (_ui) {
+        MakeContextCurrent();
         _ui->Cleanup(_window);
         _ui.reset();
     }
 
-    glfwDestroyWindow(_window);
-    _window = nullptr;
-    _isOpen = false;
+    if (_window) {
+        glfwDestroyWindow(_window);
+        _window = nullptr;
+    }
 
-    std::cout << "[Window " << _ID << "] Shutdown complete" << std::endl;
+    spdlog::info("[Window {}] Shutdown complete", _ID);
 }
 
 void Window::Render() {
@@ -207,7 +174,9 @@ void Window::Render() {
 }
 
 void Window::PollEvents() {
-    _isOpen = !glfwWindowShouldClose(_window);
+    if (_window) {
+        _isOpen = !glfwWindowShouldClose(_window);
+    }
 
     if (_input) {
         _input->Update();
@@ -227,7 +196,7 @@ void Window::SwapBuffers() {
 }
 
 bool Window::IsOpen() const {
-    return _isOpen && _window && !glfwWindowShouldClose(_window);
+    return _window && _isOpen && !glfwWindowShouldClose(_window);
 }
 
 void Window::SetShouldClose(bool value) {
@@ -261,8 +230,7 @@ int Window::SetSize(int width, int height) {
     }
     _width = width;
     _height = height;
-
-    return (width, height);
+    return 0;
 }
 
 void Window::GetPosition(int& x, int& y) const {
@@ -383,9 +351,8 @@ float Window::GetAspectRatio() const {
 void Window::Clear(float r, float g, float b, float a) {
     if (_window) {
         glfwMakeContextCurrent(_window);
-
-		glm::vec4 color(r, g, b, a);
-		GraphicsBackend::Get()->Clear(color);
+        glm::vec4 color(r, g, b, a);
+        GraphicsBackend::Get()->Clear(color);
     }
 }
 
@@ -395,7 +362,7 @@ void Window::OnFramebufferResize(int width, int height) {
 
     if (_window) {
         glfwMakeContextCurrent(_window);
-        glViewport(0, 0, width, height);
+        GraphicsBackend::Get()->SetViewport(0, 0, width, height);
     }
 
     if (_resizeCallback) {
@@ -413,7 +380,7 @@ void Window::FramebufferSizeCallback(GLFWwindow* window, int width, int height) 
 
 void Window::BeginImGuiFrame() {
     if (!_window || !_ui || !_ui->IsInitialized()) {
-        std::cerr << "[Window " << _ID << "] Warning: BeginImGuiFrame called but ImGui not properly initialized!" << std::endl;
+        spdlog::warn("[Window {}] BeginImGuiFrame called but ImGui not properly initialized!", _ID);
         return;
     }
 
@@ -423,7 +390,7 @@ void Window::BeginImGuiFrame() {
 
 void Window::EndImGuiFrame() {
     if (!_window || !_ui || !_ui->IsInitialized()) {
-        std::cerr << "[Window " << _ID << "] Warning: EndImGuiFrame called but ImGui not properly initialized!" << std::endl;
+        spdlog::warn("[Window {}] EndImGuiFrame called but ImGui not properly initialized!", _ID);
         return;
     }
 
@@ -444,10 +411,12 @@ Input* Window::GetInput() const {
 }
 
 int WindowManager::Count() {
+    std::lock_guard<std::mutex> lock(_windowsMutex);
     return static_cast<int>(_windows.size());
 }
 
 Window* WindowManager::GetWindowAt(int index) {
+    std::lock_guard<std::mutex> lock(_windowsMutex);
     if (index >= 0 && index < static_cast<int>(_windows.size())) {
         return _windows[index].get();
     }
@@ -455,8 +424,9 @@ Window* WindowManager::GetWindowAt(int index) {
 }
 
 Window* WindowManager::GetWindowByID(int windowID) {
+    std::lock_guard<std::mutex> lock(_windowsMutex);
     for (const auto& window : _windows) {
-        if (window->GetID() == windowID) {
+        if (window && window->GetID() == windowID) {
             return window.get();
         }
     }
@@ -467,39 +437,60 @@ int WindowManager::AddWindow(int width, int height, const std::string& name) {
     try {
         GLFWwindow* shareContext = nullptr;
 
-        if (!_windows.empty()) {
-            shareContext = _windows.front()->GetGLFWwindow();
+        {
+            std::lock_guard<std::mutex> lock(_windowsMutex);
+            if (!_windows.empty()) {
+                shareContext = _windows.front()->GetGLFWwindow();
+            }
         }
 
         auto window = std::make_unique<Window>(width, height, name, shareContext);
         int windowID = window->GetID();
-        _windows.push_back(std::move(window));
-        std::cout << "[WindowManager] Added window with ID: " << windowID << " at index: " << (_windows.size() - 1) << std::endl;
+
+        {
+            std::lock_guard<std::mutex> lock(_windowsMutex);
+            _windows.push_back(std::move(window));
+            spdlog::info("[WindowManager] Added window with ID: {} at index: {}", windowID, _windows.size() - 1);
+        }
+
         return windowID;
     }
     catch (const std::exception& e) {
-        std::cerr << "[WindowManager] Failed to add window: " << e.what() << std::endl;
+        spdlog::error("[WindowManager] Failed to add window: {}", e.what());
         return -1;
     }
 }
 
 int WindowManager::RemoveWindow(int windowID) {
+    std::lock_guard<std::mutex> lock(_windowsMutex);
+
     for (auto it = _windows.begin(); it != _windows.end(); ++it) {
-        if ((*it)->GetID() == windowID) {
-            std::cout << "[WindowManager] Removing window with ID: " << windowID << std::endl;
+        if ((*it) && (*it)->GetID() == windowID) {
+            spdlog::info("[WindowManager] Removing window with ID: {}", windowID);
+
+            (*it)->Shutdown();
             _windows.erase(it);
+
             if (currentWindow == windowID) {
                 currentWindow = -1;
             }
             return currentWindow;
         }
     }
-    std::cerr << "[WindowManager] Window with ID " << windowID << " not found for removal" << std::endl;
+    spdlog::error("[WindowManager] Window with ID {} not found for removal", windowID);
     return -1;
 }
 
 void WindowManager::RemoveAllWindows() {
-    std::cout << "[WindowManager] Removing all windows (" << _windows.size() << ")" << std::endl;
+    std::lock_guard<std::mutex> lock(_windowsMutex);
+    spdlog::info("[WindowManager] Removing all windows ({})", _windows.size());
+
+    for (auto& window : _windows) {
+        if (window) {
+            window->Shutdown();
+        }
+    }
+
     _windows.clear();
     currentWindow = -1;
 }
@@ -509,11 +500,20 @@ void WindowManager::Cleanup() {
 }
 
 void WindowManager::SetCurrentWindow(int windowID) {
-    Window* window = GetWindowByID(windowID);
+    std::lock_guard<std::mutex> lock(_windowsMutex);
+
+    Window* window = nullptr;
+    for (const auto& w : _windows) {
+        if (w && w->GetID() == windowID) {
+            window = w.get();
+            break;
+        }
+    }
+
     if (window) {
         currentWindow = windowID;
         window->MakeContextCurrent();
-        std::cout << "[WindowManager] Set current window to ID: " << windowID << std::endl;
+        spdlog::info("[WindowManager] Set current window to ID: {}", windowID);
     }
     else {
         throw std::runtime_error("Window with ID " + std::to_string(windowID) + " not found.");
@@ -521,8 +521,9 @@ void WindowManager::SetCurrentWindow(int windowID) {
 }
 
 Window* WindowManager::GetWindowByTitle(const std::string& title) {
+    std::lock_guard<std::mutex> lock(_windowsMutex);
     for (const auto& window : _windows) {
-        if (window->GetTitle() == title) {
+        if (window && window->GetTitle() == title) {
             return window.get();
         }
     }
@@ -530,10 +531,21 @@ Window* WindowManager::GetWindowByTitle(const std::string& title) {
 }
 
 Window* WindowManager::GetCurrentWindow() {
-    return GetWindowByID(currentWindow);
+    std::lock_guard<std::mutex> lock(_windowsMutex);
+    for (const auto& window : _windows) {
+        if (window && window->GetID() == currentWindow) {
+            return window.get();
+        }
+    }
+    return nullptr;
 }
 
 std::string WindowManager::GetWindowTitle(int windowID) {
-    Window* window = GetWindowByID(windowID);
-    return window ? window->GetTitle() : "";
+    std::lock_guard<std::mutex> lock(_windowsMutex);
+    for (const auto& window : _windows) {
+        if (window && window->GetID() == windowID) {
+            return window->GetTitle();
+        }
+    }
+    return "";
 }

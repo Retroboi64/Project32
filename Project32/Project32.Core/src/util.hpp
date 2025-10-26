@@ -11,6 +11,9 @@
 
 #pragma once
 
+#ifndef UTIL_H
+#define UTIL_H
+
 #include "common.h"
 
 namespace Util {
@@ -30,3 +33,5 @@ namespace Util {
         return (stat(name.c_str(), &buffer) == 0);
     }
 }
+
+#endif // UTIL_H

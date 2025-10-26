@@ -19,7 +19,6 @@ void ModelImporter::LoadedModel::CalculateBounds() {
     minBounds = glm::vec3(FLT_MAX);
     maxBounds = glm::vec3(-FLT_MAX);
 
-    // This is a simplified version
     center = (minBounds + maxBounds) * 0.5f;
     size = maxBounds - minBounds;
 }

@@ -11,6 +11,9 @@
 
 #pragma once
 
+#ifndef INPUT_H
+#define INPUT_H
+
 #include "common.h"
 
 class Engine;
@@ -58,3 +61,5 @@ public:
     Engine* GetEngine() const { return _engine; }
     Window* GetWindow() const { return _window; }
 };
+
+#endif // INPUT_H

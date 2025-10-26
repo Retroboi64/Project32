@@ -10,7 +10,12 @@
  */
 
 #pragma once
+
+#ifndef OBJECT_H
+#define OBJECT_H
+
 #include "common.h"
+#include "BackEnd/common.h"
  
 struct Node;
 class Object {
@@ -19,11 +24,13 @@ public:
 	uint64_t id; 
 	bool active = true;
 
-	Object(const std::string& name = "Unnamed Object");
+	Mesh* mesh;
+
+	Object(const std::string& name = "Unnamed Object", Mesh* mesh = nullptr);
 	virtual ~Object() = default;
 
-	virtual void OnUpdate(float dt) {}
-	virtual void OnDraw() {}
+	virtual void OnUpdate(float dt);
+	virtual void OnDraw();
 };
 
 struct Node : public std::enable_shared_from_this<Node> {
@@ -49,3 +56,5 @@ struct Scene {
 	void Update(float dt);
 	void Draw();
 };
+
+#endif // OBJECT_H

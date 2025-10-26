@@ -9,7 +9,11 @@
  * This header must not be removed from any source file.
  */
 
+
 #pragma once
+
+#ifdef SCENE_H
+#define SCENE_H
 
 #include "common.h"
 #include "BackEnd/common.h"
@@ -288,3 +292,5 @@ SceneObject* SceneManager::AddCubeToCurrentScene(Args&&... args) {
     }
     return nullptr;
 }
+
+#endif // SCENE_H

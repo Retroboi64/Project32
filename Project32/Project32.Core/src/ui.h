@@ -11,6 +11,9 @@
 
 #pragma once
 
+#ifndef UI_H
+#define UI_H
+
 #include "common.h"
 
 struct Theme {
@@ -64,3 +67,5 @@ public:
 	bool IsInitialized() const;
 	ImGuiContext* GetContext() const;
 };
+
+#endif // UI_H

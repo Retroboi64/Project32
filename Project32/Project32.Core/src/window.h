@@ -11,6 +11,9 @@
 
 #pragma once
 
+#ifndef WINDOW_H
+#define WINDOW_H
+
 #include "common.h"
 #include "renderer.h"
 #include "ui.h"
@@ -145,21 +148,24 @@ class WindowManager {
 private:
     std::vector<std::unique_ptr<Window>> _windows;
     int currentWindow = -1;
+    mutable std::mutex _windowsMutex;  // Add this for thread safety
 
 public:
     int Count();
     int GetCurrentWindowID() const { return currentWindow; }
 
-    Window* GetWindowAt(int index);      
-    Window* GetWindowByID(int windowID);   
+    Window* GetWindowAt(int index);
+    Window* GetWindowByID(int windowID);
     Window* GetWindowByTitle(const std::string& title);
     Window* GetCurrentWindow();
 
     int AddWindow(int width, int height, const std::string& name);
-    int RemoveWindow(int windowID);  
+    int RemoveWindow(int windowID);
     void RemoveAllWindows();
     void Cleanup();
 
     void SetCurrentWindow(int windowID);
     std::string GetWindowTitle(int windowID);
 };
+
+#endif // WINDOW_H

@@ -9,6 +9,8 @@
  * This header must not be removed from any source file.
  */
 
+#pragma once
+
 #ifndef RENDERER_H
 #define RENDERER_H
 

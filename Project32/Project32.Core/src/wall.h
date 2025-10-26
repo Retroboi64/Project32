@@ -11,6 +11,9 @@
 
 #pragma once
 
+#ifndef WALL_H
+#define WALL_H
+
 #include "common.h"
 
 struct Wall {
@@ -58,3 +61,5 @@ public:
     void CreateMaze();
     void LoadLevel(const std::string& filename);
 };
+
+#endif // !WALL_H

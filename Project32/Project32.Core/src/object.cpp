@@ -14,8 +14,19 @@
 
 static uint64_t g_objectCounter = 0;
 
-Object::Object(const std::string& n)
-	: name(n), id(++g_objectCounter) {
+Object::Object(const std::string& n, Mesh* mesh)
+	: name(n), mesh(mesh), id(++g_objectCounter) {
+}
+
+void Object::OnUpdate(float dt) {}
+
+void Object::OnDraw() {
+	if (mesh) {
+		mesh->Draw();
+		spdlog::debug("[Object {}] Drawn", id);
+		return;
+	}
+	spdlog::warn("[Object {}] OnDraw called but no mesh assigned!", id);
 }
 
 Node::Node(const std::string& n)

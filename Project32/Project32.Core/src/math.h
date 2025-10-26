@@ -11,6 +11,9 @@
 
 #pragma once
 
+#ifndef SCENE_H
+#define SCENE_H
+
 #include "common.h"
 
 // TODO: Add more math utilities as needed
@@ -61,3 +64,5 @@ namespace Math {
 	}
 
 }
+
+#endif // SCENE_H

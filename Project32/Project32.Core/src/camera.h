@@ -11,6 +11,9 @@
 
 #pragma once
 
+#ifndef CAMERA_H
+#define CAMERA_H
+
 #include "common.h"
 
 enum class CameraProjectionType {
@@ -178,3 +181,5 @@ public:
 
     void PrintCameraInfo() const;
 };
+
+#endif // CAMERA_H
