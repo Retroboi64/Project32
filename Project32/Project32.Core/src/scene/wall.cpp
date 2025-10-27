@@ -9,7 +9,7 @@
  * This header must not be removed from any source file.
  */
 
-#include "common.h"
+#include "../common.h"
 #include "wall.h"
 
 void WallSystem::AddWall(const glm::vec3& pos, const glm::vec3& scale,

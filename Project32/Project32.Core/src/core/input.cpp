@@ -9,11 +9,10 @@
  * This header must not be removed from any source file.
  */
 
-#include "common.h"
+#include "../common.h"
 #include "input.h"
 #include "engine.h"
 #include "window.h"
-#include "imgui.h"
 
 static std::unordered_map<GLFWwindow*, Input*> g_windowInputMap;
 
@@ -102,7 +101,7 @@ void Input::Init() {
         glfwSetInputMode(_glfwWindow, GLFW_CURSOR,
             _mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 
-        std::cout << "[Input::Init] Input system initialized for engine " << _engine->GetID() << std::endl;
+		spdlog::info("[Input::Init] Input system initialized for engine {}", _engine->GetID());
     }
     else if (_window) {
         _glfwWindow = _window->GetGLFWwindow();
@@ -194,5 +193,5 @@ Input::~Input() {
         contextInfo = "unknown";
     }
 
-    std::cout << "[Input::~Input] Input system cleaned up for " << contextInfo << std::endl;
+	spdlog::info("[Input::~Input] Input system cleaned up for {}", contextInfo);
 }

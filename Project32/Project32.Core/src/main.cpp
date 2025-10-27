@@ -10,8 +10,8 @@
  */
 
 #include "common.h"
-#include "engine.h"
-#include "window.h"
+#include "core/engine.h"
+#include "core/window.h"
 
 extern "C" {
     static int g_currentEngineID = -1;

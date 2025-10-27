@@ -13,7 +13,10 @@
 #define MESH_H
 
 #include "../../../common.h"
+#include "../../../renderer/vertex.h"
 #include "GL_textures.h"
+
+struct Vector;
 
 class Mesh {
 private:

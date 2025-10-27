@@ -11,8 +11,7 @@
 
 #pragma once
 
-#include "common.h"
-#include "BackEnd/common.h"
+#include "../common.h"
 
 class ModelImporter {
 private:

@@ -14,7 +14,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "common.h"
+#include "../common.h"
 
 enum class CameraProjectionType {
     Perspective,

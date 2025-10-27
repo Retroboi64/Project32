@@ -9,11 +9,11 @@
  * This header must not be removed from any source file.
  */
 
-#include "common.h"
-#include "engine.h"
-#include "renderer.h"
-#include "input.h"
-#include "window.h"
+#include "../common.h"
+#include "../core/engine.h"
+#include "../renderer/renderer.h"
+#include "../core/input.h"
+#include "../core/window.h"
 
 ThreadPool::ThreadPool(size_t threads) {
     for (size_t i = 0; i < threads; ++i) {
@@ -205,6 +205,8 @@ void Engine::RenderFrame() {
             }
             continue;
         }
+
+		window->GetRenderer()->RenderFrame();
 
         window->Render();
         window->SwapBuffers();

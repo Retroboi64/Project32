@@ -14,13 +14,12 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "common.h"
-#include "BackEnd/common.h"
-#include "wall.h"
-#include "model.h"
-#include "scene.h"
-#include "camera.h"
-#include "window.h"
+#include "../common.h"
+#include "../scene/wall.h"
+#include "../scene/model.h"
+#include "../scene/scene.h"
+#include "../scene/camera.h"
+#include "../core/window.h"
 
 class Window;
 class Skybox;
@@ -49,6 +48,7 @@ public:
     Renderer& operator=(Renderer&&) noexcept = default;
 
     void Init(BackendType backendType = BackendType::OPENGL);
+	void RenderFrame();
     void Cleanup();
 
     bool IsReady() const { return m_isReady; }
@@ -65,8 +65,8 @@ private:
     IGraphicsBackend* m_backend;
     BackendType m_backendType;
 
-    TextureManager m_textures;
-    ShaderManager m_shaderManager;
+    std::unique_ptr<TextureManager> m_textures;
+    std::unique_ptr<TextureManager> m_shaderManager;
     CameraManager m_cameraManager;
     SceneManager& m_sceneManager;
 

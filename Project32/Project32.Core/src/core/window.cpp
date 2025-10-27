@@ -9,8 +9,9 @@
  * This header must not be removed from any source file.
  */
 
-#include "common.h"
+#include "../common.h"
 #include "window.h"
+#include "../renderer/renderer.h"
 
 int Window::_nextID = 0;
 
@@ -74,6 +75,7 @@ Window::Window(int width, int height, const std::string& title, GLFWwindow* shar
 
     if (GraphicsBackend::GetCurrentType() == BackendType::UNDEFINED) {
         GraphicsBackend::Initialize(BackendType::OPENGL);
+        GraphicsTypes::Initialize();
         GraphicsBackend::Get()->SetViewport(0, 0, width, height);
         spdlog::info("[Renderer] Initialized graphics backend");
     }

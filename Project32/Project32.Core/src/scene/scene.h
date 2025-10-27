@@ -15,8 +15,7 @@
 #ifdef SCENE_H
 #define SCENE_H
 
-#include "common.h"
-#include "BackEnd/common.h"
+#include "../common.h"
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -231,51 +230,6 @@ private:
 
     void UpdateCurrentSceneIndex();
 };
-
-template<typename... Args>
-SceneObject* Scene::AddSphere(const std::string& name, Args&&... args) {
-    auto sphereMesh = StaticMeshes::GetSphere(std::forward<Args>(args)...);
-    auto object = std::make_unique<SceneObject>(
-        GenerateUniqueName(name),
-        std::move(sphereMesh),
-        Transform{},
-        SceneObject::Type::Sphere
-    );
-
-    SceneObject* ptr = object.get();
-    AddObjectInternal(std::move(object));
-    return ptr;
-}
-
-template<typename... Args>
-SceneObject* Scene::AddCylinder(const std::string& name, Args&&... args) {
-    auto cylinderMesh = StaticMeshes::GetCylinder(std::forward<Args>(args)...);
-    auto object = std::make_unique<SceneObject>(
-        GenerateUniqueName(name),
-        std::move(cylinderMesh),
-        Transform{},
-        SceneObject::Type::Cylinder
-    );
-
-    SceneObject* ptr = object.get();
-    AddObjectInternal(std::move(object));
-    return ptr;
-}
-
-template<typename... Args>
-SceneObject* Scene::AddCapsule(const std::string& name, Args&&... args) {
-    auto capsuleMesh = StaticMeshes::GetCapsule(std::forward<Args>(args)...);
-    auto object = std::make_unique<SceneObject>(
-        GenerateUniqueName(name),
-        std::move(capsuleMesh),
-        Transform{},
-        SceneObject::Type::Capsule
-    );
-
-    SceneObject* ptr = object.get();
-    AddObjectInternal(std::move(object));
-    return ptr;
-}
 
 template<typename... Args>
 SceneObject* SceneManager::AddSphereToCurrentScene(Args&&... args) {

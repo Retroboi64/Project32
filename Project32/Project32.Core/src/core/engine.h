@@ -4,14 +4,8 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include "common.h"
+#include "../common.h"
 #include "window.h"
-#include <thread>
-#include <mutex>
-#include <atomic>
-#include <condition_variable>
-#include <queue>
-#include <functional>
 
 class ThreadPool {
 private:

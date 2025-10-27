@@ -9,21 +9,21 @@
  * This header must not be removed from any source file.
  */
 
-#include "common.h"
-#include "BackEnd/common.h"
+#include "../common.h"
 #include "renderer.h"
-#include "wall.h"
-#include "imgui.h"
-#include "model.h"
-#include "scene.h"
-#include "engine.h"
-#include "window.h"
+#include "../scene/wall.h"
+#include "../scene/model.h"
+#include "../scene/scene.h"
+#include "../core/engine.h"
+#include "../core/window.h"
 
 Renderer::Renderer(Window* window)
     : m_window(window)
     , m_backend(GraphicsBackend::Get())
     , m_backendType(BackendType::UNDEFINED)
     , m_sceneManager(SceneManager::Instance())
+    , m_shaderManager(nullptr)
+	, m_textures(nullptr)
     , m_isReady(false)
 {
     if (!m_window) {
@@ -50,12 +50,24 @@ void Renderer::Init(BackendType backendType) {
             throw std::runtime_error("Failed to get graphics backend instance");
         }
 
+		m_textures = TextureFactory::CreateTextureManager();
+        // m_shaderManager = ShaderFactory::CreateShaderManager();
+
         m_isReady = true;
     }
     catch (const std::exception& e) {
         m_isReady = false;
         throw e;
     }
+}
+
+void Renderer::RenderFrame() {
+    if (!m_isReady || !m_backend) {
+        spdlog::warn("[Renderer] Attempted to render frame but Renderer is not ready");
+        return;
+    }
+    m_backend->BeginFrame();
+	m_backend->Clear(glm::vec4(m_settings.backgroundColor, 1.0f));
 }
 
 void Renderer::Cleanup() {
@@ -70,8 +82,8 @@ void Renderer::Cleanup() {
     m_wallSystem.reset();
     m_loadedModels.clear();
 
-    m_textures.Clear();
-    m_shaderManager.Clear();
+    m_textures.reset();
+    m_shaderManager.reset();
 
     // Note: Backend is managed globally, don't delete it here
     m_backend = nullptr;

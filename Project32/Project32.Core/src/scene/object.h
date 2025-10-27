@@ -14,8 +14,7 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include "common.h"
-#include "BackEnd/common.h"
+#include "../common.h"
  
 struct Node;
 class Object {

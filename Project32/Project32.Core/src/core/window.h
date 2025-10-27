@@ -14,8 +14,8 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "common.h"
-#include "renderer.h"
+#include "../common.h"
+#include "../renderer/renderer.h"
 #include "ui.h"
 #include "input.h"
 

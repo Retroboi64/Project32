@@ -14,7 +14,7 @@
 #ifndef UI_H
 #define UI_H
 
-#include "common.h"
+#include "../common.h"
 
 struct Theme {
 	ImVec4 primary;

@@ -9,7 +9,7 @@
  * This header must not be removed from any source file.
  */
 
-#include "common.h"
+#include "../common.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>

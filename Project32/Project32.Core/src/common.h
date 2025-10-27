@@ -14,7 +14,7 @@
 #define WIN32_LEAN_AND_MEAN             
 #include <windows.h>
 
-#include "constants.h"
+#include "types/constants.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -53,6 +53,9 @@
 #include <string_view>
 #include <mutex>
 #include <limits>
+#include <atomic>
+#include <condition_variable>
+#include <queue>
 
 #include <tiny_obj_loader.h>
 
@@ -60,30 +63,11 @@
 
 #include "math.h"
 
-#include "util.hpp"
-#include "timer.hpp"
+#include "types/util.hpp"
+#include "types/timer.hpp"
+#include "types/math.h"
+#include "BackEnd/common.h"
 
-struct Transform {
-    glm::vec3 position = glm::vec3(0.0f);
-    glm::vec3 rotation = glm::vec3(0.0f);
-    glm::vec3 scale = glm::vec3(1.0f);
+#include "scene/transform.h"
+#include "renderer/vertex.h"
 
-    glm::mat4 ToMatrix() const {
-        glm::mat4 m = glm::translate(glm::mat4(1.0f), position);
-        m *= glm::mat4_cast(glm::quat(rotation));
-        m = glm::scale(m, scale);
-        return m;
-    }
-};
-
-struct Vertex {
-    glm::vec3 position = glm::vec3(0.0f);
-    glm::vec3 normal = glm::vec3(0.0f);
-    glm::vec2 uv = glm::vec2(0.0f);
-    glm::vec2 texCoord = glm::vec2(0.0f);
-    glm::vec3 tangent = glm::vec3(0.0f);
-    glm::vec3 bitangent = glm::vec3(0.0f);
-
-    int m_BoneIDs[MAX_BONE_INFLUENCE];
-    float m_Weights[MAX_BONE_INFLUENCE];
-};

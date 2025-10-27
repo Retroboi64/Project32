@@ -9,7 +9,9 @@
  * This header must not be removed from any source file.
  */
 
-#include "common.h"
+// TODO: Backend Checks
+
+#include "../common.h"
 #include "ui.h"
 
 ImVec4 ColorWithAlpha(const ImVec4& color, float alpha) {
@@ -20,14 +22,14 @@ UIX::UIX(GLFWwindow* window)
     : _imguiContext(nullptr), _imguiInitialized(false)
 {
     try {
-        std::cout << "[UIX] Initializing ImGui..." << std::endl;
+		spdlog::info("[UIX] Initializing ImGui...");
 
         glfwMakeContextCurrent(window);
 
         IMGUI_CHECKVERSION();
         _imguiContext = ImGui::CreateContext();
         ImGui::SetCurrentContext(_imguiContext);
-        std::cout << "[UIX] ImGui context created: " << _imguiContext << std::endl;
+		spdlog::info("[UIX] ImGui context created: {}", (void*)_imguiContext);
 
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -48,10 +50,11 @@ UIX::UIX(GLFWwindow* window)
         _imguiInitialized = true;
 
         SetTheme(ThemePreset::Dark);
-        std::cout << "[UIX] Initialization complete!" << std::endl;
+		spdlog::info("[UIX] Default theme applied.");
+		spdlog::info("[UIX] ImGui initialization successful.");
     }
     catch (const std::exception& e) {
-        std::cerr << "[UIX ERROR] Initialization failed: " << e.what() << std::endl;
+		spdlog::error("[UIX] ImGui initialization failed: {}", e.what());
         throw;
     }
 }

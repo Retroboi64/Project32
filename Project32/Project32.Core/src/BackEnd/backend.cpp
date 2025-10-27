@@ -1,12 +1,7 @@
-/* ==========================================
-   backend.cpp - Factory implementation
-   ========================================== */
-
 #include "../common.h"
 #include "OpenGL/GL_backEnd.h"
 #include "backend.h"
 
- // Static member initialization
 std::unique_ptr<IGraphicsBackend> GraphicsBackend::s_instance = nullptr;
 BackendType GraphicsBackend::s_currentType = BackendType::UNDEFINED;
 

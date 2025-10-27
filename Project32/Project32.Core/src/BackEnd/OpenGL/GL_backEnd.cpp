@@ -11,7 +11,7 @@
 
 #include "../../common.h"
 #include "GL_backEnd.h"
-#include "../../window.h"
+#include "../../core/window.h"
 
 OpenGLBackend::~OpenGLBackend() {
     Shutdown();

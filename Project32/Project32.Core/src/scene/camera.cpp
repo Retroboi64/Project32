@@ -9,7 +9,7 @@
  * This header must not be removed from any source file.
  */
 
-#include "common.h"
+#include "../common.h"
 #include "camera.h"
 
 glm::mat4 Camera::GetViewMatrix() const {

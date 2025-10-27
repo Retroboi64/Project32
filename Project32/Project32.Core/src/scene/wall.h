@@ -14,7 +14,7 @@
 #ifndef WALL_H
 #define WALL_H
 
-#include "common.h"
+#include "../common.h"
 
 struct Wall {
     glm::vec3 position;
