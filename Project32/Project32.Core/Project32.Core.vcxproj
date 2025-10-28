@@ -88,6 +88,18 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../../../common.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../common.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="src\io\filesystem.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="src\io\manifest.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="src\project\project_manager.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="src\scene\camera.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
@@ -172,6 +184,9 @@
     <ClInclude Include="src\BackEnd\OpenGL\Types\GL_skybox.h" />
     <ClInclude Include="src\BackEnd\OpenGL\Types\GL_textures.h" />
     <ClInclude Include="src\BackEnd\types.h" />
+    <ClInclude Include="src\io\filesystem.h" />
+    <ClInclude Include="src\io\manifest.h" />
+    <ClInclude Include="src\project\project_manager.h" />
     <ClInclude Include="src\renderer\vertex.h" />
     <ClInclude Include="src\scene\camera.h" />
     <ClInclude Include="src\common.h" />
