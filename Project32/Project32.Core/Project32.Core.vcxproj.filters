@@ -105,7 +105,7 @@
     <ClCompile Include="src\io\manifest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\project\project_manager.cpp">
+    <ClCompile Include="src\project\project.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -197,7 +197,7 @@
     <ClInclude Include="src\io\filesystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\project\project_manager.h">
+    <ClInclude Include="src\project\project.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

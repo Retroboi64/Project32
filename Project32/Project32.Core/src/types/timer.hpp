@@ -14,7 +14,7 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "common.h"
+#include "../common.h"
 
 struct TimerResult {
     static constexpr size_t MAX_SAMPLES = 1000;

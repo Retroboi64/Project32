@@ -178,6 +178,14 @@ Shader* ShaderManager::GetShader(const std::string& name) {
     return nullptr;
 }
 
+int ShaderManager::GetShaderID(const std::string& name) {
+    auto shader = GetShader(name);
+    if (shader) {
+        return shader->GetID();
+    }
+    return -1;
+}
+
 void ShaderManager::Clear() {
     _shaders.clear();
 }

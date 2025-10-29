@@ -50,5 +50,6 @@ public:
 
     bool LoadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
     Shader* GetShader(const std::string& name);
+	int GetShaderID(const std::string& name);
     void Clear();
 };

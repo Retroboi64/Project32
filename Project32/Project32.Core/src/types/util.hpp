@@ -14,7 +14,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include "common.h"
+#include "../common.h"
 
 namespace Util {
     inline std::string ReadTextFromFile(const std::string& path) {

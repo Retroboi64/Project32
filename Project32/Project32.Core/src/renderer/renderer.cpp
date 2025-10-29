@@ -51,13 +51,35 @@ void Renderer::Init(BackendType backendType) {
         }
 
 		m_textures = TextureFactory::CreateTextureManager();
-        // m_shaderManager = ShaderFactory::CreateShaderManager();
+        m_shaderManager = ShaderFactory::CreateShaderManager();
 
         m_isReady = true;
+
+        LoadShaders();
     }
     catch (const std::exception& e) {
         m_isReady = false;
         throw e;
+    }
+}
+
+// TODO: Load shaders from a configuration file or directory
+//  based on projects configuration
+// 
+// [WARNING] Remember res/shaders/
+//  is added to the start of the path internally
+void Renderer::LoadShaders() {
+    if (!m_isReady || !m_backend) {
+        spdlog::warn("[Renderer::LoadShaders] Attempted to load shaders but Renderer is not ready");
+        return;
+    }
+	bool success = m_shaderManager->LoadShader("solidcolor", 
+        "solidcolor.vert", 
+        "solidcolor.frag");
+    if (success) {
+        spdlog::info("[Renderer::LoadShaders] Successfully loaded shader");
+    } else {
+        spdlog::error("[Renderer::LoadShaders] Failed to load shader");
     }
 }
 
@@ -66,8 +88,39 @@ void Renderer::RenderFrame() {
         spdlog::warn("[Renderer] Attempted to render frame but Renderer is not ready");
         return;
     }
+
     m_backend->BeginFrame();
+
 	m_backend->Clear(glm::vec4(m_settings.backgroundColor, 1.0f));
+
+    auto shader = m_shaderManager->GetShader("solidcolor");
+    shader->Bind();
+
+    shader->SetVec3("color", glm::vec3(0.8f, 0.1f, 0.1f));
+    shader->SetVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
+    shader->SetVec3("lightPos", glm::vec3(2.0f, 2.0f, 2.0f));
+    shader->SetBool("useTexture", false);
+
+    glm::mat4 view = glm::lookAt(
+        glm::vec3(0.0f, 0.0f, 3.0f), 
+        glm::vec3(0.0f), 
+        glm::vec3(0.0f, 1.0f, 0.0f)  
+    );
+
+    glm::mat4 projection = glm::perspective(
+        glm::radians(45.0f),          
+        800.0f / 600.0f,              
+        0.1f, 100.0f                  
+    );
+
+    shader->SetMat4("model", glm::mat4(1.0f));
+    shader->SetMat4("view", view);
+    shader->SetMat4("projection", projection);
+
+	m_cubeMesh = MeshFactory::CreateCube();
+	m_cubeMesh->Draw();
+
+	m_backend->EndFrame();
 }
 
 void Renderer::Cleanup() {

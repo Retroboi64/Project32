@@ -96,7 +96,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="src\project\project_manager.cpp">
+    <ClCompile Include="src\project\project.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -186,7 +186,7 @@
     <ClInclude Include="src\BackEnd\types.h" />
     <ClInclude Include="src\io\filesystem.h" />
     <ClInclude Include="src\io\manifest.h" />
-    <ClInclude Include="src\project\project_manager.h" />
+    <ClInclude Include="src\project\project.h" />
     <ClInclude Include="src\renderer\vertex.h" />
     <ClInclude Include="src\scene\camera.h" />
     <ClInclude Include="src\common.h" />

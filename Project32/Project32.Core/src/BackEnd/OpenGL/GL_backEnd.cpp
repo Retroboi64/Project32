@@ -52,8 +52,8 @@ void OpenGLBackend::Shutdown() {
     m_uniformCache.clear();
     m_currentShaderID = -1;
     m_initialized = false;
-
-    std::cout << "OpenGL Backend shut down" << std::endl;
+    
+	spdlog::info("OpenGL Backend shut down");
 }
 
 void OpenGLBackend::BeginFrame() {

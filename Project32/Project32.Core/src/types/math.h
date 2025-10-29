@@ -14,7 +14,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "common.h"
+#include "../common.h"
 
 // TODO: Add more math utilities as needed
 namespace Math {

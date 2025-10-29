@@ -51,6 +51,8 @@ public:
 	void RenderFrame();
     void Cleanup();
 
+	void LoadShaders();
+
     bool IsReady() const { return m_isReady; }
     bool IsWireframeMode() const { return m_settings.wireframeMode; }
     bool IsDebugInfoVisible() const { return m_settings.showDebugInfo; }
@@ -66,7 +68,7 @@ private:
     BackendType m_backendType;
 
     std::unique_ptr<TextureManager> m_textures;
-    std::unique_ptr<TextureManager> m_shaderManager;
+    std::unique_ptr<ShaderManager> m_shaderManager;
     CameraManager m_cameraManager;
     SceneManager& m_sceneManager;
 
