@@ -88,6 +88,9 @@ void Engine::Init() {
         size_t threadCount = std::max(2u, std::thread::hardware_concurrency() - 2);
         _threadPool = std::make_unique<ThreadPool>(threadCount);
 
+        _scriptSystem = std::make_unique<ScriptSystem>(this); 
+        _scriptSystem->Init();  
+
         if (_windowManager->Count() == 0) {
             spdlog::warn("[Engine::Init] No windows in window manager for engine {}", _ID);
         }
@@ -165,6 +168,15 @@ void Engine::UpdateLoop() {
 }
 
 void Engine::Update(float dt) {
+    if (_scriptSystem) {
+        _scriptSystem->Update(dt);
+    }
+}
+
+void Engine::FixedUpdate(float fixedDt) {
+    if (_scriptSystem) {
+        _scriptSystem->FixedUpdate(fixedDt);
+    }
 }
 
 void Engine::RenderFrame() {
@@ -247,6 +259,11 @@ void Engine::Shutdown() {
 
     isRunning.store(false);
     StopUpdateThread();
+
+    if (_scriptSystem) {
+        _scriptSystem->Shutdown();
+        _scriptSystem.reset();
+    }
 
     if (_threadPool) {
         _threadPool.reset();

@@ -20,25 +20,13 @@
 #include "../scene/scene.h"
 #include "../scene/camera.h"
 #include "../core/window.h"
+#include "render_data.h"
 
 class Window;
 class Skybox;
 
 class Renderer {
 public:
-    struct RenderSettings {
-        glm::vec3 backgroundColor{ 0.05f, 0.05f, 0.1f };
-        glm::vec3 lightPosition{ 10.0f, 10.0f, 10.0f };
-
-        bool renderScene{ true };
-
-        float fov{ 90.0f };
-        bool wireframeMode{ false };
-        bool showDebugInfo{ true };
-        bool showImGuiDemo{ false };
-        bool showSettingsWindow{ true };
-    };
-
     explicit Renderer(Window* window);
     ~Renderer();
 
@@ -57,7 +45,7 @@ public:
     bool IsWireframeMode() const { return m_settings.wireframeMode; }
     bool IsDebugInfoVisible() const { return m_settings.showDebugInfo; }
     float GetFOV() const { return m_settings.fov; }
-    const RenderSettings& GetSettings() const { return m_settings; }
+    const RendererData::RendererSettings& GetSettings() const { return m_settings; }
     BackendType GetBackendType() const { return m_backendType; }
 
     void SetFOV(float fov);
@@ -82,7 +70,7 @@ private:
     std::unique_ptr<Skybox> m_skybox;
     std::unique_ptr<WallSystem> m_wallSystem;
 
-    RenderSettings m_settings;
+    RendererData::RendererSettings m_settings;
     bool m_isReady;
 
     static constexpr int GRID_SIZE = 40;

@@ -19,3 +19,8 @@
 #define DARK_SQUARE glm::vec3(0.3984375f, 0.265625f, 0.2265625f)
 #define LIGHT_SQUARE glm::vec3(0.95703125f, 0.8984375f, 0.74609375f)
 #define MAX_BONE_INFLUENCE 4
+
+#define PI 3.14159265359f
+#define TAU (2.0f * PI)
+#define PI_2 (PI / 2.0f)
+#define PI_4 (PI / 4.0f)

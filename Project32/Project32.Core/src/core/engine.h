@@ -6,6 +6,9 @@
 
 #include "../common.h"
 #include "window.h"
+#include "../scripting/script_system.h"
+
+class ScriptSystem;
 
 class ThreadPool {
 private:
@@ -39,6 +42,7 @@ class Input;
 class Engine {
 private:
     std::unique_ptr<WindowManager> _windowManager;
+    std::unique_ptr<ScriptSystem> _scriptSystem;
     std::atomic<bool> isRunning{ false };
     std::atomic<bool> isPaused{ false };
     std::string title;
@@ -68,6 +72,7 @@ public:
     void StopUpdateThread();
 
     void Update(float dt);    
+	void FixedUpdate(float fixedDt);
     void RenderFrame();       
 
     void Run();
@@ -85,6 +90,7 @@ public:
     }
     WindowManager* GetWindowManager() const { return _windowManager.get(); }
     ThreadPool* GetThreadPool() const { return _threadPool.get(); }
+    ScriptSystem* GetScriptSystem() const { return _scriptSystem.get(); }
 
     int GetID() const { return _ID; }
     float GetDeltaTime() const { return _deltaTime.load(); }

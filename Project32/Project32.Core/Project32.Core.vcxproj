@@ -100,6 +100,10 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="src\renderer\render_data.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="src\scene\camera.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
@@ -173,6 +177,10 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="src\scripting\script_system.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\BackEnd\backend.h" />
@@ -191,6 +199,7 @@
     <ClInclude Include="src\scene\camera.h" />
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\scene\transform.h" />
+    <ClInclude Include="src\scripting\script_system.h" />
     <ClInclude Include="src\types\constants.h" />
     <ClInclude Include="src\core\engine.h" />
     <ClInclude Include="src\core\input.h" />
@@ -316,7 +325,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\spdlog\include;$(SolutionDir)Vendor\RBPak\include;$(SolutionDir)Vendor\imgui;$(SolutionDir)Vendor\Jolt\include;$(SolutionDir)Project32.UIX\src;$(SolutionDir)Vendor\glad\include;$(SolutionDir)Vendor\tiny_obj;$(SolutionDir)Vendor\stb_image;$(SolutionDir)Vendor\nlohmann;$(SolutionDir)Vendor\GLFW\include;$(SolutionDir)Vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\spdlog\include;$(SolutionDir)Vendor\RBPak\include;$(SolutionDir)Vendor\imgui;$(SolutionDir)Vendor\Jolt\include;$(SolutionDir)Project32.UIX\src;$(SolutionDir)Vendor\glad\include;$(SolutionDir)Vendor\tiny_obj;$(SolutionDir)Vendor\stb_image;$(SolutionDir)Vendor\nlohmann;$(SolutionDir)Vendor\GLFW\include;$(SolutionDir)Vendor;$(SolutionDir)Vendor\lua\include;$(SolutionDir)Vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -324,7 +333,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(SolutionDir)Vendor\RBPak\lib\Debug;$(SolutionDir)Vendor\jolt\lib\Debug;$(SolutionDir)Vendor\GLFW\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>zlib.lib;%(AdditionalDependencies);lua54.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -338,15 +347,15 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\spdlog\include;$(SolutionDir)Vendor\RBPak\include;$(SolutionDir)Vendor\imgui;$(SolutionDir)Vendor\Jolt\include;$(SolutionDir)Project32.UIX\src;$(SolutionDir)Vendor\glad\include;$(SolutionDir)Vendor\tiny_obj;$(SolutionDir)Vendor\stb_image;$(SolutionDir)Vendor\nlohmann;$(SolutionDir)Vendor\GLFW\include;$(SolutionDir)Vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\spdlog\include;$(SolutionDir)Vendor\RBPak\include;$(SolutionDir)Vendor\imgui;$(SolutionDir)Vendor\Jolt\include;$(SolutionDir)Project32.UIX\src;$(SolutionDir)Vendor\glad\include;$(SolutionDir)Vendor\tiny_obj;$(SolutionDir)Vendor\stb_image;$(SolutionDir)Vendor\nlohmann;$(SolutionDir)Vendor\GLFW\include;$(SolutionDir)Vendor;$(SolutionDir)Vendor\lua\include;$(SolutionDir)Vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(SolutionDir)Vendor\RBPak\lib\Release;$(SolutionDir)Vendor\Jolt\lib\Release;$(SolutionDir)Vendor\GLFW\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;RBPak.lib;%(AdditionalDependencies);zlib.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Vendor\lua\lib;$(SolutionDir)Vendor\RBPak\lib\Release;$(SolutionDir)Vendor\Jolt\lib\Release;$(SolutionDir)Vendor\GLFW\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;RBPak.lib;%(AdditionalDependencies);zlib.lib;lua54.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -20,7 +20,28 @@ namespace RendererData
 	};	
 
 	struct RenderData {
+		std::string name;
+		RendererSettings settings;
+
 		std::vector<Scene> _scenes;
+		size_t activeSceneIndex = 0;
+	};
+
+	class RenderDataManager {
+	private:
+		RenderData renderData;
+
+	public:
+		RenderDataManager() = default;
+		~RenderDataManager() = default;
+
+		std::string GetProjectName() const { return renderData.name; }
+		std::string GetActiveSceneName() const;
+		int GetActiveSceneIndex() const { return static_cast<int>(renderData.activeSceneIndex); }
+		void SetActiveSceneIndex(size_t index);
+		void SetProjectName(const std::string& name) { renderData.name = name; }
+		RendererSettings& GetSettings() { return renderData.settings; }
+
 	};
 }
 

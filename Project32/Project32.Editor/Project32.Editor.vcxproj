@@ -164,6 +164,17 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>@echo off
+echo Copying DLLs...
+
+if exist "$(SolutionDir)vendor\lua\lib\lua54.dll" (
+    xcopy /Y /D "$(SolutionDir)vendor\lua\lib\lua54.dll" "$(OutDir)"
+    echo Successfully copied lua54.dll
+) else (
+    echo WARNING: lua54.dll not found at $(SolutionDir)vendor\lua\lib\
+)</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
