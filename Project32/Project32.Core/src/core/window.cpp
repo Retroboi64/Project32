@@ -84,13 +84,26 @@ Window::Window(int width, int height, const std::string& title, GLFWwindow* shar
     _isOpen = true;
 
     _input = std::make_unique<Input>(this);
+    if (!_input) {
+        spdlog::error("[Window {}] Failed to create Input instance", _ID);
+        throw std::runtime_error("Failed to create Input instance");
+	}
     _input->Init();
     spdlog::info("[Window {}] Input initialized successfully", _ID);
 
     _ui = std::make_unique<UIX>(_window);
+    if (!_ui) {
+        spdlog::error("[Window {}] Failed to create UIX instance", _ID);
+        throw std::runtime_error("Failed to create UIX instance");
+    }
+
     spdlog::info("[Window {}] UI initialized successfully", _ID);
 
     _renderer = std::make_unique<Renderer>(this);
+    if (!_renderer) {
+        spdlog::error("[Window {}] Failed to create Renderer instance", _ID);
+        throw std::runtime_error("Failed to create Renderer instance");
+	}
     _renderer->Init();
     spdlog::info("[Window {}] Renderer initialized successfully", _ID);
 
@@ -107,11 +120,13 @@ Window::~Window() {
     }
 
     if (_renderer) {
+        MakeContextCurrent();
         _renderer->Cleanup();
         _renderer.reset();
     }
 
     if (_ui && _window) {
+        MakeContextCurrent();
         _ui->Cleanup(_window);
         _ui.reset();
     }
@@ -173,6 +188,9 @@ void Window::Render() {
     }
 
     MakeContextCurrent();
+
+	_renderer->RenderFrame();
+	SwapBuffers();
 }
 
 void Window::PollEvents() {
@@ -295,7 +313,11 @@ void Window::SetIcon(const std::string& iconPath) {
 
 void Window::MakeContextCurrent() {
     if (_window) {
-        glfwMakeContextCurrent(_window);
+        GLFWwindow* currentContext = glfwGetCurrentContext();
+
+        if (currentContext != _window) {
+            glfwMakeContextCurrent(_window);
+        }
 
         if (_ui && _ui->IsInitialized()) {
             ImGui::SetCurrentContext(_ui->GetContext());
@@ -387,6 +409,7 @@ void Window::BeginImGuiFrame() {
     }
 
     glfwMakeContextCurrent(_window);
+    ImGui::SetCurrentContext(_ui->GetContext());
     _ui->BeginImgui();
 }
 
@@ -397,6 +420,7 @@ void Window::EndImGuiFrame() {
     }
 
     glfwMakeContextCurrent(_window);
+    ImGui::SetCurrentContext(_ui->GetContext());
     _ui->EndImgui();
 }
 
@@ -437,16 +461,7 @@ Window* WindowManager::GetWindowByID(int windowID) {
 
 int WindowManager::AddWindow(int width, int height, const std::string& name) {
     try {
-        GLFWwindow* shareContext = nullptr;
-
-        {
-            std::lock_guard<std::mutex> lock(_windowsMutex);
-            if (!_windows.empty()) {
-                shareContext = _windows.front()->GetGLFWwindow();
-            }
-        }
-
-        auto window = std::make_unique<Window>(width, height, name, shareContext);
+        auto window = std::make_unique<Window>(width, height, name, nullptr);
         int windowID = window->GetID();
 
         {

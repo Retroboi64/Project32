@@ -88,6 +88,9 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../../../common.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../common.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="src\core\context_guard.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="src\io\filesystem.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
@@ -192,6 +195,7 @@
     <ClInclude Include="src\BackEnd\OpenGL\Types\GL_skybox.h" />
     <ClInclude Include="src\BackEnd\OpenGL\Types\GL_textures.h" />
     <ClInclude Include="src\BackEnd\types.h" />
+    <ClInclude Include="src\core\context_guard.h" />
     <ClInclude Include="src\io\filesystem.h" />
     <ClInclude Include="src\io\manifest.h" />
     <ClInclude Include="src\project\project.h" />

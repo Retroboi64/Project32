@@ -32,13 +32,15 @@ bool OpenGLBackend::Init() {
     std::cout << "  Version: " << GetAPIVersion() << std::endl;
     std::cout << "  Renderer: " << GetRendererName() << std::endl;
 
-    SetDepthTest(true);
-    SetCullFace(true);
-
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_MULTISAMPLE);
-    glDisable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    glDepthFunc(GL_LESS);
+
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
+    //glFrontFace(GL_CCW);
+
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     m_initialized = true;
     return true;
@@ -52,16 +54,20 @@ void OpenGLBackend::Shutdown() {
     m_uniformCache.clear();
     m_currentShaderID = -1;
     m_initialized = false;
-    
-	spdlog::info("OpenGL Backend shut down");
+
+    spdlog::info("OpenGL Backend shut down");
 }
 
 void OpenGLBackend::BeginFrame() {
-    // Nothing specific needed for OpenGL
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
+    //glFrontFace(GL_CCW);
 }
 
 void OpenGLBackend::EndFrame() {
-    // Nothing specific needed for OpenGL
+
 }
 
 void OpenGLBackend::Clear(const glm::vec4& color) {
@@ -86,6 +92,8 @@ void OpenGLBackend::SetDepthTest(bool enabled) {
 void OpenGLBackend::SetCullFace(bool enabled) {
     if (enabled) {
         glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glFrontFace(GL_CCW);
     }
     else {
         glDisable(GL_CULL_FACE);

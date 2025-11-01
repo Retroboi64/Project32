@@ -273,6 +273,15 @@ void ScriptSystem::Shutdown() {
     m_scripts.clear();
 }
 
+void ScriptSystem::FindAndLoadScriptsInDirectory(const std::string& directoryPath) {
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(directoryPath)) {
+        if (entry.is_regular_file() && entry.path().extension() == ".lua") {
+            spdlog::info("[ScriptSystem] Found script file: {}", entry.path().string());
+            AttachScript(-1, entry.path().string());
+        }
+    }
+}
+
 ScriptComponent* ScriptSystem::AttachScript(int objectID, const std::string& scriptPath) {
     if (m_objectScripts.find(objectID) != m_objectScripts.end()) {
         spdlog::warn("[ScriptSystem] Object {} already has a script attached, detaching old one", objectID);

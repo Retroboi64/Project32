@@ -82,6 +82,8 @@ public:
     void FixedUpdate(float fixedDt);
     void Shutdown();
 
+	void FindAndLoadScriptsInDirectory(const std::string& directoryPath);
+
     ScriptComponent* AttachScript(int objectID, const std::string& scriptPath);
     void DetachScript(int objectID);
     ScriptComponent* GetScript(int objectID);
