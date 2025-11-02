@@ -94,6 +94,26 @@ Project32's unique multi-engine architecture allows you to:
 - C API: Core exported functions for DLL interaction
 - C++ Wrapper: RAII-style P32::Engine namespace for modern C++
 - Instance Classes: EngineInstance and WindowInstance for object-oriented usage
+``` 
+┌─────────────────────────────────────────────┐
+│            Editor (High Level)              │
+│  - Visual tools, scene editing, debugging   │
+└─────────────────┬───────────────────────────┘
+                  │ uses
+┌─────────────────▼───────────────────────────┐
+│          Public API Layer (C++)             │
+│  - Clean, stable interface                  │
+│  - Lua bindings (WIP)                       │
+│  - User-friendly functions                  │
+└─────────────────┬───────────────────────────┘
+                  │ calls
+┌─────────────────▼───────────────────────────┐
+│        Core Engine (Low Level)              │
+│  - Renderer, Window, Input, Threading       │
+│  - Direct OpenGL/graphics calls             │
+│  - Performance-critical code                │
+└─────────────────────────────────────────────┘
+```
 
 ## 📚 Documentation *(coming soon)*
 For detailed documentation, examples, and API reference:
