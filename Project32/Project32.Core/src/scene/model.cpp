@@ -76,37 +76,46 @@ std::unique_ptr<ModelImporter::LoadedModel> ModelImporter::LoadFromFile(const st
             for (size_t v = 0; v < 3; v++) {
                 tinyobj::index_t idx = shapes[s].mesh.indices[indexOffset + v];
 
-                Vertex vertex;
+				glm::vec3 position;
+				glm::vec3 normal;
+				glm::vec2 uv;
+				glm::vec2 texCoord;
 
                 if (idx.vertex_index >= 0) {
-                    vertex.position.x = attrib.vertices[3 * idx.vertex_index + 0];
-                    vertex.position.y = attrib.vertices[3 * idx.vertex_index + 1];
-                    vertex.position.z = attrib.vertices[3 * idx.vertex_index + 2];
+                    position.x = attrib.vertices[3 * idx.vertex_index + 0];
+                    position.y = attrib.vertices[3 * idx.vertex_index + 1];
+                    position.z = attrib.vertices[3 * idx.vertex_index + 2];
 
-                    model->minBounds = glm::min(model->minBounds, vertex.position);
-                    model->maxBounds = glm::max(model->maxBounds, vertex.position);
+                    model->minBounds = glm::min(model->minBounds, position);
+                    model->maxBounds = glm::max(model->maxBounds, position);
                 }
 
                 if (idx.normal_index >= 0) {
-                    vertex.normal.x = attrib.normals[3 * idx.normal_index + 0];
-                    vertex.normal.y = attrib.normals[3 * idx.normal_index + 1];
-                    vertex.normal.z = attrib.normals[3 * idx.normal_index + 2];
+                    normal.x = attrib.normals[3 * idx.normal_index + 0];
+                    normal.y = attrib.normals[3 * idx.normal_index + 1];
+                    normal.z = attrib.normals[3 * idx.normal_index + 2];
                 }
                 else {
-                    vertex.normal = glm::vec3(0.0f, 1.0f, 0.0f); // Default normal
+                    normal = glm::vec3(0.0f, 1.0f, 0.0f); // Default normal
                 }
 
                 if (idx.texcoord_index >= 0) {
-                    vertex.uv.x = attrib.texcoords[2 * idx.texcoord_index + 0];
-                    vertex.uv.y = flipTextureCoords ?
+                    uv.x = attrib.texcoords[2 * idx.texcoord_index + 0];
+                    uv.y = flipTextureCoords ?
                         1.0f - attrib.texcoords[2 * idx.texcoord_index + 1] :
                         attrib.texcoords[2 * idx.texcoord_index + 1];
-                    vertex.texCoord = vertex.uv;
+                    texCoord = uv;
                 }
                 else {
-                    vertex.uv = glm::vec2(0.0f);
-                    vertex.texCoord = glm::vec2(0.0f);
+                    uv = glm::vec2(0.0f);
+                    texCoord = glm::vec2(0.0f);
                 }
+
+                Vertex vertex{
+					position,
+					normal,
+					texCoord
+                };
 
                 for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {
                     vertex.m_BoneIDs[i] = 0;

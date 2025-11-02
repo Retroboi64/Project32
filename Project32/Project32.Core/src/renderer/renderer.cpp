@@ -56,7 +56,12 @@ void Renderer::Init(BackendType backendType) {
 
         LoadShaders();
 
-        m_cubeMesh = MeshFactory::CreateCube();
+		m_meshCache.Add("cube", MeshFactory::CreateCube());
+
+        spdlog::info("[Renderer::Init()] Pre-loaded {} meshes", m_meshCache.Size());
+
+        size_t memUsage = m_meshCache.GetTotalMemoryUsage();
+        spdlog::info("[Renderer::Init] Total mesh memory: {} KB", memUsage / 1024);
 
         spdlog::info("[Renderer::Init] Renderer initialized successfully for Window {}", m_window->GetID());
         spdlog::info("[Renderer::Init] Backend: {}", m_backendType == BackendType::OPENGL ? "OpenGL" : "Unknown");
@@ -111,9 +116,14 @@ void Renderer::RenderFrame() {
     m_backend->BeginFrame();
     m_backend->Clear(glm::vec4(m_settings.backgroundColor, 1.0f));
 
-    if (!m_cubeMesh) {
-        m_cubeMesh = MeshFactory::CreateCube();
-    }
+	auto* cube = m_meshCache.Get("cube");
+    auto* sphere = m_meshCache.GetOrCreate("sphere_highres", []() {
+        StaticMeshes::SphereParams params;
+        params.latitudeSegments = 32;
+        params.longitudeSegments = 32;
+        params.radius = 1.0f;
+        return StaticMeshes::GetSphere(params);
+        });
 
     auto shader = m_shaderManager->GetShader("solidcolor");
     if (!shader) {
@@ -151,7 +161,7 @@ void Renderer::RenderFrame() {
     shader->SetMat4("view", view);
     shader->SetMat4("projection", projection);
 
-    m_cubeMesh->Draw();
+    cube->Draw();
 
     UIX* ui = m_window->GetUI();
     if (ui && ui->IsInitialized()) {
@@ -182,11 +192,7 @@ void Renderer::Cleanup() {
         m_window->MakeContextCurrent();
     }
 
-    m_quadMesh.reset();
-    m_cubeMesh.reset();
-    m_cylinderMesh.reset();
-    m_sphereMesh.reset();
-    m_capsuleMesh.reset();
+	m_meshCache.Clear();
     m_skybox.reset();
     m_wallSystem.reset();
     m_loadedModels.clear();

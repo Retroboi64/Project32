@@ -56,6 +56,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <queue>
+#include <variant>
 
 #include <tiny_obj_loader.h>
 

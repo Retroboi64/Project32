@@ -33,6 +33,7 @@
 extern "C" {
 #endif
 
+	// Main engine functions
     typedef bool (*EngineInitFunc)();
     typedef void (*EngineRunFunc)();
     typedef void (*EngineShutdownFunc)();
@@ -42,6 +43,7 @@ extern "C" {
     typedef void (*GetMousePosFunc)(float* x, float* y);
     typedef void (*GetMouseDeltaFunc)(float* dx, float* dy);
 
+	// Multi-engine management
     typedef int (*CreateEngineFunc)(const char* title);
     typedef bool (*DestroyEngineFunc)(int engineID);
     typedef void (*RunEngineFunc)(int engineID);
@@ -53,23 +55,27 @@ extern "C" {
     typedef void (*DestroyAllEnginesFunc)();
     typedef void (*CleanupEngineManagerFunc)();
 
+	// Per-engine input
     typedef bool (*EngineKeyPressedFunc)(int engineID, int key);
     typedef bool (*EngineKeyDownFunc)(int engineID, int key);
     typedef void (*EngineGetMousePosFunc)(int engineID, float* x, float* y);
     typedef void (*EngineGetMouseDeltaFunc)(int engineID, float* dx, float* dy);
 
+	// Engine configuration
     typedef void (*SetEngineBackgroundColorFunc)(int engineID, float r, float g, float b);
     typedef void (*SetEngineFOVFunc)(int engineID, float fov);
     typedef void (*ToggleEngineRenderSceneFunc)(int engineID);
     typedef void (*ToggleEngineWireframeFunc)(int engineID);
     typedef void (*ToggleEngineDebugInfoFunc)(int engineID);
 
+	// Engine window management
     typedef bool (*SetEngineWindowSizeFunc)(int engineID, int width, int height);
     typedef void (*GetEngineWindowSizeFunc)(int engineID, int* width, int* height);
     typedef void (*SetEngineWindowTitleFunc)(int engineID, const char* title);
     typedef void (*SetEngineVSyncFunc)(int engineID, bool enabled);
     typedef bool (*GetEngineVSyncFunc)(int engineID);
 
+	// Window creation/management
     typedef int (*CreateEngineWindowFunc)(int engineID, int width, int height, const char* title);
     typedef bool (*DestroyEngineWindowFunc)(int engineID, int windowID);
     typedef int (*GetEngineWindowCountFunc)(int engineID);
@@ -79,7 +85,11 @@ extern "C" {
     typedef void (*SetWindowPositionFunc)(int engineID, int windowID, int x, int y);
     typedef bool (*IsWindowOpenFunc)(int engineID, int windowID);
 
+	// Scripting functions/hooks
+	typedef void (*LoadScriptFunc)(int engineID, const char* scriptPath);
+
     struct EngineFunctions {
+		// Main engine functions
         EngineInitFunc Init;
         EngineRunFunc Run;
         EngineShutdownFunc Shutdown;
@@ -89,6 +99,7 @@ extern "C" {
         GetMousePosFunc GetMousePos;
         GetMouseDeltaFunc GetMouseDelta;
 
+		// Multi-engine management
         CreateEngineFunc CreateEngine;
         DestroyEngineFunc DestroyEngine;
         RunEngineFunc RunEngine;
@@ -100,23 +111,27 @@ extern "C" {
         DestroyAllEnginesFunc DestroyAllEngines;
         CleanupEngineManagerFunc CleanupEngineManager;
 
+		// Per-engine input
         EngineKeyPressedFunc EngineKeyPressed;
         EngineKeyDownFunc EngineKeyDown;
         EngineGetMousePosFunc EngineGetMousePos;
         EngineGetMouseDeltaFunc EngineGetMouseDelta;
 
+		// Engine configuration
         SetEngineBackgroundColorFunc SetEngineBackgroundColor;
         SetEngineFOVFunc SetEngineFOV;
         ToggleEngineRenderSceneFunc ToggleEngineRenderScene;
         ToggleEngineWireframeFunc ToggleEngineWireframe;
         ToggleEngineDebugInfoFunc ToggleEngineDebugInfo;
 
+		// Engine window management
         SetEngineWindowSizeFunc SetEngineWindowSize;
         GetEngineWindowSizeFunc GetEngineWindowSize;
         SetEngineWindowTitleFunc SetEngineWindowTitle;
         SetEngineVSyncFunc SetEngineVSync;
         GetEngineVSyncFunc GetEngineVSync;
 
+		// Window creation/management
         CreateEngineWindowFunc CreateEngineWindow;
         DestroyEngineWindowFunc DestroyEngineWindow;
         GetEngineWindowCountFunc GetEngineWindowCount;
@@ -125,6 +140,9 @@ extern "C" {
         GetWindowPositionFunc GetWindowPosition;
         SetWindowPositionFunc SetWindowPosition;
         IsWindowOpenFunc IsWindowOpen;
+
+		// Scripting functions/hooks
+		LoadScriptFunc LoadScript;
     };
 
     extern EngineFunctions engine;

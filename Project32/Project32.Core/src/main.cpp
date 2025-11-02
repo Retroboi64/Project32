@@ -300,8 +300,9 @@ extern "C" {
         if (window) {
             glm::ivec2 size = window->GetSize();
 
-			float sx = static_cast<float>(size.x);
-			float sy = static_cast<float>(size.y);
+			// Change this later to use integers directly
+			int sx = static_cast<int>(std::lround(size.x));
+			int sy = static_cast<int>(std::lround(size.y));
 
             *width = sx;
             *height = sy;
@@ -386,8 +387,9 @@ extern "C" {
         if (window) {
             glm::ivec2 pos = window->GetPosition();
 
-			float px = static_cast<float>(pos.x);
-			float py = static_cast<float>(pos.y);
+			// Change this later to use integers directly
+			int px = static_cast<int>(std::lround(pos.x));
+			int py = static_cast<int>(std::lround(pos.y));
 
             *x = px;
             *y = py;
@@ -412,5 +414,34 @@ extern "C" {
         if (!wm) return false;
         Window* window = wm->GetWindowByID(windowID);
         return window ? window->IsOpen() : false;
+    }
+
+ //   __declspec(dllexport) void CloseWindow(int engineID, int windowID) {
+ //       Engine* engine = EngineManager::Instance()->GetEngineByID(engineID);
+ //       if (!engine) return;
+ //       WindowManager* wm = engine->GetWindowManager();
+ //       if (!wm) return;
+ //       Window* window = wm->GetWindowByID(windowID);
+ //       if (window) {
+ //           window->SetShouldClose(true);
+ //       }
+	//}
+
+    __declspec(dllexport) void LoadScript(int engineID, const char* scriptPath) {
+        if (!scriptPath) return;
+        Engine* engine = EngineManager::Instance()->GetEngineByID(engineID);
+        if (!engine) return;
+        ScriptSystem* scriptSystem = engine->GetScriptSystem();
+        if (scriptSystem) {
+			scriptSystem->AttachScript(-1, std::string(scriptPath));
+        }
+	}
+
+    __declspec(dllexport) void CreateProject() {
+        // Placeholder for future implementation
+	}
+
+    __declspec(dllexport) void LoadProject() {
+        // Placeholder for future implementation
     }
 }

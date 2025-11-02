@@ -60,11 +60,7 @@ private:
     CameraManager m_cameraManager;
     SceneManager& m_sceneManager;
 
-    std::unique_ptr<Mesh> m_quadMesh;
-    std::unique_ptr<Mesh> m_cubeMesh;
-    std::unique_ptr<Mesh> m_cylinderMesh;
-    std::unique_ptr<Mesh> m_sphereMesh;
-    std::unique_ptr<Mesh> m_capsuleMesh;
+    MeshCache m_meshCache;
 
     std::vector<std::unique_ptr<ModelImporter::LoadedModel>> m_loadedModels;
     std::unique_ptr<Skybox> m_skybox;

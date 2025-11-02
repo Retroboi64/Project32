@@ -32,16 +32,6 @@ bool OpenGLBackend::Init() {
     std::cout << "  Version: " << GetAPIVersion() << std::endl;
     std::cout << "  Renderer: " << GetRendererName() << std::endl;
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
-    //glFrontFace(GL_CCW);
-
-    //glEnable(GL_BLEND);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     m_initialized = true;
     return true;
 }
@@ -61,9 +51,6 @@ void OpenGLBackend::Shutdown() {
 void OpenGLBackend::BeginFrame() {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
-    //glFrontFace(GL_CCW);
 }
 
 void OpenGLBackend::EndFrame() {

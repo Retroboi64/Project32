@@ -81,6 +81,9 @@ bool LoadEngineDLL(const std::wstring& dllPath) {
     engine.SetWindowPosition = (SetWindowPositionFunc)GetProcAddress(g_hDllModule, "SetWindowPosition");
     engine.IsWindowOpen = (IsWindowOpenFunc)GetProcAddress(g_hDllModule, "IsWindowOpen");
 
+	// Scripting functions/hooks
+	engine.LoadScript = (LoadScriptFunc)GetProcAddress(g_hDllModule, "LoadScript");
+
     if (!engine.Init || !engine.Run || !engine.Shutdown) {
         std::cerr << "Warning: Legacy engine functions not found. Multi-engine mode only." << std::endl;
     }
