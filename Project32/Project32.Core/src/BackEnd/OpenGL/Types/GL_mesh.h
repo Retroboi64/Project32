@@ -136,18 +136,42 @@ public:
     [[nodiscard]] size_t GetTotalMemoryUsage() const;
 };
 
-class MeshManager {
-private:
-    MeshCache m_meshCache;
-public:
-    MeshManager() = default;
-    ~MeshManager() = default;
-    MeshManager(const MeshManager&) = delete;
-    MeshManager& operator=(const MeshManager&) = delete;
-    MeshManager(MeshManager&&) noexcept = default;
-    MeshManager& operator=(MeshManager&&) noexcept = default;
-    MeshCache& GetMeshCache() { return m_meshCache; }
-};
+// TODO: Do this later
+//class MeshManager {
+//private:
+//	int m_nextMeshID = 0;
+//	std::vector<std::unique_ptr<Mesh>> m_meshes;
+//
+//public:
+//    MeshManager() = default;
+//    ~MeshManager() = default;
+//
+//    void AddMesh(std::unique_ptr<Mesh> mesh) {
+//		m_meshes.push_back(std::move(mesh));
+//	}
+//
+//    void RemoveMesh(size_t index) {
+//        if (index < m_meshes.size()) {
+//            m_meshes.erase(m_meshes.begin() + index);
+//        }
+//    }
+//
+//    Mesh* GetMesh(size_t index) const {
+//        if (index >= m_meshes.size()) {
+//            return nullptr;
+//        }
+//        return m_meshes[index].get();
+//	}
+//
+//    Mesh* GetMeshByName(const std::string& name) const {
+//        for (const auto& mesh : m_meshes) {
+//            if (mesh->GetName() == name) {
+//                return mesh.get();
+//            }
+//        }
+//        return nullptr;
+//	}
+//};
 
 namespace StaticMeshes {
     struct CylinderParams {

@@ -14,6 +14,7 @@
 #include "../renderer/renderer.h"
 #include "../core/input.h"
 #include "../core/window.h"
+#include "../project/project.h"
 
 ThreadPool::ThreadPool(size_t threads) {
     for (size_t i = 0; i < threads; ++i) {
@@ -62,6 +63,18 @@ void ThreadPool::Wait() {
     _condition.wait(lock, [this] { return _tasks.empty(); });
 }
 
+void TestFunctions() {
+    project32::io::project_manager pm;
+
+    auto create_result = pm.create_new_project(
+        "Projects/project.p32",
+        "AwesomeGame",
+        "1.0.0"
+    );
+
+    auto save_result = pm.save_project();
+}
+
 int Engine::s_nextID = 0;
 std::unique_ptr<EngineManager> EngineManager::s_instance = nullptr;
 
@@ -101,6 +114,8 @@ void Engine::Init() {
             spdlog::info("[Engine::Init] Engine {} initialized successfully with main window ID {} (Total windows: {})",
                 _ID, _mainWindowID, _windowManager->Count());
         }
+
+        TestFunctions();
 
         isRunning.store(true);
         std::cout << "[Engine::Init] Engine " << _ID << " initialized successfully with window ID " << _mainWindowID << std::endl;

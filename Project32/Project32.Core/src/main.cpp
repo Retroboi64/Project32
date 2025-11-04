@@ -12,6 +12,7 @@
 #include "common.h"
 #include "core/engine.h"
 #include "core/window.h"
+#include "project/project.h"
 
 extern "C" {
     static int g_currentEngineID = -1;
@@ -30,6 +31,7 @@ extern "C" {
                 EngineManager::Instance()->SetCurrentEngine(g_currentEngineID);
                 return true;
             }
+
             return false;
         }
         catch (...) {

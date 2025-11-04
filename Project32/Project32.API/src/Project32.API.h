@@ -88,6 +88,11 @@ extern "C" {
 	// Scripting functions/hooks
 	typedef void (*LoadScriptFunc)(int engineID, const char* scriptPath);
 
+    // Project Management 
+	typedef void (*CreateProject)();
+	typedef void (*LoadProject)();
+	typedef void (*EditProject)();
+
     struct EngineFunctions {
 		// Main engine functions
         EngineInitFunc Init;
@@ -143,6 +148,11 @@ extern "C" {
 
 		// Scripting functions/hooks
 		LoadScriptFunc LoadScript;
+
+		// Project Management
+		CreateProject CreateProject;
+		LoadProject LoadProject;
+		EditProject EditProject;
     };
 
     extern EngineFunctions engine;
@@ -184,6 +194,7 @@ namespace P32 {
         static void UnloadDLL();
         static bool IsLoaded();
 
+		// Legacy engine functions 
         static bool Init();
         static void Run();
         static void Shutdown();
@@ -193,6 +204,7 @@ namespace P32 {
         static void GetMousePos(float* x, float* y);
         static void GetMouseDelta(float* dx, float* dy);
 
+		// Multi-engine management
         static int CreateEngine(const std::string& title);
         static bool DestroyEngine(int engineID);
         static void RunEngine(int engineID);
@@ -204,23 +216,27 @@ namespace P32 {
         static void DestroyAllEngines();
         static void CleanupEngineManager();
 
+		// Per-engine input
         static bool EngineKeyPressed(int engineID, int key);
         static bool EngineKeyDown(int engineID, int key);
         static void EngineGetMousePos(int engineID, float* x, float* y);
         static void EngineGetMouseDelta(int engineID, float* dx, float* dy);
 
+		// Engine configuration
         static void SetEngineBackgroundColor(int engineID, float r, float g, float b);
         static void SetEngineFOV(int engineID, float fov);
         static void ToggleEngineRenderScene(int engineID);
         static void ToggleEngineWireframe(int engineID);
         static void ToggleEngineDebugInfo(int engineID);
 
+		// Engine window management
         static bool SetEngineWindowSize(int engineID, int width, int height);
         static void GetEngineWindowSize(int engineID, int* width, int* height);
         static void SetEngineWindowTitle(int engineID, const std::string& title);
         static void SetEngineVSync(int engineID, bool enabled);
         static bool GetEngineVSync(int engineID);
 
+		// Window creation/management
         static int CreateEngineWindow(int engineID, int width, int height, const std::string& title);
         static bool DestroyEngineWindow(int engineID, int windowID);
         static int GetEngineWindowCount(int engineID);
@@ -229,6 +245,11 @@ namespace P32 {
         static void GetWindowPosition(int engineID, int windowID, int* x, int* y);
         static void SetWindowPosition(int engineID, int windowID, int x, int y);
         static bool IsWindowOpen(int engineID, int windowID);
+
+		// Project Management
+		//static void CreateProject();
+		//static void LoadProject();
+		//static void EditProject();
     };
 
     class WindowInstance {
