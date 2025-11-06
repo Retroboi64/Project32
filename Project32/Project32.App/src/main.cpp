@@ -15,6 +15,5 @@
 int main() {
     InitializeEditor();
     ShutdownEditor();
-
     return 0;
 }

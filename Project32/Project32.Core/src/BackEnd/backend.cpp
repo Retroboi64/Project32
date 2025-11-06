@@ -1,6 +1,14 @@
-#include "../common.h"
+﻿#include "../common.h"
 #include "OpenGL/GL_backEnd.h"
 #include "backend.h"
+
+/*
+  Engine/
+    Renderer.dll          ← main interface / manager
+    RendererGL.dll        ← OpenGL backend
+    RendererVK.dll        ← Vulkan backend
+    RendererDX12.dll      ← optional future backend
+*/
 
 std::unique_ptr<IGraphicsBackend> GraphicsBackend::s_instance = nullptr;
 BackendType GraphicsBackend::s_currentType = BackendType::UNDEFINED;
