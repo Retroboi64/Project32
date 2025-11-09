@@ -3,8 +3,8 @@
 #include "backend.h"
 
 /*
-  Engine/
-    Renderer.dll          ← main interface / manager
+  Renderer.dll          ← main interface / manager
+  RendererAPI/
     RendererGL.dll        ← OpenGL backend
     RendererVK.dll        ← Vulkan backend
     RendererDX12.dll      ← optional future backend

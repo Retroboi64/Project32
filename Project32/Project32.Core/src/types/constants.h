@@ -21,6 +21,6 @@
 #define MAX_BONE_INFLUENCE 4
 
 #define PI 3.14159265359f
-#define TAU (2.0f * PI)
 #define PI_2 (PI / 2.0f)
 #define PI_4 (PI / 4.0f)
+#define TAU (2.0f * PI)

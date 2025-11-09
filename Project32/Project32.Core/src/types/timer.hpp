@@ -163,7 +163,8 @@ inline void ResetTimer(std::string_view name) {
 
 inline void PrintTimerSummary() {
     std::lock_guard<std::mutex> lock(g_timerMutex);
-    std::cout << "\n=== Timer Summary ===\n";
+    spdlog::info("\n=== Timer Summary ===\n");
+    // TODO: Convert over to spdlog
     for (const auto& [name, result] : g_timerResults) {
         int extraSpaces = std::max(0, 50 - static_cast<int>(name.length()));
         std::string spacing(extraSpaces, ' ');
@@ -173,7 +174,7 @@ inline void PrintTimerSummary() {
             << "max: " << std::format("{:.4f}", result.maxTime) << "ms    "
             << "samples: " << static_cast<int>(result.sampleCount) << "\n";
     }
-    std::cout << "=====================\n\n";
+    spdlog::info("============================");
 }
 
 #endif // TIMER_H

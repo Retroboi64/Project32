@@ -58,7 +58,6 @@ namespace Math {
         return view;
     }
 
-
     inline glm::vec3 Reflect(const glm::vec3& incident, const glm::vec3& normal) {
         return incident - 2.0f * glm::dot(incident, normal) * normal;
 	}

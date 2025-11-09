@@ -99,15 +99,6 @@
     <ClCompile Include="src\BackEnd\types.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\io\filesystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\io\manifest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\project\project.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\renderer\render_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -115,6 +106,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\core\context_guard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\ui_app.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -200,19 +194,13 @@
     <ClInclude Include="src\renderer\vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\io\manifest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\io\filesystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\project\project.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\scripting\script_system.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\context_guard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\ui_app.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
