@@ -24,13 +24,13 @@ bool OpenGLBackend::Init() {
 
     const GLubyte* version = glGetString(GL_VERSION);
     if (!version) {
-        std::cerr << "Failed to get OpenGL version" << std::endl;
+        spdlog::error("Failed to get OpenGL version");
         return false;
     }
 
-    std::cout << "OpenGL Backend initialized" << std::endl;
-    std::cout << "  Version: " << GetAPIVersion() << std::endl;
-    std::cout << "  Renderer: " << GetRendererName() << std::endl;
+    spdlog::info("OpenGL Backend initialized");
+    spdlog::info("  Version: {}", GetAPIVersion());
+    spdlog::info("  Renderer: {}", GetRendererName());
 
     m_initialized = true;
     return true;
@@ -125,7 +125,7 @@ int OpenGLBackend::GetUniformLocation(int shaderID, const std::string& name) {
     shaderCache[name] = location;
 
     if (location == -1) {
-        std::cerr << "Warning: Uniform '" << name << "' not found in shader " << shaderID << std::endl;
+        spdlog::warn("[OpenGLBackend::GetUniformLocation] Uniform '{}' not found in shader {}", name, shaderID);
     }
 
     return location;

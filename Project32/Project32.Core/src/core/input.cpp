@@ -115,7 +115,7 @@ void Input::Init() {
         glfwSetInputMode(_glfwWindow, GLFW_CURSOR,
             _mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 
-        std::cout << "[Input::Init] Input system initialized for window " << _window->GetID() << std::endl;
+        spdlog::info("[Input::Init] Input system initialized for window {}", _window->GetID());
     }
     else {
         throw std::runtime_error("Neither Engine nor Window instance available for Input initialization");

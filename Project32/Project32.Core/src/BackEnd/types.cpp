@@ -10,17 +10,17 @@ namespace {
 namespace GraphicsTypes {
     void Initialize() {
         if (g_typesInitialized) {
-            std::cerr << "[GraphicsTypes] Already initialized!" << std::endl;
+			spdlog::warn("[GraphicsTypes] Already initialized!");
             return;
         }
 
         BackendType currentBackend = GraphicsBackend::GetCurrentType();
         if (currentBackend == BackendType::UNDEFINED) {
-            std::cerr << "[GraphicsTypes] No graphics backend initialized! Call GraphicsBackend::Initialize() first." << std::endl;
+			spdlog::error("[GraphicsTypes] No graphics backend initialized! Call GraphicsBackend::Initialize() first.");
             return;
         }
 
-        std::cout << "[GraphicsTypes] Initializing types for backend: " << static_cast<int>(currentBackend) << std::endl;
+		spdlog::info("[GraphicsTypes] Initializing types for backend: {}", static_cast<int>(currentBackend));
         g_typesInitialized = true;
     }
 
@@ -29,7 +29,7 @@ namespace GraphicsTypes {
             return;
         }
 
-        std::cout << "[GraphicsTypes] Shutting down graphics types" << std::endl;
+		spdlog::info("[GraphicsTypes] Shutting down graphics types");
         g_typesInitialized = false;
     }
 
@@ -47,19 +47,19 @@ namespace MeshFactory {
             return StaticMeshes::GetQuad();
 
         case BackendType::VULKAN:
-            std::cerr << "[MeshFactory] Vulkan not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] Vulkan not implemented yet!");
             return nullptr;
 
         case BackendType::DX11:
-            std::cerr << "[MeshFactory] DirectX 11 not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] DirectX 11 not implemented yet!");
             return nullptr;
 
         case BackendType::DX12:
-            std::cerr << "[MeshFactory] DirectX 12 not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] DirectX 12 not implemented yet!");
             return nullptr;
 
         default:
-            std::cerr << "[MeshFactory] Unknown backend type!" << std::endl;
+			spdlog::error("[MeshFactory] Unknown backend type!");
             return nullptr;
         }
     }
@@ -72,19 +72,19 @@ namespace MeshFactory {
             return StaticMeshes::GetCube();
 
         case BackendType::VULKAN:
-            std::cerr << "[MeshFactory] Vulkan not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] Vulkan not implemented yet!");
             return nullptr;
 
         case BackendType::DX11:
-            std::cerr << "[MeshFactory] DirectX 11 not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] DirectX 11 not implemented yet!");
             return nullptr;
 
         case BackendType::DX12:
-            std::cerr << "[MeshFactory] DirectX 12 not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] DirectX 12 not implemented yet!");
             return nullptr;
 
         default:
-            std::cerr << "[MeshFactory] Unknown backend type!" << std::endl;
+			spdlog::error("[MeshFactory] Unknown backend type!");
             return nullptr;
         }
     }
@@ -97,23 +97,24 @@ namespace MeshFactory {
             return StaticMeshes::GetCylinder(segments, height, radius);
 
         case BackendType::VULKAN:
-            std::cerr << "[MeshFactory] Vulkan not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] Vulkan not implemented yet!");
             return nullptr;
 
         case BackendType::DX11:
-            std::cerr << "[MeshFactory] DirectX 11 not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] DirectX 11 not implemented yet!");
             return nullptr;
 
         case BackendType::DX12:
-            std::cerr << "[MeshFactory] DirectX 12 not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] DirectX 12 not implemented yet!");
             return nullptr;
 
         default:
-            std::cerr << "[MeshFactory] Unknown backend type!" << std::endl;
+			spdlog::error("[MeshFactory] Unknown backend type!");
             return nullptr;
         }
     }
 
+	// TODO: Improve error logging consistency
     std::unique_ptr<Mesh> CreateSphere(unsigned int latitudeSegments, unsigned int longitudeSegments, float radius) {
         BackendType backend = GraphicsBackend::GetCurrentType();
 
@@ -122,19 +123,19 @@ namespace MeshFactory {
             return StaticMeshes::GetSphere(latitudeSegments, longitudeSegments, radius);
 
         case BackendType::VULKAN:
-            std::cerr << "[MeshFactory] Vulkan not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] Vulkan not implemented yet!");
             return nullptr;
 
         case BackendType::DX11:
-            std::cerr << "[MeshFactory] DirectX 11 not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] DirectX 11 not implemented yet!");
             return nullptr;
 
         case BackendType::DX12:
-            std::cerr << "[MeshFactory] DirectX 12 not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] DirectX 12 not implemented yet!");
             return nullptr;
 
         default:
-            std::cerr << "[MeshFactory] Unknown backend type!" << std::endl;
+			spdlog::error("[MeshFactory] Unknown backend type!");
             return nullptr;
         }
     }
@@ -147,7 +148,7 @@ namespace MeshFactory {
             return StaticMeshes::GetCapsule(segments, rings, height, radius);
 
         case BackendType::VULKAN:
-            std::cerr << "[MeshFactory] Vulkan not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] Vulkan not implemented yet!");
             return nullptr;
 
         case BackendType::DX11:
@@ -155,11 +156,11 @@ namespace MeshFactory {
             return nullptr;
 
         case BackendType::DX12:
-            std::cerr << "[MeshFactory] DirectX 12 not implemented yet!" << std::endl;
+			spdlog::error("[MeshFactory] DirectX 12 not implemented yet!");
             return nullptr;
 
         default:
-            std::cerr << "[MeshFactory] Unknown backend type!" << std::endl;
+			spdlog::error("[MeshFactory] Unknown backend type!");
             return nullptr;
         }
     }
@@ -177,19 +178,19 @@ namespace ShaderFactory {
             return std::make_unique<Shader>();
 
         case BackendType::VULKAN:
-            std::cerr << "[ShaderFactory] Vulkan not implemented yet!" << std::endl;
+			spdlog::error("[ShaderFactory] Vulkan not implemented yet!");
             return nullptr;
 
         case BackendType::DX11:
-            std::cerr << "[ShaderFactory] DirectX 11 not implemented yet!" << std::endl;
+			spdlog::error("[ShaderFactory] DirectX 11 not implemented yet!");
             return nullptr;
 
         case BackendType::DX12:
-            std::cerr << "[ShaderFactory] DirectX 12 not implemented yet!" << std::endl;
+			spdlog::error("[ShaderFactory] DirectX 12 not implemented yet!");
             return nullptr;
 
         default:
-            std::cerr << "[ShaderFactory] Unknown backend type!" << std::endl;
+			spdlog::error("[ShaderFactory] Unknown backend type!");
             return nullptr;
         }
     }
@@ -202,19 +203,19 @@ namespace ShaderFactory {
             return std::make_unique<ShaderManager>();
 
         case BackendType::VULKAN:
-            std::cerr << "[ShaderFactory] Vulkan not implemented yet!" << std::endl;
+			spdlog::error("[ShaderFactory] Vulkan not implemented yet!");
             return nullptr;
 
         case BackendType::DX11:
-            std::cerr << "[ShaderFactory] DirectX 11 not implemented yet!" << std::endl;
+			spdlog::error("[ShaderFactory] DirectX 11 not implemented yet!");
             return nullptr;
 
         case BackendType::DX12:
-            std::cerr << "[ShaderFactory] DirectX 12 not implemented yet!" << std::endl;
+			spdlog::error("[ShaderFactory] DirectX 12 not implemented yet!");
             return nullptr;
 
         default:
-            std::cerr << "[ShaderFactory] Unknown backend type!" << std::endl;
+			spdlog::error("[ShaderFactory] Unknown backend type!");
             return nullptr;
         }
     }
@@ -229,19 +230,19 @@ namespace TextureFactory {
             return std::make_unique<Texture>(name);
 
         case BackendType::VULKAN:
-            std::cerr << "[TextureFactory] Vulkan not implemented yet!" << std::endl;
+			spdlog::error("[TextureFactory] Vulkan not implemented yet!");
             return nullptr;
 
         case BackendType::DX11:
-            std::cerr << "[TextureFactory] DirectX 11 not implemented yet!" << std::endl;
+			spdlog::error("[TextureFactory] DirectX 11 not implemented yet!");
             return nullptr;
 
         case BackendType::DX12:
-            std::cerr << "[TextureFactory] DirectX 12 not implemented yet!" << std::endl;
+			spdlog::error("[TextureFactory] DirectX 12 not implemented yet!");
             return nullptr;
 
         default:
-            std::cerr << "[TextureFactory] Unknown backend type!" << std::endl;
+			spdlog::error("[TextureFactory] Unknown backend type!");
             return nullptr;
         }
     }
@@ -254,7 +255,7 @@ namespace TextureFactory {
             return std::make_unique<TextureManager>();
 
         case BackendType::VULKAN:
-            std::cerr << "[TextureFactory] Vulkan not implemented yet!" << std::endl;
+			spdlog::error("[TextureFactory] Vulkan not implemented yet!");
             return nullptr;
 
         case BackendType::DX11:
@@ -262,11 +263,11 @@ namespace TextureFactory {
             return nullptr;
 
         case BackendType::DX12:
-            std::cerr << "[TextureFactory] DirectX 12 not implemented yet!" << std::endl;
+			spdlog::error("[TextureFactory] DirectX 12 not implemented yet!");
             return nullptr;
 
         default:
-            std::cerr << "[TextureFactory] Unknown backend type!" << std::endl;
+			spdlog::error("[TextureFactory] Unknown backend type!");
             return nullptr;
         }
     }
@@ -281,15 +282,15 @@ namespace SkyboxFactory {
             return std::make_unique<Skybox>();
 
         case BackendType::VULKAN:
-            std::cerr << "[SkyboxFactory] Vulkan not implemented yet!" << std::endl;
+			spdlog::error("[SkyboxFactory] Vulkan not implemented yet!");
             return nullptr;
 
         case BackendType::DX11:
-            std::cerr << "[SkyboxFactory] DirectX 11 not implemented yet!" << std::endl;
+			spdlog::error("[SkyboxFactory] DirectX 11 not implemented yet!");
             return nullptr;
 
         case BackendType::DX12:
-            std::cerr << "[SkyboxFactory] DirectX 12 not implemented yet!" << std::endl;
+			spdlog::error("[SkyboxFactory] DirectX 12 not implemented yet!");
             return nullptr;
 
         default:

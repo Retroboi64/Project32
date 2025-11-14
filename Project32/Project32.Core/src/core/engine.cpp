@@ -103,7 +103,7 @@ void Engine::Init() {
         }
 
         isRunning.store(true);
-        std::cout << "[Engine::Init] Engine " << _ID << " initialized successfully with window ID " << _mainWindowID << std::endl;
+		spdlog::info("[Engine::Init] Engine {} initialization complete", _ID);
     }
     catch (const std::exception& e) {
         spdlog::error("[Engine::Init] Fatal error in engine {}: {}", _ID, e.what());

@@ -158,7 +158,9 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) void GetMouseDelta(float* dx, float* dy) {
+	// TODO: Fix dxy parameter usage or remove it
+    __declspec(dllexport) void GetMouseDelta(float* dx, float* dy, float* dxy) {
+		if (!dxy) return;
         if (!dx || !dy) return;
 
         *dx = 0.0f;
@@ -372,11 +374,12 @@ extern "C" {
         return engine->GetMainWindowID();
     }
 
-    __declspec(dllexport) void GetWindowPosition(int engineID, int windowID, int* x, int* y) {
-        if (!x || !y) return;
+    __declspec(dllexport)
+        void GetWindowPosition(int engineID, int windowID, int* pos) {
+        if (!pos) return;
 
-        *x = 0;
-        *y = 0;
+        pos[0] = 0; // X
+        pos[1] = 0; // Y
 
         Engine* engine = EngineManager::Instance()->GetEngineByID(engineID);
         if (!engine) return;
@@ -385,16 +388,12 @@ extern "C" {
         if (!wm) return;
 
         Window* window = wm->GetWindowByID(windowID);
-        if (window) {
-            glm::ivec2 pos = window->GetPosition();
+        if (!window) return;
 
-			// Change this later to use integers directly
-			int px = static_cast<int>(std::lround(pos.x));
-			int py = static_cast<int>(std::lround(pos.y));
+        glm::ivec2 tpos = window->GetPosition();
 
-            *x = px;
-            *y = py;
-        }
+        pos[0] = static_cast<int>(std::lround(tpos.x));   // X
+        pos[1] = static_cast<int>(std::lround(tpos.y));   // Y
     }
 
     __declspec(dllexport) void SetWindowPosition(int engineID, int windowID, int x, int y) {
@@ -416,17 +415,6 @@ extern "C" {
         Window* window = wm->GetWindowByID(windowID);
         return window ? window->IsOpen() : false;
     }
-
- //   __declspec(dllexport) void CloseWindow(int engineID, int windowID) {
- //       Engine* engine = EngineManager::Instance()->GetEngineByID(engineID);
- //       if (!engine) return;
- //       WindowManager* wm = engine->GetWindowManager();
- //       if (!wm) return;
- //       Window* window = wm->GetWindowByID(windowID);
- //       if (window) {
- //           window->SetShouldClose(true);
- //       }
-	//}
 
     __declspec(dllexport) void LoadScript(int engineID, const char* scriptPath) {
         if (!scriptPath) return;

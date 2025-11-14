@@ -15,27 +15,3 @@ struct Transform {
         return m;
     }
 };
-
-//class Transform {
-//private:
-//
-//    glm::vec3 postion = glm::vec3(0.0f);
-//    glm::vec3 rotation = glm::vec3(0.0f);
-//    glm::vec3 scale = glm::vec3(1.0f);
-//public:
-//
-//    Transform(glm::vec3 pos, glm::vec3 rot, glm::vec3 size) {
-//        postion = pos;
-//        rotation = rot;
-//        scale = size;
-//    };
-//    ~Transform() {};
-//
-//    glm::mat4 ToMatrix() const {
-//        glm::mat4 m = glm::translate(glm::mat4(1.0f), postion);
-//        m *= glm::mat4_cast(glm::quat(rotation));
-//        m = glm::scale(m, scale);
-//        return m;
-//    }
-//
-//};

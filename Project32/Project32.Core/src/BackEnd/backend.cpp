@@ -27,7 +27,7 @@ BackendType GraphicsBackend::GetCurrentType() {
 
 bool GraphicsBackend::Initialize(BackendType type) {
     if (s_instance) {
-        std::cerr << "[GraphicsBackend] Backend already initialized!" << std::endl;
+        spdlog::warn("[GraphicsBackend] Backend already initialized!");
         return false;
     }
 
@@ -38,35 +38,34 @@ bool GraphicsBackend::Initialize(BackendType type) {
             break;
 
         case BackendType::VULKAN:
-            std::cerr << "[GraphicsBackend] Vulkan not implemented yet!" << std::endl;
+            spdlog::warn("[GraphicsBackend] Vulkan not implemented yet!");
             return false;
 
         case BackendType::DX11:
-            std::cerr << "[GraphicsBackend] DirectX 11 not implemented yet!" << std::endl;
+            spdlog::warn("[GraphicsBackend] DirectX 11 not implemented yet!");
             return false;
 
         case BackendType::DX12:
-            std::cerr << "[GraphicsBackend] DirectX 12 not implemented yet!" << std::endl;
+            spdlog::warn("[GraphicsBackend] DirectX 12 not implemented yet!");
             return false;
 
         default:
-            std::cerr << "[GraphicsBackend] Unknown backend type!" << std::endl;
+            spdlog::warn("[GraphicsBackend] Unknown backend type!");
             return false;
         }
 
         if (!s_instance->Init()) {
-            std::cerr << "[GraphicsBackend] Failed to initialize backend!" << std::endl;
+            spdlog::warn("[GraphicsBackend] Failed to initialize backend!");
             s_instance.reset();
             return false;
         }
 
         s_currentType = type;
-        std::cout << "[GraphicsBackend] Successfully initialized: "
-            << s_instance->GetRendererName() << std::endl;
+        spdlog::info("[GraphicsBackend] Successfully initialized: {}", s_instance->GetRendererName());
         return true;
     }
     catch (const std::exception& e) {
-        std::cerr << "[GraphicsBackend] Exception during initialization: " << e.what() << std::endl;
+        spdlog::error("[GraphicsBackend] Exception during initialization: {}", e.what());
         s_instance.reset();
         return false;
     }
@@ -77,6 +76,6 @@ void GraphicsBackend::Destroy() {
         s_instance->Shutdown();
         s_instance.reset();
         s_currentType = BackendType::UNDEFINED;
-        std::cout << "[GraphicsBackend] Backend destroyed" << std::endl;
+        spdlog::info("[GraphicsBackend] Backend destroyed");
     }
 }

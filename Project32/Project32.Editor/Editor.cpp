@@ -40,25 +40,15 @@ extern "C" {
 
         if (engine_ready) {
             P32::EngineInstance engine("My Game", 1280, 720);
-            P32::EngineInstance engine2("Test", 1280, 720);
 
             if (!engine.IsValid()) {
                 std::cerr << "Failed to create engine!" << std::endl;
                 return;
             }
 
-            if (!engine2.IsValid()) {
-                std::cerr << "Failed to create engine2!" << std::endl;
-                return;
-            }
-
             engine.CreateNewWindow(323, 323, "Main Window || Engine: 1");
-            engine.CreateNewWindow(323, 323, "Second Window || Engine: 1"); 
-            engine2.CreateNewWindow(323, 323, "Main Window || Engine: 2");
-            engine2.CreateNewWindow(323, 323, "Second Window || Engine: 2");
             
             engine.SetVSync(true);
-            engine2.SetVSync(true);
 
             P32::Engine::RunAllEngines(); 
         }
