@@ -23,9 +23,9 @@ glm::mat4 Camera::GetViewMatrix() const {
     view[1] = glm::vec4(u, 0.0f);
     view[2] = glm::vec4(-f, 0.0f);
     view[3] = glm::vec4(
-        -glm::dot(r, _transform.position),
-        -glm::dot(u, _transform.position),
-        glm::dot(f, _transform.position),
+        -glm::dot(r, _transform.GetPosition()),
+        -glm::dot(u, _transform.GetPosition()),
+        glm::dot(f, _transform.GetPosition()),
         1.0f
     );
 
@@ -48,7 +48,7 @@ glm::mat4 Camera::GetProjectionMatrix(float fov, float aspect, float nearPlane, 
 }
 
 glm::vec3 Camera::GetForward() const {
-    return Math::GetForward(_transform.rotation.x, _transform.rotation.y);;
+    return Math::GetForward(_transform.GetRotation().x, _transform.GetRotation().y);;
 }
 
 glm::vec3 Camera::GetRight() const {
@@ -56,35 +56,36 @@ glm::vec3 Camera::GetRight() const {
 }
 
 void Camera::Move(const glm::vec3& offset) {
-    _transform.position += offset;
+	_transform.AddPosition(offset);
 }
 
 void Camera::MoveForward(float distance) {
-    _transform.position += GetForward() * distance;
+	_transform.AddPosition(GetForward() * distance);
 }
 
 void Camera::MoveRight(float distance) {
-    _transform.position += GetRight() * distance;
+	_transform.AddPosition(GetRight() * distance);
 }
 
 void Camera::MoveUp(float distance) {
-    _transform.position += _up * distance;
+	_transform.AddPosition(_up * distance);
 }
 
+// This Looks a bit messy but it works fine
 void Camera::Rotate(const glm::vec3& eulerAngles) {
-    _transform.rotation += eulerAngles;
-
-    _transform.rotation.x = glm::clamp(_transform.rotation.x, -89.0f, 89.0f);
-
-    while (_transform.rotation.y > 360.0f) _transform.rotation.y -= 360.0f;
-    while (_transform.rotation.y < 0.0f) _transform.rotation.y += 360.0f;
+    _transform.AddRotation(eulerAngles);
+    glm::vec3 rot = _transform.GetRotation();
+    rot.x = glm::clamp(rot.x, -89.0f, 89.0f);
+    rot.y = fmodf(rot.y, 360.0f);
+    if (rot.y < 0.0f) rot.y += 360.0f;
+    _transform.SetRotation(rot);
 }
 
 void Camera::LookAt(const glm::vec3& target) {
-    glm::vec3 direction = glm::normalize(target - _transform.position);
+    glm::vec3 direction = glm::normalize(target - _transform.GetPosition());
 
-    _transform.rotation.x = glm::degrees(asin(direction.y));
-    _transform.rotation.y = glm::degrees(atan2(direction.z, direction.x));
+	_transform.SetPositionX(glm::degrees(asin(direction.y)));
+	_transform.SetPositionY(glm::degrees(atan2(direction.z, direction.x)));
 }
 
 int CameraManager::AddCamera(const std::string& name) {
@@ -134,10 +135,11 @@ int CameraManager::CreateCamera(const std::string& name,
     const glm::vec3& rotation,
     const glm::vec3& scale) {
 
+	// TODO: Look at this later
     Transform transform{
-        .position = position,
-        .rotation = rotation,
-        .scale = scale,
+        position,
+        rotation,
+        scale,
     };
 
     return AddCamera(name, transform);

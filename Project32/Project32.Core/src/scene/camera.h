@@ -48,9 +48,9 @@ public:
     Camera(const std::string& name, const Transform& transform)
         : _name(name), _transform(transform), _isActive(false), _up(0.0f, 1.0f, 0.0f) {
         std::cout << "Camera created: " << name << " at position ("
-            << transform.position.x << ", "
-            << transform.position.y << ", "
-            << transform.position.z << ")" << std::endl;
+            << transform.GetPosition().x << ", "
+            << transform.GetPosition().y << ", "
+            << transform.GetPosition().z << ")" << std::endl;
     }
 
     ~Camera() = default;
@@ -80,13 +80,13 @@ public:
     const Transform& GetTransform() const { return _transform; }
     void SetTransform(const Transform& transform) { _transform = transform; }
 
-    const glm::vec3& GetPosition() const { return _transform.position; }
-    const glm::vec3& GetRotation() const { return _transform.rotation; }
-    const glm::vec3& GetScale() const { return _transform.scale; }
+    const glm::vec3& GetPosition() const { return _transform.GetPosition(); }
+    const glm::vec3& GetRotation() const { return _transform.GetRotation(); }
+    const glm::vec3& GetScale() const { return _transform.GetScale(); }
 
-    void SetPosition(const glm::vec3& position) { _transform.position = position; }
-    void SetRotation(const glm::vec3& rotation) { _transform.rotation = rotation; }
-    void SetScale(const glm::vec3& scale) { _transform.scale = scale; }
+    void SetPosition(const glm::vec3& position) { _transform.SetPosition(position); }
+    void SetRotation(const glm::vec3& rotation) { _transform.SetRotation(rotation); }
+    void SetScale(const glm::vec3& scale) { _transform.SetScale(scale); }
 
     glm::mat4 GetViewMatrix() const;
     glm::mat4 GetProjectionMatrix(float aspect) const;
@@ -119,12 +119,12 @@ public:
     void SetFOV(float fov) { _properties.fov = glm::clamp(fov, 1.0f, 179.0f); }
 
     float GetNearPlane() const { return _properties.nearPlane; }
-    void SetNearPlane(float near) { _properties.nearPlane = (NEAR_PLANE > 0.001f) ? NEAR_PLANE : 0.001f; }
+    void SetNearPlane(float near) { _properties.nearPlane = (P32::NEAR_PLANE > 0.001f) ? P32::NEAR_PLANE : 0.001f; }
 
     float GetFarPlane() const { return _properties.farPlane; }
     void SetFarPlane(float far) {
         float minFar = _properties.nearPlane + 0.1f;
-        _properties.farPlane = (FAR_PLANE > minFar) ? FAR_PLANE : minFar;
+        _properties.farPlane = (P32::FAR_PLANE > minFar) ? P32::FAR_PLANE : minFar;
     }
 
     CameraProjectionType GetProjectionType() const { return _properties.projectionType; }

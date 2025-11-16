@@ -130,8 +130,7 @@ ScriptSystem::ScriptSystem(Engine* engine)
     , m_hotReloadEnabled(true)
     , m_hotReloadCheckInterval(1.0f)
     , m_timeSinceLastCheck(0.0f)
-{
-}
+{}
 
 ScriptSystem::~ScriptSystem() {
     Shutdown();
@@ -336,6 +335,15 @@ void ScriptSystem::TriggerEvent(int objectID, const std::string& eventName) {
     }
 }
 
+// TODO: Implement argument forwarding in TriggerEvent
+template<typename... Args>
+void ScriptSystem::TriggerEvent(int objectID, const std::string& eventName, Args&&... args) {
+    auto script = GetScript(objectID);
+    if (script) {
+        script->OnEvent(eventName);
+    }
+}
+
 void ScriptSystem::CheckForScriptChanges() {
     for (auto& [objectID, script] : m_objectScripts) {
         if (script && script->IsLoaded() && script->HasChanged()) {
@@ -360,5 +368,25 @@ void ScriptSystem::ExecuteLua(const std::string& code) {
     }
     catch (const sol::error& e) {
         spdlog::error("[ScriptSystem] Lua execution error: {}", e.what());
+    }
+}
+
+void ScriptSystem::RegisterFunction(const std::string& name) {
+    try {
+        m_lua[name] = [name]() {
+            spdlog::info("[Lua] Called registered function: {}", name);
+        };
+    }
+    catch (const sol::error& e) {
+        spdlog::error("[ScriptSystem] Failed to register function '{}': {}", name, e.what());
+	}
+}
+
+void ScriptSystem::ExecuteLuaFile(const std::string& filePath) {
+    try {
+        m_lua.script_file(filePath);
+    }
+    catch (const sol::error& e) {
+        spdlog::error("[ScriptSystem] Lua file execution error ({}): {}", filePath, e.what());
     }
 }

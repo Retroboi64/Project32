@@ -22,23 +22,23 @@ namespace SceneUtils {
         if (transformJson.contains("position") && transformJson["position"].is_array() &&
             transformJson["position"].size() >= 3) {
             const auto& pos = transformJson["position"];
-            transform.position = glm::vec3(pos[0].get<float>(), pos[1].get<float>(), pos[2].get<float>());
+            transform.SetPosition(glm::vec3(pos[0].get<float>(), pos[1].get<float>(), pos[2].get<float>()));
         }
 
         if (transformJson.contains("rotation") && transformJson["rotation"].is_array() &&
             transformJson["rotation"].size() >= 3) {
             const auto& rot = transformJson["rotation"];
-            transform.rotation = glm::vec3(rot[0].get<float>(), rot[1].get<float>(), rot[2].get<float>());
+            transform.SetPosition(glm::vec3(rot[0].get<float>(), rot[1].get<float>(), rot[2].get<float>()));
         }
 
         if (transformJson.contains("scale")) {
             const auto& scale = transformJson["scale"];
             if (scale.is_array() && scale.size() >= 3) {
-                transform.scale = glm::vec3(scale[0].get<float>(), scale[1].get<float>(), scale[2].get<float>());
+                transform.SetScale(glm::vec3(scale[0].get<float>(), scale[1].get<float>(), scale[2].get<float>()));
             }
             else if (scale.is_number()) {
                 float uniformScale = scale.get<float>();
-                transform.scale = glm::vec3(uniformScale);
+                transform.SetScale(glm::vec3(uniformScale));
             }
         }
 
@@ -47,9 +47,9 @@ namespace SceneUtils {
 
     json TransformToJSON(const Transform& transform) {
         json transformJson;
-        transformJson["position"] = { transform.position.x, transform.position.y, transform.position.z };
-        transformJson["rotation"] = { transform.rotation.x, transform.rotation.y, transform.rotation.z };
-        transformJson["scale"] = { transform.scale.x, transform.scale.y, transform.scale.z };
+        transformJson["position"] = { transform.GetPosition().x, transform.GetPosition().y, transform.GetPosition().z};
+        transformJson["rotation"] = { transform.GetRotation().x, transform.GetRotation().y, transform.GetRotation().z};
+        transformJson["scale"] = { transform.GetScale().x, transform.GetScale().y, transform.GetScale().z};
         return transformJson;
     }
 }
@@ -425,7 +425,7 @@ void Scene::DebugPrint() const {
     std::cout << "Object count: " << _objects.size() << std::endl;
 
     for (const auto& object : _objects) {
-        const auto& pos = object->GetTransform().position;
+        const auto& pos = object->GetTransform().GetPosition();
         std::cout << "  [" << object->GetId() << "] " << object->GetName()
             << " (" << (object->IsVisible() ? "visible" : "hidden") << ")"
             << " at (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;

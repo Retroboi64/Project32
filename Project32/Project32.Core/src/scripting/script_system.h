@@ -89,6 +89,8 @@ public:
     ScriptComponent* GetScript(int objectID);
 
     void TriggerEvent(int objectID, const std::string& eventName);
+
+	// TODO: Implement argument forwarding in TriggerEvent
     template<typename... Args>
     void TriggerEvent(int objectID, const std::string& eventName, Args&&... args);
 
@@ -100,8 +102,8 @@ public:
     void ExecuteLua(const std::string& code);
     sol::state& GetLuaState() { return m_lua; }
 
-    template<typename Func>
-    void RegisterFunction(const std::string& name, Func&& func);
+    void RegisterFunction(const std::string& name);
+	void ExecuteLuaFile(const std::string& name);
 };
 
 #endif // SCRIPT_SYSTEM_H

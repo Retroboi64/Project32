@@ -35,11 +35,11 @@ Node::Node(const std::string& n)
 
 glm::mat4 Node::GetLocalMatrix() const {
 	glm::mat4 m(1.0f);
-	m = glm::translate(m, transform.position);
-	m = glm::rotate(m, glm::radians(transform.rotation.x), glm::vec3(1, 0, 0));
-	m = glm::rotate(m, glm::radians(transform.rotation.y), glm::vec3(0, 1, 0));
-	m = glm::rotate(m, glm::radians(transform.rotation.z), glm::vec3(0, 0, 1));
-	m = glm::scale(m, transform.scale);
+	m = glm::translate(m, transform.GetPosition());
+	m = glm::rotate(m, glm::radians(transform.GetRotation().x), glm::vec3(1, 0, 0));
+	m = glm::rotate(m, glm::radians(transform.GetRotation().y), glm::vec3(0, 1, 0));
+	m = glm::rotate(m, glm::radians(transform.GetRotation().z), glm::vec3(0, 0, 1));
+	m = glm::scale(m, transform.GetScale());
 	return m;
 }
 

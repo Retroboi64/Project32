@@ -196,11 +196,11 @@ extern "C" {
         return false;
     }
 
-    __declspec(dllexport) void EngineGetMousePos(int engineID, float* x, float* y) {
-        if (!x || !y) return;
+    __declspec(dllexport) void EngineGetMousePos(int engineID, float* tpos) {
+        if (!tpos) return;
 
-        *x = 0.0f;
-        *y = 0.0f;
+        tpos[0] = 0.0f;
+        tpos[1] = 0.0f;
 
         Engine* engine = EngineManager::Instance()->GetEngineByID(engineID);
         if (!engine) return;
@@ -212,16 +212,16 @@ extern "C" {
 			float px = static_cast<float>(pos.x);
             float py = static_cast<float>(pos.y);
 
-            *x = px;
-            *y = py;
+            tpos[0] = px;
+            tpos[1] = py;
         }
     }
 
-    __declspec(dllexport) void EngineGetMouseDelta(int engineID, float* dx, float* dy) {
-        if (!dx || !dy) return;
+    __declspec(dllexport) void EngineGetMouseDelta(int engineID, float* dxy) {
+        if (!dxy) return;
 
-        *dx = 0.0f;
-        *dy = 0.0f;
+        dxy[0] = 0.0f;
+        dxy[1] = 0.0f;
 
         Engine* engine = EngineManager::Instance()->GetEngineByID(engineID);
         if (!engine) return;
@@ -233,8 +233,8 @@ extern "C" {
 			float mdx = static_cast<float>(md.x);
 			float mdy = static_cast<float>(md.y);
             
-            *dx = mdx;
-            *dy = mdy;
+            dxy[0] = mdx;
+            dxy[1] = mdy;
         }
     }
 
@@ -290,11 +290,11 @@ extern "C" {
         return false;
     }
 
-    __declspec(dllexport) void GetEngineWindowSize(int engineID, int* width, int* height) {
-        if (!width || !height) return;
+    __declspec(dllexport) void GetEngineWindowSize(int engineID, int* size) {
+        if (!size) return;
 
-        *width = 0;
-        *height = 0;
+        size[0] = 0;
+        size[1] = 0;
 
         Engine* engine = EngineManager::Instance()->GetEngineByID(engineID);
         if (!engine) return;
@@ -307,8 +307,8 @@ extern "C" {
 			int sx = static_cast<int>(std::lround(size.x));
 			int sy = static_cast<int>(std::lround(size.y));
 
-            *width = sx;
-            *height = sy;
+            size[0] = sx;
+            size[1] = sy;
         }
     }
 

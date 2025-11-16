@@ -33,9 +33,9 @@ struct Wall {
 
     Transform GetTransform() const {
         Transform t;
-        t.position = position;
-        t.scale = scale;
-        t.rotation = rotation;
+        t.SetPosition(position);
+        t.SetScale(scale);
+        t.SetRotation(rotation);
         return t;
     }
 };
