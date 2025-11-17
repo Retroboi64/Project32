@@ -41,6 +41,8 @@ public:
     template<typename... Args>
     void OnEvent(const std::string& eventName, Args&&... args);
 
+    sol::table GetScriptTable() { return m_scriptTable; }
+
     bool IsLoaded() const { return m_isLoaded; }
     const std::string& GetScriptPath() const { return m_scriptPath; }
     int GetObjectID() const { return m_objectID; }
@@ -89,6 +91,15 @@ public:
     ScriptComponent* GetScript(int objectID);
 
     void TriggerEvent(int objectID, const std::string& eventName);
+
+    std::vector<int> GetAllScriptedObjectIDs() const {
+        std::vector<int> ids;
+        ids.reserve(m_objectScripts.size());
+        for (const auto& [objectID, script] : m_objectScripts) {
+            ids.push_back(objectID);
+        }
+        return ids;
+	}
 
 	// TODO: Implement argument forwarding in TriggerEvent
     template<typename... Args>

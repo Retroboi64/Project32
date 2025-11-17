@@ -49,6 +49,8 @@ private:
     static int _nextID;
     int _ID;
 
+    Engine* _engine;
+
     glm::ivec2 _windowedPos{ 100, 100 };
     glm::ivec2 _windowedSize{ 800, 600 };
 
@@ -60,11 +62,14 @@ private:
     bool _imguiInitialized = false;
 
 public:
-    Window(int width, int height, const std::string& title, GLFWwindow* shareContext);
+    Window(int width, int height, const std::string& title, GLFWwindow* shareContext, Engine* engine = nullptr);
     ~Window();
 
     Window(const Window&) = delete;
     Window& operator=(const Window&) = delete;
+
+    Engine* GetEngine() const { return _engine; }
+    void SetEngine(Engine* engine) { _engine = engine; }
 
     void Init();
     void InitGLAD();
@@ -146,11 +151,15 @@ public:
 
 class WindowManager {
 private:
+	Engine* _engine = nullptr;
     std::vector<std::unique_ptr<Window>> _windows;
     int currentWindow = -1;
-    mutable std::mutex _windowsMutex;  // Add this for thread safety
+    mutable std::mutex _windowsMutex;  
 
 public:
+	WindowManager(Engine* engine) : _engine(engine) {}
+	~WindowManager() = default;
+
     int Count();
     int GetCurrentWindowID() const { return currentWindow; }
 

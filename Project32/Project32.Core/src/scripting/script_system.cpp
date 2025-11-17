@@ -233,6 +233,37 @@ void ScriptSystem::ExposeEngineSystems() {
         "GetDeltaTime", [this]() { return m_engine ? m_engine->GetDeltaTime() : 0.0f; },
         "GetFrameCount", [this]() { return m_engine ? m_engine->GetFrameCount() : 0; }
     );
+
+    m_lua["GetScript"] = [this](int objectID) -> sol::optional<sol::table> {
+        auto* script = GetScript(objectID);
+        if (script && script->IsLoaded()) {
+            return script->GetScriptTable();
+        }
+        return sol::nullopt;
+        };
+
+    m_lua["Random"] = m_lua.create_table_with(
+        "Range", [](float min, float max) {
+            return min + static_cast<float>(rand()) /
+                (static_cast<float>(RAND_MAX / (max - min)));
+        },
+        "Value", []() {
+            return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+        }
+    );
+
+    // TODO: Fix this window fixed so this isn't
+    //  Ideal lol
+    m_lua["Input"] = m_lua.create_table_with(
+        "GetKey", [this](int key) { return m_engine->GetWindowManager()->GetWindowByID(0)->IsKeyPressed(key); },
+        "IsKeyPressed", []() { return ""; }
+	);
+
+	// I DON'T LIKE THIS HERE
+ //   m_lua["Engine"] = m_lua.create_table_with(
+ //       "GetVersion", []() { return ENGINE_VERSION; },
+ //       "GetName", []() { return ENGINE_NAME; }
+	//);
 }
 
 void ScriptSystem::Update(float dt) {

@@ -22,10 +22,16 @@ static void StaticFramebufferSizeCallback(GLFWwindow* glfwWindow, int width, int
     }
 }
 
-Window::Window(int width, int height, const std::string& title, GLFWwindow* shareContext)
-    : _width(width), _height(height), _title(title), _ID(_nextID++)
+Window::Window(int width, int height, const std::string& title, GLFWwindow* shareContext, Engine* engine)
+    : _width(width), _height(height), _title(title), _ID(_nextID++), _engine(engine)
 {
     spdlog::info("[Window {}] Constructor called: {}x{} '{}'", _ID, width, height, title);
+
+	// TODO: Look into moving this elsewhere to avoid problems
+	//  And readability
+    if (_engine) {
+        SetEngine(engine);
+    }
 
     static bool glfwInitialized = false;
     if (!glfwInitialized) {
@@ -461,7 +467,7 @@ Window* WindowManager::GetWindowByID(int windowID) {
 
 int WindowManager::AddWindow(int width, int height, const std::string& name) {
     try {
-        auto window = std::make_unique<Window>(width, height, name, nullptr);
+        auto window = std::make_unique<Window>(width, height, name, nullptr, _engine);
         int windowID = window->GetID();
 
         {

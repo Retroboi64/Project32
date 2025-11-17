@@ -56,7 +56,12 @@ void Renderer::Init(BackendType backendType) {
 
         LoadShaders();
 
-		m_meshCache.Add("cube", MeshFactory::CreateCube());
+		ScriptSystem* scriptSystem = EngineManager::Instance()->GetCurrentEngine()->GetScriptSystem();
+        if (scriptSystem) {
+            scriptSystem;
+        }
+
+        m_meshCache.Add("cube", MeshFactory::CreateCube());
 
         spdlog::info("[Renderer::Init()] Pre-loaded {} meshes", m_meshCache.Size());
 
@@ -116,67 +121,144 @@ void Renderer::RenderFrame() {
     m_backend->BeginFrame();
     m_backend->Clear(glm::vec4(m_settings.backgroundColor, 1.0f));
 
-	auto* cube = m_meshCache.Get("cube");
-    auto* sphere = m_meshCache.GetOrCreate("sphere_highres", []() {
-        StaticMeshes::SphereParams params;
-        params.latitudeSegments = 32;
-        params.longitudeSegments = 32;
-        params.radius = 1.0f;
-        return StaticMeshes::GetSphere(params);
-        });
-
     auto shader = m_shaderManager->GetShader("solidcolor");
     if (!shader) {
-        spdlog::error("[Renderer] Shader 'solidcolor' not found");
         m_backend->EndFrame();
         return;
     }
-
     shader->Bind();
 
-    shader->SetVec3("color", glm::vec3(0.8f, 0.1f, 0.1f));
-    shader->SetVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
-    shader->SetVec3("lightPos", glm::vec3(2.0f, 2.0f, 2.0f));
-    shader->SetBool("useTexture", false);
+    glm::vec3 cameraPos = glm::vec3(0.0f, 1.7f, 5.0f);
+    glm::vec3 cameraRot = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 3.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
+    if (m_window) {
+        Engine* engine = m_window->GetEngine();
+        if (engine) {
+            ScriptSystem* scripts = engine->GetScriptSystem();
+            if (scripts) {
+                auto* playerScript = scripts->GetScript(0);
+                if (playerScript && playerScript->IsLoaded()) {
+                    sol::table player = playerScript->GetScriptTable();
 
+                    if (player["isCamera"].valid() && player["isCamera"].get<bool>()) {
+                        if (player["cameraPosition"].valid()) {
+                            cameraPos = player["cameraPosition"].get<glm::vec3>();
+                        }
+                        if (player["cameraRotation"].valid()) {
+                            cameraRot = player["cameraRotation"].get<glm::vec3>();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    float pitchRad = glm::radians(cameraRot.x);
+    float yawRad = glm::radians(cameraRot.y);
+
+    glm::vec3 forward;
+    forward.x = cos(pitchRad) * sin(yawRad);
+    forward.y = -sin(pitchRad);
+    forward.z = -cos(pitchRad) * cos(yawRad);
+
+    glm::vec3 target = cameraPos + glm::normalize(forward);
+    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+    glm::mat4 view = glm::lookAt(cameraPos, target, up);
     glm::mat4 projection = glm::perspective(
-        glm::radians(45.0f),
+        glm::radians(90.0f), 
         aspectRatio,
-        0.1f, 100.0f
+        0.1f, 1000.0f
     );
 
-    static float rotation = 0.0f;
-    rotation += 0.02f;
-
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, rotation, glm::vec3(0.5f, 1.0f, 0.0f));
-
-    shader->SetMat4("model", model);
     shader->SetMat4("view", view);
     shader->SetMat4("projection", projection);
+    shader->SetVec3("viewPos", cameraPos);
+    shader->SetVec3("lightPos", glm::vec3(5.0f, 10.0f, 5.0f));
+    shader->SetBool("useTexture", false);
 
-    cube->Draw();
+    if (m_window) {
+        Engine* engine = m_window->GetEngine();
+        if (engine) {
+            ScriptSystem* scripts = engine->GetScriptSystem();
+
+            if (scripts) {
+                for (int id = 0; id < 10; id++) {
+                    auto* script = scripts->GetScript(id);
+                    if (!script || !script->IsLoaded()) continue;
+
+                    sol::table obj = script->GetScriptTable();
+
+                    if (obj["isCamera"].valid() && obj["isCamera"].get<bool>()) {
+                        continue;
+                    }
+
+                    if (!obj["position"].valid()) continue;
+
+                    glm::vec3 pos = obj["position"].get<glm::vec3>();
+                    glm::vec3 color = obj["color"].valid() ?
+                        obj["color"].get<glm::vec3>() : glm::vec3(1.0f);
+
+                    shader->SetVec3("color", color);
+
+                    glm::vec3 rotation = obj["rotation"].valid() ?
+                        obj["rotation"].get<glm::vec3>() : glm::vec3(0.0f);
+
+                    if (obj["size"].valid()) {
+                        glm::vec3 size = obj["size"].get<glm::vec3>();
+
+                        glm::mat4 model = glm::mat4(1.0f);
+                        model = glm::translate(model, pos);
+
+                        model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0, 1, 0));
+                        model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1, 0, 0));
+                        model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0, 0, 1));
+
+                        model = glm::scale(model, size);
+
+                        shader->SetMat4("model", model);
+                        m_meshCache.Get("cube")->Draw();
+                    }
+                    else if (obj["radius"].valid()) {
+                        float radius = obj["radius"].get<float>();
+
+                        glm::mat4 model = glm::mat4(1.0f);
+                        model = glm::translate(model, pos);
+                        model = glm::scale(model, glm::vec3(radius));
+
+                        shader->SetMat4("model", model);
+
+                        auto* sphere = m_meshCache.GetOrCreate("sphere", []() {
+                            StaticMeshes::SphereParams params;
+                            params.latitudeSegments = 16;
+                            params.longitudeSegments = 16;
+                            return StaticMeshes::GetSphere(params);
+                            });
+                        sphere->Draw();
+                    }
+                }
+            }
+        }
+    }
 
     UIX* ui = m_window->GetUI();
     if (ui && ui->IsInitialized()) {
         m_window->BeginImGuiFrame();
 
         if (m_settings.showDebugInfo) {
-            ImGui::Begin("Debug Info", &m_settings.showDebugInfo);
-            ImGui::Text("Window ID: %d", m_window->GetID());
+            ImGui::Begin("FPS Debug", &m_settings.showDebugInfo);
             ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
             ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
-            ImGui::Text("Size: %dx%d", width, height);
-            ImGui::Text("Backend: %s", m_backendType == BackendType::OPENGL ? "OpenGL" : "Unknown");
             ImGui::Separator();
-            ImGui::Text("Camera Position: (%.1f, %.1f, %.1f)", 0.0f, 0.0f, 3.0f);
-            ImGui::Text("Rotation: %.2f", rotation);
+            ImGui::Text("Camera Position: (%.1f, %.1f, %.1f)",
+                cameraPos.x, cameraPos.y, cameraPos.z);
+            ImGui::Text("Camera Rotation: (%.1f, %.1f, %.1f)",
+                cameraRot.x, cameraRot.y, cameraRot.z);
+            ImGui::Separator();
+            ImGui::Text("Controls:");
+            ImGui::Text("WASD - Move (auto for now)");
+            ImGui::Text("Mouse - Look (auto rotate)");
+            ImGui::Text("Space - Jump");
             ImGui::End();
         }
 

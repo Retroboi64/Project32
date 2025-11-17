@@ -1,4 +1,4 @@
-/*
+﻿/*
  * This file is part of Project32 - A compact yet powerful and flexible C++ Game Engine
  * Copyright (c) 2025 Patrick Reese (Retroboi64)
  *
@@ -83,13 +83,83 @@ Engine::~Engine() {
 
 void Engine::Init() {
     try {
-        _windowManager = std::make_unique<WindowManager>();
-
+		_windowManager = std::make_unique<WindowManager>(this);
         size_t threadCount = std::max(2u, std::thread::hardware_concurrency() - 2);
         _threadPool = std::make_unique<ThreadPool>(threadCount);
 
         _scriptSystem = std::make_unique<ScriptSystem>(this);
         _scriptSystem->Init();
+
+		// Remove this all later - just for testing purposes
+        auto* player = _scriptSystem->AttachScript(0, "scripts/player_fps.lua");
+        if (player) {
+            spdlog::info("✓ Created Player Controller (ID: 0)");
+        }
+        else {
+            spdlog::error("✗ Failed to create Player Controller");
+        }
+
+        auto* floor = _scriptSystem->AttachScript(1, "scripts/floor.lua");
+        if (floor) {
+            spdlog::info("✓ Created Floor (ID: 1)");
+        }
+        else {
+            spdlog::error("✗ Failed to create Floor");
+        }
+
+        auto* cube = _scriptSystem->AttachScript(2, "scripts/rotating_cube.lua");
+        if (cube) {
+            spdlog::info("✓ Created Rotating Cube (ID: 2)");
+        }
+        else {
+            spdlog::error("✗ Failed to create Rotating Cube");
+        }
+
+        spdlog::info("=== Initializing Objects ===");
+
+        _scriptSystem->ExecuteLua(R"(
+            local player = GetScript(0)
+            if player then
+                player.position = Vec3.new(0.0, 1.7, 5.0)
+                player.rotation = Vec3.new(0.0, 0.0, 0.0)
+                player.velocity = Vec3.new(0.0, 0.0, 0.0)
+                player.moveSpeed = 5.0
+                player.sprintSpeed = 10.0
+                player.jumpForce = 7.0
+                player.mouseSensitivity = 0.1
+                player.isGrounded = true
+                player.gravity = -20.0
+                Log("Player initialized at position: " .. tostring(player.position.x))
+            else
+                LogError("Failed to get Player script")
+            end
+        )");
+
+        _scriptSystem->ExecuteLua(R"(
+            local floor = GetScript(1)
+            if floor then
+                floor.position = Vec3.new(0.0, 0.0, 0.0)
+                floor.size = Vec3.new(20.0, 0.1, 20.0)
+                floor.color = Vec3.new(0.3, 0.3, 0.3)
+                Log("Floor initialized")
+            else
+                LogError("Failed to get Floor script")
+            end
+        )");
+
+        _scriptSystem->ExecuteLua(R"(
+            local cube = GetScript(2)
+            if cube then
+                cube.position = Vec3.new(0.0, 1.5, 0.0)
+                cube.size = Vec3.new(1.0, 1.0, 1.0)
+                cube.rotation = Vec3.new(0.0, 0.0, 0.0)
+                cube.rotationSpeed = 45.0
+                cube.color = Vec3.new(1.0, 0.5, 0.2)
+                Log("Cube initialized")
+            else
+                LogError("Failed to get Cube script")
+            end
+        )");
 
         if (_windowManager->Count() == 0) {
             spdlog::warn("[Engine::Init] No windows in window manager for engine {}", _ID);
