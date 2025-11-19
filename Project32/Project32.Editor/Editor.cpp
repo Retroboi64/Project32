@@ -9,6 +9,9 @@
  * This header must not be removed from any source file.
  */
 
+// This is not the editor but for now it's just for testing purposes
+//  which will turn into the editor later on
+
 #include "Editor.h"
 #include "../Project32.API/src/Project32.API.h"
 #include <iostream>
@@ -46,7 +49,9 @@ extern "C" {
                 return;
             }
 
-            engine.CreateNewWindow(323, 323, "Main Window || Engine: 1");
+            auto window = engine.CreateNewWindow(323, 323, "Main Window || Engine: 1");
+			// TODO: Fix mouse locking
+			//window->SetMouse(true);
             
             engine.SetVSync(true);
 

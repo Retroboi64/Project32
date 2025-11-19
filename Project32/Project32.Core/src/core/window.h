@@ -95,6 +95,8 @@ public:
     glm::ivec2 GetPosition() const;
     void SetPosition(int x, int y);
 
+	void MouseLocked(bool locked);
+
     void SetTitle(const std::string& title);
     void SetIcon(const std::string& iconPath);
 

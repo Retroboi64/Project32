@@ -46,7 +46,7 @@ private:
     std::atomic<bool> isRunning{ false };
     std::atomic<bool> isPaused{ false };
     std::string title;
-    int _mainWindowID = -1;
+    int _mainWindowID = 0;
 
     static int s_nextID;
     int _ID;

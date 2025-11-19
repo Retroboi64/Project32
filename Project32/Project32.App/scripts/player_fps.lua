@@ -1,5 +1,4 @@
 -- scripts/player_fps.lua
--- Quake-style first person controller
 
 Script = {
     position = Vec3.new(0.0, 1.7, 5.0),
@@ -17,7 +16,8 @@ Script = {
     lastMouseX = 0.0,
     lastMouseY = 0.0,
     firstMouse = true,
-    
+    invertY = true,  
+	
     -- State
     isGrounded = true,
     isSprinting = false,
@@ -35,10 +35,7 @@ function Script:Init(objectID)
 end
 
 function Script:Update(objectID, dt)
-    -- Mouse look (simplified - you'll need to integrate with your Input system)
     self:UpdateMouseLook(dt)
-    
-    -- Movement input (simplified)
     self:UpdateMovement(dt)
     
     -- Apply gravity
@@ -70,30 +67,31 @@ function Script:Update(objectID, dt)
 end
 
 function Script:UpdateMouseLook(dt)
-    -- This is a placeholder - you'll need to integrate with your Input system
-    -- For now, auto-rotate slowly to demonstrate
-    -- self.rotation.y = self.rotation.y + (10.0 * dt)
+    local mouseX, mouseY = Input.GetMousePosition()
     
-    -- In a real implementation:
-    -- local mouseX, mouseY = Input.GetMousePosition()
-    -- if self.firstMouse then
-    --     self.lastMouseX = mouseX
-    --     self.lastMouseY = mouseY
-    --     self.firstMouse = false
-    -- end
-    -- 
-    -- local xoffset = (mouseX - self.lastMouseX) * self.mouseSensitivity
-    -- local yoffset = (self.lastMouseY - mouseY) * self.mouseSensitivity
-    -- 
-    -- self.lastMouseX = mouseX
-    -- self.lastMouseY = mouseY
-    -- 
-    -- self.rotation.y = self.rotation.y + xoffset
-    -- self.rotation.x = self.rotation.x + yoffset
+    if self.firstMouse then
+        self.lastMouseX = mouseX
+        self.lastMouseY = mouseY
+        self.firstMouse = false
+        return  
+    end
+    
+    local xoffset = (mouseX - self.lastMouseX) * self.mouseSensitivity
+    local yoffset = (mouseY - self.lastMouseY) * self.mouseSensitivity  
+
+    self.lastMouseX = mouseX
+    self.lastMouseY = mouseY
+
+    self.rotation.y = self.rotation.y + xoffset  
+    
+    if self.invertY then
+        self.rotation.x = self.rotation.x + yoffset  
+    else
+        self.rotation.x = self.rotation.x - yoffset  
+    end
 end
 
 function Script:UpdateMovement(dt)
-    -- Get forward and right vectors based on rotation
     local yawRad = Math.Radians(self.rotation.y)
     
     local forward = Vec3.new(
@@ -108,48 +106,37 @@ function Script:UpdateMovement(dt)
         Math.Sin(yawRad)
     )
     
-    -- Reset horizontal velocity
     self.velocity.x = 0.0
     self.velocity.z = 0.0
     
     local speed = self.isSprinting and self.sprintSpeed or self.moveSpeed
     
-    -- Simulated movement (auto-move forward)
-    -- In real implementation, check Input.GetKey("W"), etc.
-    
-    -- Move forward automatically for demo
-    --  self.velocity.x = forward.x * speed * 0.3
-    --  self.velocity.z = forward.z * speed * 0.3
-    
-    -- TODO: Add key id names or somthing
-    if Input.GetKey(87) then
-         self.velocity.x = self.velocity.x + (forward.x * speed)
-         self.velocity.z = self.velocity.z + (forward.z * speed)
+    if Input.GetKeyDown("W") then  -- W
+        self.velocity.x = self.velocity.x + (forward.x * speed)
+        self.velocity.z = self.velocity.z + (forward.z * speed)
     end
     
-	if Input.GetKey(83) then
+    if Input.GetKeyDown("S") then  -- S
         self.velocity.x = self.velocity.x - (forward.x * speed)
         self.velocity.z = self.velocity.z - (forward.z * speed)
     end
     
-	if Input.GetKey(65) then
+    if Input.GetKeyDown("A") then  -- A
         self.velocity.x = self.velocity.x - (right.x * speed)
         self.velocity.z = self.velocity.z - (right.z * speed)
     end
-	
-    if Input.GetKey(68) then
+    
+    if Input.GetKeyDown("D") then  -- D
         self.velocity.x = self.velocity.x + (right.x * speed)
         self.velocity.z = self.velocity.z + (right.z * speed)
     end
-    -- 
-    -- -- Sprint
-    -- self.isSprinting = Input.GetKey("LeftShift")
-    -- 
-    -- -- Jump
-    -- if Input.GetKeyDown("Space") and self.isGrounded then
-    --     self.velocity.y = self.jumpForce
-    --     self.isGrounded = false
-    -- end
+    
+    self.isSprinting = Input.GetKeyDown("LeftShift")
+    
+    if Input.GetKeyDown("Space") and self.isGrounded then
+        self.velocity.y = self.jumpForce
+        self.isGrounded = false
+    end
 end
 
 function Script:GetForwardVector()
@@ -177,6 +164,7 @@ function Script:GetUpVector()
 end
 
 function Script:FixedUpdate(objectID, fixedDt)
+    -- Physics can go here
 end
 
 function Script:OnDestroy(objectID)

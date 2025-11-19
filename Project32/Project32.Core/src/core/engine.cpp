@@ -87,10 +87,21 @@ void Engine::Init() {
         size_t threadCount = std::max(2u, std::thread::hardware_concurrency() - 2);
         _threadPool = std::make_unique<ThreadPool>(threadCount);
 
+        if (_windowManager->Count() == 0) {
+            spdlog::warn("[Engine::Init] No windows in window manager for engine {}", _ID);
+        }
+        else if (_mainWindowID < 0) {
+            spdlog::info("[Engine::Init] No main window set for engine {}, defaulting to window ID {}", _ID, _mainWindowID);
+        }
+        else {
+            spdlog::info("[Engine::Init] Engine {} initialized successfully with main window ID {} (Total windows: {})",
+                _ID, _mainWindowID, _windowManager->Count());
+        }
+
         _scriptSystem = std::make_unique<ScriptSystem>(this);
         _scriptSystem->Init();
 
-		// Remove this all later - just for testing purposes
+        // Remove this all later - just for testing purposes
         auto* player = _scriptSystem->AttachScript(0, "scripts/player_fps.lua");
         if (player) {
             spdlog::info("✓ Created Player Controller (ID: 0)");
@@ -160,17 +171,6 @@ void Engine::Init() {
                 LogError("Failed to get Cube script")
             end
         )");
-
-        if (_windowManager->Count() == 0) {
-            spdlog::warn("[Engine::Init] No windows in window manager for engine {}", _ID);
-        }
-        else if (_mainWindowID < 0) {
-            spdlog::info("[Engine::Init] No main window set for engine {}, defaulting to window ID {}", _ID, _mainWindowID);
-        }
-        else {
-            spdlog::info("[Engine::Init] Engine {} initialized successfully with main window ID {} (Total windows: {})",
-                _ID, _mainWindowID, _windowManager->Count());
-        }
 
         isRunning.store(true);
 		spdlog::info("[Engine::Init] Engine {} initialization complete", _ID);

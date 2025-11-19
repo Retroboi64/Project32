@@ -12,6 +12,7 @@
 #pragma once
 
 #include <limits>
+#include <format>
 #include <algorithm>
 #include <glm/glm.hpp>
 
@@ -19,6 +20,20 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 namespace P32 {
+    namespace Engine {
+        constexpr int PATCH_VERSION = 1;
+		constexpr int MINOR_VERSION = 0;
+		constexpr int MAJOR_VERSION = 0;
+
+        inline std::string GetVersionString() {
+            return std::format("{}.{}.{}", PATCH_VERSION, MINOR_VERSION, MAJOR_VERSION);
+		}
+    }
+
+    namespace Constants {
+		// TODO: PUT CONSTANTS HERE
+    }
+
     // Mathematical Constants
     constexpr float PI = 3.14159265359f;
     constexpr float PI_2 = PI / 2.0f;

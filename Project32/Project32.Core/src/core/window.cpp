@@ -374,6 +374,18 @@ void Window::SetMousePosition(float x, float y) {
     }
 }
 
+void Window::MouseLocked(bool locked) {
+    if (!_window) return;
+    if (locked) {
+        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        _cursorMode = CursorMode::Disabled;
+    }
+    else {
+        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        _cursorMode = CursorMode::Normal;
+    }
+}
+
 float Window::GetAspectRatio() const {
     return static_cast<float>(_width) / static_cast<float>(_height);
 }

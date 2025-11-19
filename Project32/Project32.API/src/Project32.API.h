@@ -84,6 +84,7 @@ extern "C" {
     typedef void (*GetWindowPositionFunc)(int engineID, int windowID, int* x, int* y);
     typedef void (*SetWindowPositionFunc)(int engineID, int windowID, int x, int y);
     typedef bool (*IsWindowOpenFunc)(int engineID, int windowID);
+	typedef void (*MouseLockFunc)(int engineID, int windowID, bool lock);
 
 	// Scripting functions/hooks
 	typedef void (*LoadScriptFunc)(int engineID, const char* scriptPath);
@@ -145,6 +146,8 @@ extern "C" {
         GetWindowPositionFunc GetWindowPosition;
         SetWindowPositionFunc SetWindowPosition;
         IsWindowOpenFunc IsWindowOpen;
+
+		MouseLockFunc MouseLock;
 
 		// Scripting functions/hooks
 		LoadScriptFunc LoadScript;
@@ -246,6 +249,8 @@ namespace P32 {
         static void SetWindowPosition(int engineID, int windowID, int x, int y);
         static bool IsWindowOpen(int engineID, int windowID);
 
+		static void MouseLock(int engineID, int windowID, bool locked);
+
 		// Project Management
 		//static void CreateProject();
 		//static void LoadProject();
@@ -273,6 +278,8 @@ namespace P32 {
         void SetTitle(const std::string& title);
         bool IsOpen() const;
         bool Close();
+
+		void SetMouse(bool locked);
 
         void SetBackgroundColor(float r, float g, float b);
         void SetFOV(float fov);

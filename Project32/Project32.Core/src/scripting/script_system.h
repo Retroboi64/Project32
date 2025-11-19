@@ -18,18 +18,21 @@
 #include <sol/sol.hpp>
 
 class Engine;
+class Window;
+class EAUI;
 
 class ScriptComponent {
 private:
+    Engine* m_engine;
     sol::state* m_lua;
     sol::table m_scriptTable;
     std::string m_scriptPath;
     bool m_isLoaded;
     std::filesystem::file_time_type m_lastWriteTime;
-    int m_objectID;  
+    int m_objectID;
 
 public:
-    ScriptComponent(sol::state* lua, const std::string& scriptPath, int objectID);
+    ScriptComponent(sol::state* lua, const std::string& scriptPath, int objectID, Engine* engine = nullptr);
     ~ScriptComponent() = default;
 
     bool Load();
@@ -63,7 +66,8 @@ private:
     sol::state m_lua;
     Engine* m_engine;
     std::vector<std::unique_ptr<ScriptComponent>> m_scripts;
-    std::unordered_map<int, ScriptComponent*> m_objectScripts;  // objectID -> script
+    std::unordered_map<int, ScriptComponent*> m_objectScripts;
+    std::unordered_map<int, std::unique_ptr<EAUI>> m_uiApps;
 
     bool m_hotReloadEnabled;
     float m_hotReloadCheckInterval;
@@ -71,6 +75,11 @@ private:
 
     void BindMathTypes();
     void ExposeEngineSystems();
+    void ExposeWindowSystem();
+    void ExposeInputSystem();
+    void ExposeUIAppSystem();
+    void ExposeRendererSystem();
+    void ExposeSceneSystem();
 
 public:
     explicit ScriptSystem(Engine* engine);
@@ -84,7 +93,7 @@ public:
     void FixedUpdate(float fixedDt);
     void Shutdown();
 
-	void FindAndLoadScriptsInDirectory(const std::string& directoryPath);
+    void FindAndLoadScriptsInDirectory(const std::string& directoryPath);
 
     ScriptComponent* AttachScript(int objectID, const std::string& scriptPath);
     void DetachScript(int objectID);
@@ -99,9 +108,8 @@ public:
             ids.push_back(objectID);
         }
         return ids;
-	}
+    }
 
-	// TODO: Implement argument forwarding in TriggerEvent
     template<typename... Args>
     void TriggerEvent(int objectID, const std::string& eventName, Args&&... args);
 
@@ -114,7 +122,13 @@ public:
     sol::state& GetLuaState() { return m_lua; }
 
     void RegisterFunction(const std::string& name);
-	void ExecuteLuaFile(const std::string& name);
+    void ExecuteLuaFile(const std::string& name);
+
+	// UI App Management (Using EAUI) for the future
+    //int CreateUIApp(const std::string& title, int width, int height);
+    //void RemoveUIApp(int appID);
+    //EAUI* GetUIApp(int appID);
+    //void UpdateUIApps(float dt);
 };
 
-#endif // SCRIPT_SYSTEM_H
+#endif
