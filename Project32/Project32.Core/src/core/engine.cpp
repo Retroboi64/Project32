@@ -126,6 +126,14 @@ void Engine::Init() {
             spdlog::error("✗ Failed to create Rotating Cube");
         }
 
+		auto* ui = _scriptSystem->AttachScript(3, "scripts/game_hud.lua");
+        if (ui) {
+            spdlog::info("✓ Created UI Example (ID: 3)");
+        }
+        else {
+            spdlog::error("✗ Failed to create UI Example");
+		}
+
         spdlog::info("=== Initializing Objects ===");
 
         _scriptSystem->ExecuteLua(R"(

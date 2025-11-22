@@ -36,10 +36,10 @@ public:
     Renderer& operator=(Renderer&&) noexcept = default;
 
     void Init(BackendType backendType = BackendType::OPENGL);
-	void RenderFrame();
+    void RenderFrame();
     void Cleanup();
 
-	void LoadShaders();
+    void LoadShaders();
 
     bool IsReady() const { return m_isReady; }
     bool IsWireframeMode() const { return m_settings.wireframeMode; }
@@ -57,10 +57,12 @@ private:
 
     std::unique_ptr<TextureManager> m_textures;
     std::unique_ptr<ShaderManager> m_shaderManager;
+    std::unique_ptr<ShadowMap> shadowMap;
     CameraManager m_cameraManager;
     SceneManager& m_sceneManager;
 
     MeshCache m_meshCache;
+
 
     std::vector<std::unique_ptr<ModelImporter::LoadedModel>> m_loadedModels;
     std::unique_ptr<Skybox> m_skybox;

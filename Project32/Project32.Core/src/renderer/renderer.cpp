@@ -54,9 +54,14 @@ void Renderer::Init(BackendType backendType) {
         m_textures = TextureFactory::CreateTextureManager();
         m_shaderManager = ShaderFactory::CreateShaderManager();
 
+        shadowMap = std::make_unique<ShadowMap>(2048, 2048);
+        if (!shadowMap->Initialize()) {
+            throw std::runtime_error("Failed to initialize shadow map");
+        }
+
         LoadShaders();
 
-		ScriptSystem* scriptSystem = EngineManager::Instance()->GetCurrentEngine()->GetScriptSystem();
+        ScriptSystem* scriptSystem = EngineManager::Instance()->GetCurrentEngine()->GetScriptSystem();
         if (scriptSystem) {
             scriptSystem;
         }
@@ -97,6 +102,28 @@ void Renderer::LoadShaders() {
     else {
         spdlog::error("[Renderer::LoadShaders] Failed to load 'solidcolor' shader");
     }
+
+    bool success2 = m_shaderManager->LoadShader("depth",
+        "shadow_depth.vert",
+        "shadow_depth.frag");
+
+    if (success2) {
+        spdlog::info("[Renderer::LoadShaders] Successfully loaded 'depth' shader");
+    }
+    else {
+        spdlog::error("[Renderer::LoadShaders] Failed to load 'depth' shader");
+    }
+
+    bool success3 = m_shaderManager->LoadShader("pbr",
+        "pbr_shadow.vert",
+        "pbr_shadow.frag");
+
+    if (success3) {
+        spdlog::info("[Renderer::LoadShaders] Successfully loaded 'pbr' shader");
+    }
+    else {
+        spdlog::error("[Renderer::LoadShaders] Failed to load 'pbr' shader");
+    }
 }
 
 void Renderer::RenderFrame() {
@@ -117,16 +144,13 @@ void Renderer::RenderFrame() {
 
     float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
-    m_backend->SetViewport(0, 0, width, height);
-    m_backend->BeginFrame();
-    m_backend->Clear(glm::vec4(m_settings.backgroundColor, 1.0f));
+    auto depthShader = m_shaderManager->GetShader("depth");
+    auto pbrShader = m_shaderManager->GetShader("pbr");
 
-    auto shader = m_shaderManager->GetShader("solidcolor");
-    if (!shader) {
-        m_backend->EndFrame();
+    if (!depthShader || !pbrShader) {
+        spdlog::error("[Renderer] Required shaders not loaded");
         return;
     }
-    shader->Bind();
 
     glm::vec3 cameraPos = glm::vec3(0.0f, 1.7f, 5.0f);
     glm::vec3 cameraRot = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -166,16 +190,94 @@ void Renderer::RenderFrame() {
 
     glm::mat4 view = glm::lookAt(cameraPos, target, up);
     glm::mat4 projection = glm::perspective(
-        glm::radians(90.0f), 
+        glm::radians(90.0f),
         aspectRatio,
         0.1f, 1000.0f
     );
 
-    shader->SetMat4("view", view);
-    shader->SetMat4("projection", projection);
-    shader->SetVec3("viewPos", cameraPos);
-    shader->SetVec3("lightPos", glm::vec3(5.0f, 10.0f, 5.0f));
-    shader->SetBool("useTexture", false);
+    glm::vec3 lightPos(5.0f, 10.0f, 5.0f);
+    glm::vec3 lightTarget(0.0f, 2.0f, 0.0f);
+
+    shadowMap->UpdateLightSpaceMatrix(lightPos, lightTarget);
+    glm::mat4 lightSpaceMatrix = shadowMap->GetLightSpaceMatrix();
+
+    // PASS 1: RENDER SHADOW MAP (DEPTH PASS)
+
+    shadowMap->BeginShadowPass();
+    depthShader->Bind();
+    depthShader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+    if (m_window) {
+        Engine* engine = m_window->GetEngine();
+        if (engine) {
+            ScriptSystem* scripts = engine->GetScriptSystem();
+            if (scripts) {
+                for (int id = 0; id < 10; id++) {
+                    auto* script = scripts->GetScript(id);
+                    if (!script || !script->IsLoaded()) continue;
+
+                    sol::table obj = script->GetScriptTable();
+
+                    if (obj["isCamera"].valid() && obj["isCamera"].get<bool>()) {
+                        continue;
+                    }
+
+                    if (!obj["position"].valid()) continue;
+
+                    glm::vec3 pos = obj["position"].get<glm::vec3>();
+                    glm::vec3 rotation = obj["rotation"].valid() ?
+                        obj["rotation"].get<glm::vec3>() : glm::vec3(0.0f);
+
+                    glm::mat4 model = glm::mat4(1.0f);
+                    model = glm::translate(model, pos);
+                    model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0, 1, 0));
+                    model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1, 0, 0));
+                    model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0, 0, 1));
+
+                    if (obj["size"].valid()) {
+                        glm::vec3 size = obj["size"].get<glm::vec3>();
+                        model = glm::scale(model, size);
+
+                        depthShader->SetMat4("model", model);
+                        m_meshCache.Get("cube")->Draw();
+                    }
+                    else if (obj["radius"].valid()) {
+                        float radius = obj["radius"].get<float>();
+                        model = glm::scale(model, glm::vec3(radius));
+
+                        depthShader->SetMat4("model", model);
+
+                        auto* sphere = m_meshCache.GetOrCreate("sphere", []() {
+                            StaticMeshes::SphereParams params;
+                            params.latitudeSegments = 16;
+                            params.longitudeSegments = 16;
+                            return StaticMeshes::GetSphere(params);
+                            });
+                        sphere->Draw();
+                    }
+                }
+            }
+        }
+    }
+
+    shadowMap->EndShadowPass();
+
+    // PASS 2: NORMAL RENDER WITH SHADOWS
+
+    m_backend->SetViewport(0, 0, width, height);
+    m_backend->BeginFrame();
+    m_backend->Clear(glm::vec4(m_settings.backgroundColor, 1.0f));
+
+    pbrShader->Bind();
+    pbrShader->SetMat4("view", view);
+    pbrShader->SetMat4("projection", projection);
+    pbrShader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+    pbrShader->SetVec3("viewPos", cameraPos);
+    pbrShader->SetVec3("lightPos", lightPos);
+    pbrShader->SetBool("useTexture", false);
+
+    shadowMap->BindForReading(1);
+    pbrShader->SetInt("shadowMap", 1);
 
     if (m_window) {
         Engine* engine = m_window->GetEngine();
@@ -199,7 +301,11 @@ void Renderer::RenderFrame() {
                     glm::vec3 color = obj["color"].valid() ?
                         obj["color"].get<glm::vec3>() : glm::vec3(1.0f);
 
-                    shader->SetVec3("color", color);
+                    pbrShader->SetVec3("color", color);
+
+                    pbrShader->SetFloat("metallic", 0.0f);
+                    pbrShader->SetFloat("roughness", 0.5f);
+                    pbrShader->SetFloat("ao", 1.0f);
 
                     glm::vec3 rotation = obj["rotation"].valid() ?
                         obj["rotation"].get<glm::vec3>() : glm::vec3(0.0f);
@@ -209,14 +315,12 @@ void Renderer::RenderFrame() {
 
                         glm::mat4 model = glm::mat4(1.0f);
                         model = glm::translate(model, pos);
-
                         model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0, 1, 0));
                         model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1, 0, 0));
                         model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0, 0, 1));
-
                         model = glm::scale(model, size);
 
-                        shader->SetMat4("model", model);
+                        pbrShader->SetMat4("model", model);
                         m_meshCache.Get("cube")->Draw();
                     }
                     else if (obj["radius"].valid()) {
@@ -226,7 +330,7 @@ void Renderer::RenderFrame() {
                         model = glm::translate(model, pos);
                         model = glm::scale(model, glm::vec3(radius));
 
-                        shader->SetMat4("model", model);
+                        pbrShader->SetMat4("model", model);
 
                         auto* sphere = m_meshCache.GetOrCreate("sphere", []() {
                             StaticMeshes::SphereParams params;
@@ -274,7 +378,8 @@ void Renderer::Cleanup() {
         m_window->MakeContextCurrent();
     }
 
-	m_meshCache.Clear();
+    shadowMap.reset();
+    m_meshCache.Clear();
     m_skybox.reset();
     m_wallSystem.reset();
     m_loadedModels.clear();

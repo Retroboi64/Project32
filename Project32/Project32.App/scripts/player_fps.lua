@@ -32,6 +32,7 @@ function Script:Init(objectID)
     self.objectID = objectID
     self.lastMouseX = 400.0 
     self.lastMouseY = 300.0 
+
 end
 
 function Script:Update(objectID, dt)

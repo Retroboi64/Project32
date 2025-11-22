@@ -1,0 +1,3 @@
+Script = {}
+
+function Script::Init() {}

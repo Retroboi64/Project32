@@ -9,8 +9,6 @@
  * This header must not be removed from any source file.
  */
 
-// TODO: Backend Checks
-
 #include "../common.h"
 #include "ui.h"
 
@@ -22,44 +20,75 @@ UIX::UIX(GLFWwindow* window)
     : _imguiContext(nullptr), _imguiInitialized(false)
 {
     try {
-		spdlog::info("[UIX] Initializing ImGui...");
+        spdlog::info("[UIX] Initializing ImGui...");
 
         glfwMakeContextCurrent(window);
 
         IMGUI_CHECKVERSION();
         _imguiContext = ImGui::CreateContext();
-        ImGui::SetCurrentContext(_imguiContext);
-		spdlog::info("[UIX] ImGui context created: {}", (void*)_imguiContext);
 
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        if (!_imguiContext) {
+            throw std::runtime_error("Failed to create ImGui context");
+        }
+
+        ImGui::SetCurrentContext(_imguiContext);
+        spdlog::info("[UIX] ImGui context created: {}", static_cast<void*>(_imguiContext));
+
+        ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
         ImGui::StyleColorsDark();
 
-        float xscale, yscale;
-        glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &xscale, &yscale);
+        float xscale = 1.0f, yscale = 1.0f;
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        if (monitor) {
+            glfwGetMonitorContentScale(monitor, &xscale, &yscale);
+        }
         float main_scale = (xscale + yscale) * 0.5f;
+
         ImGuiStyle& style = ImGui::GetStyle();
         style.ScaleAllSizes(main_scale);
-        style.FontScaleDpi = main_scale;
 
-        ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init("#version 460");
+        if (!ImGui_ImplGlfw_InitForOpenGL(window, true)) {
+            throw std::runtime_error("Failed to initialize ImGui GLFW implementation");
+        }
+
+        if (!ImGui_ImplOpenGL3_Init("#version 460")) {
+            ImGui_ImplGlfw_Shutdown();
+            throw std::runtime_error("Failed to initialize ImGui OpenGL3 implementation");
+        }
 
         _imguiInitialized = true;
 
         SetTheme(ThemePreset::Dark);
-		spdlog::info("[UIX] Default theme applied.");
-		spdlog::info("[UIX] ImGui initialization successful.");
+        spdlog::info("[UIX] Default theme applied.");
+        spdlog::info("[UIX] ImGui initialization successful.");
     }
     catch (const std::exception& e) {
-		spdlog::error("[UIX] ImGui initialization failed: {}", e.what());
+        spdlog::error("[UIX] ImGui initialization failed: {}", e.what());
+
+        if (_imguiContext) {
+            ImGui::DestroyContext(_imguiContext);
+            _imguiContext = nullptr;
+        }
+        _imguiInitialized = false;
+
         throw;
     }
 }
 
 UIX::~UIX() {
+    if (_imguiInitialized && _imguiContext) {
+        ImGui::SetCurrentContext(_imguiContext);
+
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+
+        ImGui::DestroyContext(_imguiContext);
+    }
+
     _imguiContext = nullptr;
     _imguiInitialized = false;
 }
@@ -67,7 +96,10 @@ UIX::~UIX() {
 void UIX::Cleanup(GLFWwindow* window) {
     if (_imguiInitialized && _imguiContext) {
         ImGui::SetCurrentContext(_imguiContext);
-        glfwMakeContextCurrent(window);
+
+        if (window) {
+            glfwMakeContextCurrent(window);
+        }
 
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
@@ -79,24 +111,30 @@ void UIX::Cleanup(GLFWwindow* window) {
 }
 
 void UIX::BeginImgui() {
-    if (_imguiInitialized && _imguiContext) {
-        ImGui::SetCurrentContext(_imguiContext);
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+    if (!_imguiInitialized || !_imguiContext) {
+        spdlog::error("[UIX] BeginImgui called but ImGui not initialized");
+        return;
     }
+
+    ImGui::SetCurrentContext(_imguiContext);
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 }
 
 void UIX::EndImgui() {
-    if (_imguiInitialized && _imguiContext) {
-        ImGui::SetCurrentContext(_imguiContext);
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    if (!_imguiInitialized || !_imguiContext) {
+        spdlog::error("[UIX] EndImgui called but ImGui not initialized");
+        return;
     }
+
+    ImGui::SetCurrentContext(_imguiContext);
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 bool UIX::IsInitialized() const {
-    return _imguiInitialized;
+    return _imguiInitialized && _imguiContext != nullptr;
 }
 
 ImGuiContext* UIX::GetContext() const {
@@ -127,14 +165,14 @@ Theme UIX::GetThemePreset(ThemePreset preset) {
         break;
 
     case ThemePreset::Cyberpunk:
-        theme.primary = ImVec4(1.0f, 0.0f, 0.8f, 1.0f);       
-        theme.secondary = ImVec4(0.1f, 0.1f, 0.15f, 1.0f);    
-        theme.accent = ImVec4(0.0f, 0.9f, 0.9f, 1.0f);        
-        theme.background = ImVec4(0.05f, 0.05f, 0.08f, 1.0f); 
-        theme.text = ImVec4(0.0f, 1.0f, 0.8f, 1.0f);          
+        theme.primary = ImVec4(1.0f, 0.0f, 0.8f, 1.0f);
+        theme.secondary = ImVec4(0.1f, 0.1f, 0.15f, 1.0f);
+        theme.accent = ImVec4(0.0f, 0.9f, 0.9f, 1.0f);
+        theme.background = ImVec4(0.05f, 0.05f, 0.08f, 1.0f);
+        theme.text = ImVec4(0.0f, 1.0f, 0.8f, 1.0f);
         theme.textDim = ImVec4(0.5f, 0.5f, 0.6f, 1.0f);
-        theme.rounding = 0.0f;  
-        theme.borderSize = 2.0f; 
+        theme.rounding = 0.0f;
+        theme.borderSize = 2.0f;
         break;
 
     case ThemePreset::Ocean:
@@ -171,66 +209,66 @@ Theme UIX::GetThemePreset(ThemePreset preset) {
         break;
 
     case ThemePreset::Dracula:
-        theme.primary = ImVec4(0.74f, 0.58f, 0.98f, 1.0f);    
-        theme.secondary = ImVec4(0.16f, 0.16f, 0.21f, 1.0f);  
-        theme.accent = ImVec4(1.0f, 0.47f, 0.78f, 1.0f);      
-        theme.background = ImVec4(0.11f, 0.11f, 0.15f, 1.0f); 
-        theme.text = ImVec4(0.97f, 0.97f, 0.94f, 1.0f);       
+        theme.primary = ImVec4(0.74f, 0.58f, 0.98f, 1.0f);
+        theme.secondary = ImVec4(0.16f, 0.16f, 0.21f, 1.0f);
+        theme.accent = ImVec4(1.0f, 0.47f, 0.78f, 1.0f);
+        theme.background = ImVec4(0.11f, 0.11f, 0.15f, 1.0f);
+        theme.text = ImVec4(0.97f, 0.97f, 0.94f, 1.0f);
         theme.textDim = ImVec4(0.62f, 0.62f, 0.68f, 1.0f);
         theme.rounding = 4.0f;
         theme.borderSize = 1.0f;
         break;
 
     case ThemePreset::Nord:
-        theme.primary = ImVec4(0.51f, 0.63f, 0.76f, 1.0f);    
-        theme.secondary = ImVec4(0.23f, 0.26f, 0.32f, 1.0f);  
-        theme.accent = ImVec4(0.55f, 0.75f, 0.68f, 1.0f);    
-        theme.background = ImVec4(0.18f, 0.20f, 0.25f, 1.0f); 
-        theme.text = ImVec4(0.92f, 0.94f, 0.95f, 1.0f);      
+        theme.primary = ImVec4(0.51f, 0.63f, 0.76f, 1.0f);
+        theme.secondary = ImVec4(0.23f, 0.26f, 0.32f, 1.0f);
+        theme.accent = ImVec4(0.55f, 0.75f, 0.68f, 1.0f);
+        theme.background = ImVec4(0.18f, 0.20f, 0.25f, 1.0f);
+        theme.text = ImVec4(0.92f, 0.94f, 0.95f, 1.0f);
         theme.textDim = ImVec4(0.60f, 0.65f, 0.70f, 1.0f);
         theme.rounding = 3.0f;
         theme.borderSize = 1.0f;
         break;
 
     case ThemePreset::Gruvbox:
-        theme.primary = ImVec4(0.98f, 0.74f, 0.40f, 1.0f);    
-        theme.secondary = ImVec4(0.20f, 0.18f, 0.16f, 1.0f);  
-        theme.accent = ImVec4(0.72f, 0.73f, 0.15f, 1.0f);     
-        theme.background = ImVec4(0.16f, 0.15f, 0.13f, 1.0f); 
-        theme.text = ImVec4(0.92f, 0.86f, 0.70f, 1.0f);       
+        theme.primary = ImVec4(0.98f, 0.74f, 0.40f, 1.0f);
+        theme.secondary = ImVec4(0.20f, 0.18f, 0.16f, 1.0f);
+        theme.accent = ImVec4(0.72f, 0.73f, 0.15f, 1.0f);
+        theme.background = ImVec4(0.16f, 0.15f, 0.13f, 1.0f);
+        theme.text = ImVec4(0.92f, 0.86f, 0.70f, 1.0f);
         theme.textDim = ImVec4(0.66f, 0.60f, 0.53f, 1.0f);
         theme.rounding = 2.0f;
         theme.borderSize = 1.0f;
         break;
 
     case ThemePreset::Monokai:
-        theme.primary = ImVec4(0.40f, 0.85f, 0.94f, 1.0f);    
-        theme.secondary = ImVec4(0.16f, 0.16f, 0.14f, 1.0f);  
-        theme.accent = ImVec4(0.98f, 0.96f, 0.45f, 1.0f);    
-        theme.background = ImVec4(0.13f, 0.13f, 0.11f, 1.0f); 
-        theme.text = ImVec4(0.97f, 0.97f, 0.95f, 1.0f);       
+        theme.primary = ImVec4(0.40f, 0.85f, 0.94f, 1.0f);
+        theme.secondary = ImVec4(0.16f, 0.16f, 0.14f, 1.0f);
+        theme.accent = ImVec4(0.98f, 0.96f, 0.45f, 1.0f);
+        theme.background = ImVec4(0.13f, 0.13f, 0.11f, 1.0f);
+        theme.text = ImVec4(0.97f, 0.97f, 0.95f, 1.0f);
         theme.textDim = ImVec4(0.58f, 0.58f, 0.56f, 1.0f);
         theme.rounding = 2.0f;
         theme.borderSize = 0.0f;
         break;
 
     case ThemePreset::SolarizedDark:
-        theme.primary = ImVec4(0.15f, 0.55f, 0.82f, 1.0f);    
-        theme.secondary = ImVec4(0.03f, 0.21f, 0.26f, 1.0f);  
-        theme.accent = ImVec4(0.71f, 0.54f, 0.0f, 1.0f);      
-        theme.background = ImVec4(0.0f, 0.17f, 0.21f, 1.0f);  
-        theme.text = ImVec4(0.51f, 0.58f, 0.59f, 1.0f);       
+        theme.primary = ImVec4(0.15f, 0.55f, 0.82f, 1.0f);
+        theme.secondary = ImVec4(0.03f, 0.21f, 0.26f, 1.0f);
+        theme.accent = ImVec4(0.71f, 0.54f, 0.0f, 1.0f);
+        theme.background = ImVec4(0.0f, 0.17f, 0.21f, 1.0f);
+        theme.text = ImVec4(0.51f, 0.58f, 0.59f, 1.0f);
         theme.textDim = ImVec4(0.36f, 0.43f, 0.44f, 1.0f);
         theme.rounding = 4.0f;
         theme.borderSize = 1.0f;
         break;
 
     case ThemePreset::TokyoNight:
-        theme.primary = ImVec4(0.45f, 0.68f, 1.0f, 1.0f);     
-        theme.secondary = ImVec4(0.11f, 0.13f, 0.20f, 1.0f);  
-        theme.accent = ImVec4(0.73f, 0.57f, 1.0f, 1.0f);      
-        theme.background = ImVec4(0.09f, 0.10f, 0.15f, 1.0f); 
-        theme.text = ImVec4(0.79f, 0.82f, 0.92f, 1.0f);      
+        theme.primary = ImVec4(0.45f, 0.68f, 1.0f, 1.0f);
+        theme.secondary = ImVec4(0.11f, 0.13f, 0.20f, 1.0f);
+        theme.accent = ImVec4(0.73f, 0.57f, 1.0f, 1.0f);
+        theme.background = ImVec4(0.09f, 0.10f, 0.15f, 1.0f);
+        theme.text = ImVec4(0.79f, 0.82f, 0.92f, 1.0f);
         theme.textDim = ImVec4(0.56f, 0.60f, 0.72f, 1.0f);
         theme.rounding = 5.0f;
         theme.borderSize = 1.0f;

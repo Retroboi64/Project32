@@ -15,16 +15,14 @@ private:
     glm::quat m_rotation;
     glm::vec3 m_scale;
 
-    // Cached matrix
     mutable glm::mat4 m_cachedMatrix;
     mutable bool m_matrixDirty = true;
 
 public:
-    // Constructors
     Transform()
-        : m_position(P32::V3_ZERO)
-        , m_rotation(glm::quat(1.0f, 0.0f, 0.0f, 0.0f)) // Identity quaternion
-        , m_scale(P32::V3_ONE) {
+        : m_position(P32::Constants::V3_ZERO)
+        , m_rotation(glm::quat(1.0f, 0.0f, 0.0f, 0.0f))
+        , m_scale(P32::Constants::V3_ONE) {
     }
 
     Transform(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scl)
@@ -44,17 +42,16 @@ public:
         return m_cachedMatrix;
     }
 
-    // Direction vectors (direct quaternion multiplication)
     inline glm::vec3 GetForwardVector() const {
-        return m_rotation * P32::V3_FORWARD;
+        return m_rotation * P32::Constants::V3_FORWARD;
     }
 
     inline glm::vec3 GetUpVector() const {
-        return m_rotation * P32::V3_UP;
+        return m_rotation * P32::Constants::V3_UP;
     }
 
     inline glm::vec3 GetRightVector() const {
-        return m_rotation * P32::V3_RIGHT;
+        return m_rotation * P32::Constants::V3_RIGHT;
     }
 
     // Getters
@@ -137,7 +134,6 @@ public:
         m_matrixDirty = true;
     }
 
-    // Modifiers (return new values for chaining)
     inline glm::vec3 AddPosition(const glm::vec3& delta) {
         m_position += delta;
         m_matrixDirty = true;
@@ -150,7 +146,6 @@ public:
         return glm::eulerAngles(m_rotation);
     }
 
-    // Movement helpers
     inline void Translate(const glm::vec3& delta) {
         m_position += delta;
         m_matrixDirty = true;
@@ -174,16 +169,16 @@ public:
     }
 
     // Utility
-    inline void LookAt(const glm::vec3& target, const glm::vec3& up = P32::V3_UP) {
+    inline void LookAt(const glm::vec3& target, const glm::vec3& up = P32::Constants::V3_UP) {
         glm::vec3 direction = glm::normalize(target - m_position);
         m_rotation = glm::quatLookAt(direction, up);
         m_matrixDirty = true;
     }
 
     inline void Reset() {
-        m_position = P32::V3_ZERO;
+        m_position = P32::Constants::V3_ZERO;
         m_rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-        m_scale = P32::V3_ONE;
+        m_scale = P32::Constants::V3_ONE;
         m_matrixDirty = true;
     }
 };

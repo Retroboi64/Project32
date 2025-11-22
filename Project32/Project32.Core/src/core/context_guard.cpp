@@ -19,6 +19,9 @@ ContextGuard::ContextGuard(Window* window)
     if (_window) {
         _window->MakeContextCurrent();
     }
+    else {
+        spdlog::warn("[ContextGuard] Window pointer is null");
+    }
 }
 
 ContextGuard::~ContextGuard() {

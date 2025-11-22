@@ -4,6 +4,7 @@
 #include "../common.h"
 
 class IGraphicsBackend;
+class ShadowMap;
 
 enum class BackendType {
     UNDEFINED,
@@ -31,6 +32,8 @@ public:
     virtual void SetCullFace(bool enabled) = 0;
     virtual void SetWireframe(bool enabled) = 0;
     virtual void SetBlending(bool enabled) = 0;
+
+	virtual ShadowMap* CreateShadowMap(unsigned int width = 2048, unsigned int height = 2048) = 0;
 
     virtual void BindShader(int shaderID) = 0;
     virtual void SetShaderMat4(int shaderID, const std::string& name, const glm::mat4& value) = 0;

@@ -24,7 +24,7 @@ private:
     Window* _window;
 
 public:
-    explicit ContextGuard(Window* window);
+	explicit ContextGuard(Window* window);
     ~ContextGuard();
 
     ContextGuard(const ContextGuard&) = delete;

@@ -119,12 +119,12 @@ public:
     void SetFOV(float fov) { _properties.fov = glm::clamp(fov, 1.0f, 179.0f); }
 
     float GetNearPlane() const { return _properties.nearPlane; }
-    void SetNearPlane(float near) { _properties.nearPlane = (P32::NEAR_PLANE > 0.001f) ? P32::NEAR_PLANE : 0.001f; }
+    void SetNearPlane(float near) { _properties.nearPlane = (P32::Constants::NEAR_PLANE > 0.001f) ? P32::Constants::NEAR_PLANE : 0.001f; }
 
     float GetFarPlane() const { return _properties.farPlane; }
     void SetFarPlane(float far) {
         float minFar = _properties.nearPlane + 0.1f;
-        _properties.farPlane = (P32::FAR_PLANE > minFar) ? P32::FAR_PLANE : minFar;
+        _properties.farPlane = (P32::Constants::FAR_PLANE > minFar) ? P32::Constants::FAR_PLANE : minFar;
     }
 
     CameraProjectionType GetProjectionType() const { return _properties.projectionType; }

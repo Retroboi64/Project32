@@ -16,9 +16,10 @@
 #include "../backend.h"
 
 #include "Types/GL_shader.h"
+#include "Types/GL_shadow.h"
 
- // Forward declarations
 class Mesh;
+class ShadowMap;
 
 class OpenGLBackend : public IGraphicsBackend {
 public:
@@ -34,6 +35,8 @@ public:
 
     void Clear(const glm::vec4& color) override;
     void SetViewport(int x, int y, int width, int height) override;
+
+	ShadowMap* CreateShadowMap(unsigned int width = 2048, unsigned int height = 2048);
 
     void SetDepthTest(bool enabled) override;
     void SetCullFace(bool enabled) override;

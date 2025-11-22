@@ -21,7 +21,10 @@ class Object {
 public:
 	std::string name;
 	uint64_t id; 
+	int scriptID;
 	bool active = true;
+	Transform transform;
+	glm::vec4 color = glm::vec4(1.0f);
 
 	Mesh* mesh;
 

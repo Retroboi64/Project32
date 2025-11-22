@@ -19,7 +19,36 @@
 
 class Engine;
 class Window;
-class EAUI;
+
+struct UIElement {
+    int id;
+    int windowID;
+    std::string type;
+    std::string label;
+    bool visible;
+
+    float x = 0.0f;
+    float y = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
+
+    float value = 0.0f;
+    std::string text;
+
+    float minValue = 0.0f;
+    float maxValue = 1.0f;
+
+    std::vector<std::string> items;
+    int selectedIndex = -1;
+
+    float colorR = 1.0f;
+    float colorG = 1.0f;
+    float colorB = 1.0f;
+    float colorA = 1.0f;
+
+    sol::function callback;
+    std::vector<int> children;
+};
 
 class ScriptComponent {
 private:
@@ -28,6 +57,7 @@ private:
     sol::table m_scriptTable;
     std::string m_scriptPath;
     bool m_isLoaded;
+	bool m_hasChanged;
     std::filesystem::file_time_type m_lastWriteTime;
     int m_objectID;
 
@@ -36,6 +66,7 @@ public:
     ~ScriptComponent() = default;
 
     bool Load();
+	bool Unload();
     bool Reload();
     void Update(float dt);
     void FixedUpdate(float fixedDt);
@@ -67,7 +98,8 @@ private:
     Engine* m_engine;
     std::vector<std::unique_ptr<ScriptComponent>> m_scripts;
     std::unordered_map<int, ScriptComponent*> m_objectScripts;
-    std::unordered_map<int, std::unique_ptr<EAUI>> m_uiApps;
+    std::unordered_map<int, UIElement> m_uiElements;
+    int m_nextUIID;
 
     bool m_hotReloadEnabled;
     float m_hotReloadCheckInterval;
@@ -77,9 +109,15 @@ private:
     void ExposeEngineSystems();
     void ExposeWindowSystem();
     void ExposeInputSystem();
-    void ExposeUIAppSystem();
+    void ExposeUISystem();
     void ExposeRendererSystem();
     void ExposeSceneSystem();
+
+    int CreateUIElement(int windowID, const std::string& type, const std::string& label);
+    void RemoveUIElement(int elementID);
+    UIElement* GetUIElement(int elementID);
+    void ClearUIElements(int windowID);
+    void RenderUIElement(int elementID);
 
 public:
     explicit ScriptSystem(Engine* engine);
@@ -91,7 +129,10 @@ public:
     void Init();
     void Update(float dt);
     void FixedUpdate(float fixedDt);
+    void Reset();
     void Shutdown();
+
+    void RenderUI(int windowID);
 
     void FindAndLoadScriptsInDirectory(const std::string& directoryPath);
 
@@ -123,12 +164,6 @@ public:
 
     void RegisterFunction(const std::string& name);
     void ExecuteLuaFile(const std::string& name);
-
-	// UI App Management (Using EAUI) for the future
-    //int CreateUIApp(const std::string& title, int width, int height);
-    //void RemoveUIApp(int appID);
-    //EAUI* GetUIApp(int appID);
-    //void UpdateUIApps(float dt);
 };
 
 #endif

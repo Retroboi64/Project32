@@ -12,6 +12,7 @@
 #include "../common.h"
 #include "window.h"
 #include "../renderer/renderer.h"
+#include "context_guard.h"
 
 int Window::_nextID = 0;
 
@@ -27,8 +28,6 @@ Window::Window(int width, int height, const std::string& title, GLFWwindow* shar
 {
     spdlog::info("[Window {}] Constructor called: {}x{} '{}'", _ID, width, height, title);
 
-	// TODO: Look into moving this elsewhere to avoid problems
-	//  And readability
     if (_engine) {
         SetEngine(engine);
     }
@@ -69,9 +68,10 @@ Window::Window(int width, int height, const std::string& title, GLFWwindow* shar
     spdlog::info("[Window {}] GLFW window created at: {}", _ID, static_cast<void*>(_window));
 
     glfwSetWindowUserPointer(_window, this);
-    glfwMakeContextCurrent(_window);
-    glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetFramebufferSizeCallback(_window, StaticFramebufferSizeCallback);
+
+    MakeContextCurrent();
+    glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     static bool gladInitialized = false;
     if (!gladInitialized) {
@@ -93,7 +93,7 @@ Window::Window(int width, int height, const std::string& title, GLFWwindow* shar
     if (!_input) {
         spdlog::error("[Window {}] Failed to create Input instance", _ID);
         throw std::runtime_error("Failed to create Input instance");
-	}
+    }
     _input->Init();
     spdlog::info("[Window {}] Input initialized successfully", _ID);
 
@@ -102,14 +102,13 @@ Window::Window(int width, int height, const std::string& title, GLFWwindow* shar
         spdlog::error("[Window {}] Failed to create UIX instance", _ID);
         throw std::runtime_error("Failed to create UIX instance");
     }
-
     spdlog::info("[Window {}] UI initialized successfully", _ID);
 
     _renderer = std::make_unique<Renderer>(this);
     if (!_renderer) {
         spdlog::error("[Window {}] Failed to create Renderer instance", _ID);
         throw std::runtime_error("Failed to create Renderer instance");
-	}
+    }
     _renderer->Init();
     spdlog::info("[Window {}] Renderer initialized successfully", _ID);
 
@@ -126,13 +125,13 @@ Window::~Window() {
     }
 
     if (_renderer) {
-        MakeContextCurrent();
+        ContextGuard guard(this);
         _renderer->Cleanup();
         _renderer.reset();
     }
 
     if (_ui && _window) {
-        MakeContextCurrent();
+        ContextGuard guard(this);
         _ui->Cleanup(_window);
         _ui.reset();
     }
@@ -169,13 +168,13 @@ void Window::Shutdown() {
     }
 
     if (_renderer) {
-        MakeContextCurrent();
+        ContextGuard guard(this);
         _renderer->Cleanup();
         _renderer.reset();
     }
 
     if (_ui) {
-        MakeContextCurrent();
+        ContextGuard guard(this);
         _ui->Cleanup(_window);
         _ui.reset();
     }
@@ -193,10 +192,9 @@ void Window::Render() {
         return;
     }
 
-    MakeContextCurrent();
-
-	_renderer->RenderFrame();
-	SwapBuffers();
+    ContextGuard guard(this);
+    _renderer->RenderFrame();
+    SwapBuffers();
 }
 
 void Window::PollEvents() {
@@ -283,7 +281,7 @@ void Window::SetPosition(int x, int y) {
 void Window::SetVSync(bool enabled) {
     _vsync = enabled;
     if (_window) {
-        glfwMakeContextCurrent(_window);
+        ContextGuard guard(this);
         glfwSwapInterval(enabled ? 1 : 0);
     }
 }
@@ -318,16 +316,16 @@ void Window::SetIcon(const std::string& iconPath) {
 }
 
 void Window::MakeContextCurrent() {
-    if (_window) {
-        GLFWwindow* currentContext = glfwGetCurrentContext();
+    if (!_window) return;
 
-        if (currentContext != _window) {
-            glfwMakeContextCurrent(_window);
-        }
+    GLFWwindow* currentContext = glfwGetCurrentContext();
 
-        if (_ui && _ui->IsInitialized()) {
-            ImGui::SetCurrentContext(_ui->GetContext());
-        }
+    if (currentContext != _window) {
+        glfwMakeContextCurrent(_window);
+    }
+
+    if (_ui && _ui->IsInitialized()) {
+        ImGui::SetCurrentContext(_ui->GetContext());
     }
 }
 
@@ -392,7 +390,7 @@ float Window::GetAspectRatio() const {
 
 void Window::Clear(float r, float g, float b, float a) {
     if (_window) {
-        glfwMakeContextCurrent(_window);
+        ContextGuard guard(this);
         glm::vec4 color(r, g, b, a);
         GraphicsBackend::Get()->Clear(color);
     }
@@ -403,7 +401,7 @@ void Window::OnFramebufferResize(int width, int height) {
     _height = height;
 
     if (_window) {
-        glfwMakeContextCurrent(_window);
+        ContextGuard guard(this);
         GraphicsBackend::Get()->SetViewport(0, 0, width, height);
     }
 
@@ -426,8 +424,7 @@ void Window::BeginImGuiFrame() {
         return;
     }
 
-    glfwMakeContextCurrent(_window);
-    ImGui::SetCurrentContext(_ui->GetContext());
+    ContextGuard guard(this);
     _ui->BeginImgui();
 }
 
@@ -437,8 +434,7 @@ void Window::EndImGuiFrame() {
         return;
     }
 
-    glfwMakeContextCurrent(_window);
-    ImGui::SetCurrentContext(_ui->GetContext());
+    ContextGuard guard(this);
     _ui->EndImgui();
 }
 

@@ -12,7 +12,7 @@
 #include "../common.h"
 #include "script_system.h"
 #include "../core/engine.h"
-#include "../core/ui_app.h"
+#include "../core/window.h"
 
 ScriptComponent::ScriptComponent(sol::state* lua, const std::string& scriptPath, int objectID, Engine* engine)
     : m_lua(lua)
@@ -66,9 +66,17 @@ bool ScriptComponent::Load() {
 bool ScriptComponent::Reload() {
     spdlog::info("[ScriptComponent] Reloading script: {}", m_scriptPath);
 
-    if (m_isLoaded && m_scriptTable["OnDestroy"].valid()) {
-        sol::protected_function onDestroy = m_scriptTable["OnDestroy"];
-        onDestroy(m_scriptTable, m_objectID);
+    if (m_isLoaded && m_scriptTable.valid()) {
+        if (m_scriptTable["OnDestroy"].valid()) {
+            sol::protected_function onDestroy = m_scriptTable["OnDestroy"];
+            auto result = onDestroy(m_scriptTable, m_objectID);
+            if (!result.valid()) {
+                sol::error err = result;
+                spdlog::error("[ScriptComponent] Error in OnDestroy during reload: {}", err.what());
+            }
+        }
+
+        m_scriptTable = sol::lua_nil;
     }
 
     m_isLoaded = false;
@@ -131,6 +139,7 @@ ScriptSystem::ScriptSystem(Engine* engine)
     , m_hotReloadEnabled(true)
     , m_hotReloadCheckInterval(1.0f)
     , m_timeSinceLastCheck(0.0f)
+    , m_nextUIID(1)
 {
 }
 
@@ -153,7 +162,7 @@ void ScriptSystem::Init() {
     ExposeEngineSystems();
     ExposeWindowSystem();
     ExposeInputSystem();
-    ExposeUIAppSystem();
+    ExposeUISystem();
     ExposeRendererSystem();
     ExposeSceneSystem();
 
@@ -453,7 +462,6 @@ void ScriptSystem::ExposeInputSystem() {
 
             Window* window = m_engine->GetWindowManager()->GetWindowByID(windowID);
             if (!window) return false;
-            if (!m_engine) return false;
 
             if (key.length() == 1) {
                 char c = key[0];
@@ -461,7 +469,6 @@ void ScriptSystem::ExposeInputSystem() {
                 return window->IsKeyPressed(keyCode);
             }
 
-			// TODO: Add all keys into a map for better performance or something
             if (key == "Space") return window->IsKeyPressed(32);
             if (key == "LeftShift") return window->IsKeyPressed(340);
             if (key == "LeftControl") return window->IsKeyPressed(341);
@@ -481,35 +488,159 @@ void ScriptSystem::ExposeInputSystem() {
     );
 }
 
-void ScriptSystem::ExposeUIAppSystem() {
-	// This may be implemented in the future (Not Sure Yet)
-    //m_lua["UIApp"] = m_lua.create_table_with(
-    //    "Create", [this](const std::string& title, int width, int height) -> int {
-    //        return CreateUIApp(title, width, height);
-    //    },
+void ScriptSystem::ExposeUISystem() {
+    m_lua.new_usertype<UIElement>("UIElement",
+        "id", sol::readonly(&UIElement::id),
+        "windowID", &UIElement::windowID,
+        "type", &UIElement::type,
+        "label", &UIElement::label,
+        "visible", &UIElement::visible,
+        "x", &UIElement::x,
+        "y", &UIElement::y,
+        "width", &UIElement::width,
+        "height", &UIElement::height,
+        "value", &UIElement::value,
+        "text", &UIElement::text,
+        "minValue", &UIElement::minValue,
+        "maxValue", &UIElement::maxValue,
+        "items", &UIElement::items,
+        "selectedIndex", &UIElement::selectedIndex,
+        "callback", &UIElement::callback,
+        "children", &UIElement::children
+    );
 
-    //    "Remove", [this](int appID) {
-    //        RemoveUIApp(appID);
-    //    },
+    m_lua["UI"] = m_lua.create_table_with(
+        "CreateWindow", [this](sol::variadic_args args) -> int {
+            std::string title = "UI Window";
+            int windowID = m_engine ? m_engine->GetMainWindowID() : 0;
 
-    //    "IsValid", [this](int appID) -> bool {
-    //        return GetUIApp(appID) != nullptr;
-    //    },
+            if (args.size() >= 1) title = args.get<std::string>(0);
+            if (args.size() >= 2) windowID = args.get<int>(1);
 
-    //    "IsRunning", [this](int appID) -> bool {
-    //        EAUI* app = GetUIApp(appID);
-    //        return app ? app->IsRunning() : false;
-    //    },
+            return CreateUIElement(windowID, "Window", title);
+        },
 
-    //    "Close", [this](int appID) {
-    //        EAUI* app = GetUIApp(appID);
-    //        if (app) app->Close();
-    //    }
-    //);
+        "CreateButton", [this](int windowID, const std::string& label) -> int {
+            return CreateUIElement(windowID, "Button", label);
+        },
+
+        "CreateText", [this](int windowID, const std::string& text) -> int {
+            int id = CreateUIElement(windowID, "Text", "");
+            auto* elem = GetUIElement(id);
+            if (elem) elem->text = text;
+            return id;
+        },
+
+        "CreateSlider", [this](int windowID, const std::string& label, float min, float max, float value) -> int {
+            int id = CreateUIElement(windowID, "Slider", label);
+            auto* elem = GetUIElement(id);
+            if (elem) {
+                elem->minValue = min;
+                elem->maxValue = max;
+                elem->value = value;
+            }
+            return id;
+        },
+
+        "CreateInputText", [this](int windowID, const std::string& label) -> int {
+            return CreateUIElement(windowID, "InputText", label);
+        },
+
+        "CreateCheckbox", [this](int windowID, const std::string& label, bool checked) -> int {
+            int id = CreateUIElement(windowID, "Checkbox", label);
+            auto* elem = GetUIElement(id);
+            if (elem) elem->value = checked ? 1.0f : 0.0f;
+            return id;
+        },
+
+        "CreateComboBox", [this](int windowID, const std::string& label, const std::vector<std::string>& items) -> int {
+            int id = CreateUIElement(windowID, "ComboBox", label);
+            auto* elem = GetUIElement(id);
+            if (elem) elem->items = items;
+            return id;
+        },
+
+        "CreateColorPicker", [this](int windowID, const std::string& label) -> int {
+            return CreateUIElement(windowID, "ColorPicker", label);
+        },
+
+        "CreateSeparator", [this](int windowID) -> int {
+            return CreateUIElement(windowID, "Separator", "");
+        },
+
+        "Remove", [this](int elementID) {
+            RemoveUIElement(elementID);
+        },
+
+        "SetVisible", [this](int elementID, bool visible) {
+            auto* elem = GetUIElement(elementID);
+            if (elem) elem->visible = visible;
+        },
+
+        "SetPosition", [this](int elementID, float x, float y) {
+            auto* elem = GetUIElement(elementID);
+            if (elem) {
+                elem->x = x;
+                elem->y = y;
+            }
+        },
+
+        "SetSize", [this](int elementID, float width, float height) {
+            auto* elem = GetUIElement(elementID);
+            if (elem) {
+                elem->width = width;
+                elem->height = height;
+            }
+        },
+
+        "SetValue", [this](int elementID, float value) {
+            auto* elem = GetUIElement(elementID);
+            if (elem) elem->value = value;
+        },
+
+        "GetValue", [this](int elementID) -> float {
+            auto* elem = GetUIElement(elementID);
+            return elem ? elem->value : 0.0f;
+        },
+
+        "SetText", [this](int elementID, const std::string& text) {
+            auto* elem = GetUIElement(elementID);
+            if (elem) elem->text = text;
+        },
+
+        "GetText", [this](int elementID) -> std::string {
+            auto* elem = GetUIElement(elementID);
+            return elem ? elem->text : "";
+        },
+
+        "SetCallback", [this](int elementID, sol::function callback) {
+            auto* elem = GetUIElement(elementID);
+            if (elem) elem->callback = callback;
+        },
+
+        "AddChild", [this](int parentID, int childID) {
+            auto* parent = GetUIElement(parentID);
+            if (parent) parent->children.push_back(childID);
+        },
+
+        "ClearAll", [this](int windowID) {
+            ClearUIElements(windowID);
+        }
+    );
 }
 
 void ScriptSystem::ExposeRendererSystem() {
-    m_lua["Renderer"] = m_lua.create_table_with();
+    m_lua["Renderer"] = m_lua.create_table_with(
+        "LoadSkybox", [this](const std::vector<std::string>& faces) {
+            if (!m_engine) return;
+        },
+        "ClearColor", [this](float r, float g, float b, float a) {
+        },
+        "SetViewport", [this](glm::vec2, int width, int height) {
+        },
+        "DrawScene", [this]() {
+        }
+    );
 }
 
 void ScriptSystem::ExposeSceneSystem() {
@@ -535,6 +666,158 @@ void ScriptSystem::ExposeSceneSystem() {
     );
 }
 
+int ScriptSystem::CreateUIElement(int windowID, const std::string& type, const std::string& label) {
+    UIElement element;
+    element.id = m_nextUIID++;
+    element.windowID = windowID;
+    element.type = type;
+    element.label = label;
+    element.visible = true;
+
+    m_uiElements[element.id] = element;
+    spdlog::info("[ScriptSystem] Created UI element '{}' with ID {} for window {}", type, element.id, windowID);
+
+    return element.id;
+}
+
+void ScriptSystem::RemoveUIElement(int elementID) {
+    auto it = m_uiElements.find(elementID);
+    if (it != m_uiElements.end()) {
+        m_uiElements.erase(it);
+        spdlog::info("[ScriptSystem] Removed UI element with ID {}", elementID);
+    }
+}
+
+UIElement* ScriptSystem::GetUIElement(int elementID) {
+    auto it = m_uiElements.find(elementID);
+    return (it != m_uiElements.end()) ? &it->second : nullptr;
+}
+
+void ScriptSystem::ClearUIElements(int windowID) {
+    for (auto it = m_uiElements.begin(); it != m_uiElements.end();) {
+        if (it->second.windowID == windowID) {
+            it = m_uiElements.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+    spdlog::info("[ScriptSystem] Cleared all UI elements for window {}", windowID);
+}
+
+void ScriptSystem::RenderUI(int windowID) {
+    if (!m_engine) return;
+
+    Window* window = m_engine->GetWindowManager()->GetWindowByID(windowID);
+    if (!window || !window->GetUI() || !window->GetUI()->IsInitialized()) return;
+
+    for (auto& [id, elem] : m_uiElements) {
+        if (elem.windowID != windowID || !elem.visible) continue;
+
+        if (elem.type == "Window") {
+            ImGui::SetNextWindowPos(ImVec2(elem.x, elem.y), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(elem.width > 0 ? elem.width : 300, elem.height > 0 ? elem.height : 200), ImGuiCond_FirstUseEver);
+
+            if (ImGui::Begin(elem.label.c_str())) {
+                for (int childID : elem.children) {
+                    RenderUIElement(childID);
+                }
+            }
+            ImGui::End();
+        }
+        else {
+            RenderUIElement(id);
+        }
+    }
+}
+
+void ScriptSystem::RenderUIElement(int elementID) {
+    auto* elem = GetUIElement(elementID);
+    if (!elem || !elem->visible) return;
+
+    if (elem->type == "Button") {
+        if (ImGui::Button(elem->label.c_str())) {
+            if (elem->callback.valid()) {
+                elem->callback(elem->id);
+            }
+        }
+    }
+    else if (elem->type == "Text") {
+        ImGui::Text("%s", elem->text.c_str());
+    }
+    else if (elem->type == "Slider") {
+        if (ImGui::SliderFloat(elem->label.c_str(), &elem->value, elem->minValue, elem->maxValue)) {
+            if (elem->callback.valid()) {
+                elem->callback(elem->id, elem->value);
+            }
+        }
+    }
+    else if (elem->type == "InputText") {
+        char buffer[256];
+        std::snprintf(buffer, sizeof(buffer), "%s", elem->text.c_str());
+
+        if (ImGui::InputText(elem->label.c_str(), buffer, sizeof(buffer))) {
+            elem->text = std::string(buffer);
+            if (elem->callback.valid()) {
+                elem->callback(elem->id, elem->text);
+            }
+        }
+    }
+    else if (elem->type == "Checkbox") {
+        bool checked = elem->value > 0.5f;
+        if (ImGui::Checkbox(elem->label.c_str(), &checked)) {
+            elem->value = checked ? 1.0f : 0.0f;
+            if (elem->callback.valid()) {
+                elem->callback(elem->id, checked);
+            }
+        }
+    }
+    else if (elem->type == "ComboBox") {
+        if (!elem->items.empty()) {
+            const char* preview = elem->selectedIndex >= 0 && elem->selectedIndex < static_cast<int>(elem->items.size())
+                ? elem->items[elem->selectedIndex].c_str()
+                : "Select...";
+
+            if (ImGui::BeginCombo(elem->label.c_str(), preview)) {
+                for (int i = 0; i < static_cast<int>(elem->items.size()); i++) {
+                    bool selected = (elem->selectedIndex == i);
+                    if (ImGui::Selectable(elem->items[i].c_str(), selected)) {
+                        elem->selectedIndex = i;
+                        if (elem->callback.valid()) {
+                            elem->callback(elem->id, i, elem->items[i]);
+                        }
+                    }
+                    if (selected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+        }
+    }
+    else if (elem->type == "ColorPicker") {
+        float color[4] = { elem->colorR, elem->colorG, elem->colorB, elem->colorA };
+        if (ImGui::ColorEdit4(elem->label.c_str(), color)) {
+            elem->colorR = color[0];
+            elem->colorG = color[1];
+            elem->colorB = color[2];
+            elem->colorA = color[3];
+            if (elem->callback.valid()) {
+                elem->callback(elem->id, color[0], color[1], color[2], color[3]);
+            }
+        }
+    }
+    else if (elem->type == "Separator") {
+        ImGui::Separator();
+    }
+    else if (elem->type == "SameLine") {
+        ImGui::SameLine();
+    }
+    else if (elem->type == "Spacing") {
+        ImGui::Spacing();
+    }
+}
+
 void ScriptSystem::Update(float dt) {
     if (m_hotReloadEnabled) {
         m_timeSinceLastCheck += dt;
@@ -549,8 +832,6 @@ void ScriptSystem::Update(float dt) {
             script->Update(dt);
         }
     }
-
-    //UpdateUIApps(dt);
 }
 
 void ScriptSystem::FixedUpdate(float fixedDt) {
@@ -570,7 +851,7 @@ void ScriptSystem::Shutdown() {
         }
     }
 
-    m_uiApps.clear();
+    m_uiElements.clear();
     m_objectScripts.clear();
     m_scripts.clear();
 }
@@ -695,45 +976,3 @@ void ScriptSystem::ExecuteLuaFile(const std::string& filePath) {
         spdlog::error("[ScriptSystem] Lua file execution error ({}): {}", filePath, e.what());
     }
 }
-
-//int ScriptSystem::CreateUIApp(const std::string& title, int width, int height) {
-//    static int nextAppID = 10000;
-//    int appID = nextAppID++;
-//
-//    try {
-//        auto app = std::make_unique<EAUI>(title, width, height, m_engine);
-//        m_uiApps[appID] = std::move(app);
-//        spdlog::info("[ScriptSystem] Created UI App '{}' with ID {}", title, appID);
-//        return appID;
-//    }
-//    catch (const std::exception& e) {
-//        spdlog::error("[ScriptSystem] Failed to create UI App: {}", e.what());
-//        return -1;
-//    }
-//}
-//
-//void ScriptSystem::RemoveUIApp(int appID) {
-//    auto it = m_uiApps.find(appID);
-//    if (it != m_uiApps.end()) {
-//        spdlog::info("[ScriptSystem] Removing UI App with ID {}", appID);
-//        m_uiApps.erase(it);
-//    }
-//}
-//
-//EAUI* ScriptSystem::GetUIApp(int appID) {
-//    auto it = m_uiApps.find(appID);
-//    return (it != m_uiApps.end()) ? it->second.get() : nullptr;
-//}
-//
-//void ScriptSystem::UpdateUIApps(float dt) {
-//    for (auto it = m_uiApps.begin(); it != m_uiApps.end();) {
-//        if (it->second && it->second->IsRunning()) {
-//            it->second->RunFrame();
-//            ++it;
-//        }
-//        else {
-//            spdlog::info("[ScriptSystem] UI App {} has stopped, removing", it->first);
-//            it = m_uiApps.erase(it);
-//        }
-//    }
-//}

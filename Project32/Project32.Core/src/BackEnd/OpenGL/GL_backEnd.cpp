@@ -66,6 +66,16 @@ void OpenGLBackend::SetViewport(int x, int y, int width, int height) {
     glViewport(x, y, width, height);
 }
 
+ShadowMap* OpenGLBackend::CreateShadowMap(unsigned int width, unsigned int height) {
+	// TODO: FIX THIS (WORKS FOR NOW)
+    ShadowMap* shadowMap = new ShadowMap(width, height);
+    if (!shadowMap->Initialize()) {
+        delete shadowMap;
+        return nullptr;
+    }
+    return shadowMap;
+}
+
 void OpenGLBackend::SetDepthTest(bool enabled) {
     if (enabled) {
         glEnable(GL_DEPTH_TEST);
