@@ -195,6 +195,7 @@
     <ClInclude Include="src\BackEnd\types.h" />
     <ClInclude Include="src\core\context_guard.h" />
     <ClInclude Include="src\core\ui_app.h" />
+    <ClInclude Include="src\renderer\lighting.h" />
     <ClInclude Include="src\renderer\vertex.h" />
     <ClInclude Include="src\scene\camera.h" />
     <ClInclude Include="src\common.h" />

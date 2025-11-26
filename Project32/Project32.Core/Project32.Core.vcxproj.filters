@@ -209,5 +209,8 @@
     <ClInclude Include="src\BackEnd\OpenGL\Types\GL_shadow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\renderer\lighting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

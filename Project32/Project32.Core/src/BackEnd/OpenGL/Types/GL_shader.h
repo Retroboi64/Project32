@@ -15,6 +15,7 @@
 class Shader {
 private:
     int _ID = -1;
+	std::string _name;
     std::unordered_map<std::string, int> _uniformsLocations;
 
     bool CheckErrors(unsigned int shader, const std::string& type);
@@ -35,6 +36,7 @@ public:
 
     bool IsValid() const;
     int GetID() const { return _ID; }
+    std::string GetName() const { return _name; };
 };
 
 class ShaderManager {

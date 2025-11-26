@@ -72,11 +72,17 @@ void Mesh::LoadData(const std::vector<Vertex>& vertices,
         return;
     }
 
-    CalculateBounds(vertices);
-    SetupMesh(vertices, indices);
+    // Create a mutable copy for tangent calculation
+    std::vector<Vertex> verticesCopy = vertices;
+
+    // Calculate tangents and bitangents
+    CalculateTangents(verticesCopy, indices);
+
+    CalculateBounds(verticesCopy);
+    SetupMesh(verticesCopy, indices);
 
     _indexCount = static_cast<GLuint>(indices.size());
-    _vertexCount = static_cast<GLuint>(vertices.size());
+    _vertexCount = static_cast<GLuint>(verticesCopy.size());
     m_isLoaded = true;
 
     spdlog::debug("[Mesh] Loaded indexed mesh '{}': {} vertices, {} indices",
@@ -216,25 +222,35 @@ void Mesh::SetupMesh(const std::vector<Vertex>& vertices,
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
         indices.data(), GL_STATIC_DRAW);
 
-    // Position attribute
+    // Position attribute (location 0)
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, position));
 
-    // Normal attribute
+    // Normal attribute (location 1)
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, normal));
 
-    // TexCoords attribute
+    // TexCoords attribute (location 2)
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, texCoord));
 
-    // Color attribute (if exists in Vertex struct)
+    // Color attribute (location 3)
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, color));
+
+    // Tangent attribute (location 4)
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, tangent));
+
+    // Bitangent attribute (location 5)
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, bitangent));
 
     glBindVertexArray(0);
 }
@@ -253,7 +269,7 @@ void Mesh::SetupMesh(const std::vector<Vertex>& vertices) {
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex),
         vertices.data(), GL_STATIC_DRAW);
 
-    // Attribute pointers
+    // Attribute pointers (same as indexed version)
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, position));
@@ -269,6 +285,14 @@ void Mesh::SetupMesh(const std::vector<Vertex>& vertices) {
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         (void*)offsetof(Vertex, color));
+
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, tangent));
+
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        (void*)offsetof(Vertex, bitangent));
 
     glBindVertexArray(0);
 }

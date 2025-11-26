@@ -51,6 +51,9 @@ void Renderer::Init(BackendType backendType) {
             throw std::runtime_error("Failed to get graphics backend instance");
         }
 
+        m_lightingSystem = std::make_unique<LightingSystem>();
+        m_lightingSystem->SetupDefaultLighting();
+
         m_textures = TextureFactory::CreateTextureManager();
         m_shaderManager = ShaderFactory::CreateShaderManager();
 
@@ -201,8 +204,6 @@ void Renderer::RenderFrame() {
     shadowMap->UpdateLightSpaceMatrix(lightPos, lightTarget);
     glm::mat4 lightSpaceMatrix = shadowMap->GetLightSpaceMatrix();
 
-    // PASS 1: RENDER SHADOW MAP (DEPTH PASS)
-
     shadowMap->BeginShadowPass();
     depthShader->Bind();
     depthShader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
@@ -262,8 +263,7 @@ void Renderer::RenderFrame() {
 
     shadowMap->EndShadowPass();
 
-    // PASS 2: NORMAL RENDER WITH SHADOWS
-
+    // === PASS 2: NORMAL RENDER WITH SHADOWS ===
     m_backend->SetViewport(0, 0, width, height);
     m_backend->BeginFrame();
     m_backend->Clear(glm::vec4(m_settings.backgroundColor, 1.0f));
@@ -274,10 +274,15 @@ void Renderer::RenderFrame() {
     pbrShader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
     pbrShader->SetVec3("viewPos", cameraPos);
     pbrShader->SetVec3("lightPos", lightPos);
-    pbrShader->SetBool("useTexture", false);
 
     shadowMap->BindForReading(1);
+
     pbrShader->SetInt("shadowMap", 1);
+    pbrShader->SetBool("useAlbedoMap", false);
+    pbrShader->SetBool("useNormalMap", false);
+    pbrShader->SetBool("useMetallicMap", false);
+    pbrShader->SetBool("useRoughnessMap", false);
+    pbrShader->SetBool("useAOMap", false);
 
     if (m_window) {
         Engine* engine = m_window->GetEngine();
@@ -302,9 +307,11 @@ void Renderer::RenderFrame() {
                         obj["color"].get<glm::vec3>() : glm::vec3(1.0f);
 
                     pbrShader->SetVec3("color", color);
-
-                    pbrShader->SetFloat("metallic", 0.0f);
-                    pbrShader->SetFloat("roughness", 0.5f);
+                    pbrShader->SetVec3("albedo", glm::vec3(1.0f));
+                    pbrShader->SetFloat("metallic", obj["metallic"].valid() ?
+                        obj["metallic"].get<float>() : 0.0f);
+                    pbrShader->SetFloat("roughness", obj["roughness"].valid() ?
+                        obj["roughness"].get<float>() : 0.5f);
                     pbrShader->SetFloat("ao", 1.0f);
 
                     glm::vec3 rotation = obj["rotation"].valid() ?
@@ -359,9 +366,12 @@ void Renderer::RenderFrame() {
             ImGui::Text("Camera Rotation: (%.1f, %.1f, %.1f)",
                 cameraRot.x, cameraRot.y, cameraRot.z);
             ImGui::Separator();
+            ImGui::Text("Light Position: (%.1f, %.1f, %.1f)",
+                lightPos.x, lightPos.y, lightPos.z);
+            ImGui::Separator();
             ImGui::Text("Controls:");
-            ImGui::Text("WASD - Move (auto for now)");
-            ImGui::Text("Mouse - Look (auto rotate)");
+            ImGui::Text("WASD - Move");
+            ImGui::Text("Mouse - Look");
             ImGui::Text("Space - Jump");
             ImGui::End();
         }
@@ -370,6 +380,119 @@ void Renderer::RenderFrame() {
     }
 
     m_backend->EndFrame();
+}
+
+void Renderer::RenderSceneObjects(Shader* shader, const glm::mat4& view,
+    const glm::mat4& projection) {
+    if (!m_window) return;
+
+    Engine* engine = m_window->GetEngine();
+    if (!engine) return;
+
+    ScriptSystem* scripts = engine->GetScriptSystem();
+    if (!scripts) return;
+
+    for (int id = 0; id < 10; id++) {
+        auto* script = scripts->GetScript(id);
+        if (!script || !script->IsLoaded()) continue;
+
+        sol::table obj = script->GetScriptTable();
+
+        if (obj["isCamera"].valid() && obj["isCamera"].get<bool>()) {
+            continue;
+        }
+
+        if (!obj["position"].valid()) continue;
+
+        glm::vec3 pos = obj["position"].get<glm::vec3>();
+        glm::vec3 color = obj["color"].valid() ?
+            obj["color"].get<glm::vec3>() : glm::vec3(1.0f);
+        glm::vec3 rotation = obj["rotation"].valid() ?
+            obj["rotation"].get<glm::vec3>() : glm::vec3(0.0f);
+
+        // Set material properties if using PBR shader
+		//if (shader->GetID() == 1) { 
+  //          shader->SetMat4("view", view);
+  //          shader->SetMat4("projection", projection);
+		//}
+        if (shader->GetID() == 1) {
+            shader->SetVec3("albedo", color);
+            shader->SetFloat("metallic", obj["metallic"].valid() ?
+                obj["metallic"].get<float>() : 0.0f);
+            shader->SetFloat("roughness", obj["roughness"].valid() ?
+                obj["roughness"].get<float>() : 0.5f);
+            shader->SetFloat("ao", 1.0f);
+        }
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, pos);
+        model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0, 1, 0));
+        model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1, 0, 0));
+        model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0, 0, 1));
+
+        if (obj["size"].valid()) {
+            glm::vec3 size = obj["size"].get<glm::vec3>();
+            model = glm::scale(model, size);
+            shader->SetMat4("model", model);
+            m_meshCache.Get("cube")->Draw();
+        }
+        else if (obj["radius"].valid()) {
+            float radius = obj["radius"].get<float>();
+            model = glm::scale(model, glm::vec3(radius));
+            shader->SetMat4("model", model);
+
+            auto* sphere = m_meshCache.GetOrCreate("sphere", []() {
+                StaticMeshes::SphereParams params;
+                params.latitudeSegments = 32;
+                params.longitudeSegments = 32;
+                return StaticMeshes::GetSphere(params);
+                });
+            sphere->Draw();
+        }
+    }
+}
+
+void Renderer::RenderDebugUI(const glm::vec3& cameraPos, const glm::vec3& cameraRot) {
+    ImGui::Begin("Debug Info", &m_settings.showDebugInfo);
+
+    if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+        ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
+    }
+
+    if (ImGui::CollapsingHeader("Camera")) {
+        ImGui::Text("Position: (%.1f, %.1f, %.1f)",
+            cameraPos.x, cameraPos.y, cameraPos.z);
+        ImGui::Text("Rotation: (%.1f, %.1f, %.1f)",
+            cameraRot.x, cameraRot.y, cameraRot.z);
+        ImGui::SliderFloat("FOV", &m_settings.fov, 30.0f, 120.0f);
+    }
+
+    if (ImGui::CollapsingHeader("Lighting")) {
+        int lightCount = m_lightingSystem->GetActiveLightCount();
+        ImGui::Text("Active Lights: %d", lightCount);
+
+        for (int i = 0; i < lightCount; ++i) {
+            Light* light = m_lightingSystem->GetLight(i);
+            if (!light) continue;
+
+            std::string label = "Light " + std::to_string(i);
+            if (ImGui::TreeNode(label.c_str())) {
+                ImGui::Checkbox("Enabled", &light->enabled);
+                ImGui::ColorEdit3("Color", &light->color.x);
+                ImGui::SliderFloat("Intensity", &light->intensity, 0.0f, 5.0f);
+                ImGui::DragFloat3("Position", &light->position.x, 0.1f);
+                ImGui::TreePop();
+            }
+        }
+    }
+
+    if (ImGui::CollapsingHeader("Render Settings")) {
+        ImGui::Checkbox("Wireframe", &m_settings.wireframeMode);
+        ImGui::ColorEdit3("Background", &m_settings.backgroundColor.x);
+    }
+
+    ImGui::End();
 }
 
 void Renderer::Cleanup() {
