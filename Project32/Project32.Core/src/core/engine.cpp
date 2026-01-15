@@ -14,6 +14,7 @@
 #include "../renderer/renderer.h"
 #include "../core/input.h"
 #include "../core/window.h"
+#include "../modules/ModuleManager.h"
 
 ThreadPool::ThreadPool(size_t threads) {
     for (size_t i = 0; i < threads; ++i) {
@@ -83,6 +84,19 @@ Engine::~Engine() {
 
 void Engine::Init() {
     try {
+        ModuleManager mm;
+
+        if (mm.TryLoadModule("Renderer", "Project32.Renderer.dll")) {
+            spdlog::info("Module loaded!");
+
+            using AddFunc = int(*)(int, int);
+            if (auto func = mm.GetFunction<AddFunc>("Renderer", "Add")) {
+                int result = (*func)(5, 3);
+                spdlog::info("5 + 3 = {}", result);
+            }
+        }
+
+        // This will be in simailer location
 		_windowManager = std::make_unique<WindowManager>(this);
         size_t threadCount = std::max(2u, std::thread::hardware_concurrency() - 2);
         _threadPool = std::make_unique<ThreadPool>(threadCount);
@@ -98,6 +112,8 @@ void Engine::Init() {
                 _ID, _mainWindowID, _windowManager->Count());
         }
 
+        // This may be in a separate module bc this is not required to
+        //  use the engine
         _scriptSystem = std::make_unique<ScriptSystem>(this);
         _scriptSystem->Init();
 

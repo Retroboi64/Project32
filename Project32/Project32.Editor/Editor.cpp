@@ -49,10 +49,7 @@ extern "C" {
                 return;
             }
 
-            auto window = engine.CreateNewWindow(323, 323, "Main Window || Engine: 1");
-			// TODO: Fix mouse locking
-			//window->SetMouse(true);
-            
+            auto window = engine.CreateNewWindow(656, 443, "Main Window || Engine: 1");
             engine.SetVSync(true);
 
             P32::Engine::RunAllEngines(); 

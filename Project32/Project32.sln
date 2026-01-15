@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36414.22
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Project32.Core", "Project32.Core\Project32.Core.vcxproj", "{109BC2D9-AB4A-46E7-933A-5B93DA5F3405}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6F431430-FAE9-4B2F-AA56-B7C8E25F5EDD} = {6F431430-FAE9-4B2F-AA56-B7C8E25F5EDD}
+		{BEA79D66-666B-4F9F-9394-E84E3C246FE2} = {BEA79D66-666B-4F9F-9394-E84E3C246FE2}
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Project32.App", "Project32.App\Project32.App.vcxproj", "{72299B6C-AB7D-4590-AB48-E6B414A12528}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Project32.Client", "Project32.App\Project32.App.vcxproj", "{72299B6C-AB7D-4590-AB48-E6B414A12528}"
 	ProjectSection(ProjectDependencies) = postProject
 		{109BC2D9-AB4A-46E7-933A-5B93DA5F3405} = {109BC2D9-AB4A-46E7-933A-5B93DA5F3405}
 	EndProjectSection

@@ -100,6 +100,10 @@
     <ClCompile Include="src\core\ui_app.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="src\modules\ModuleManager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="src\renderer\render_data.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
@@ -195,6 +199,7 @@
     <ClInclude Include="src\BackEnd\types.h" />
     <ClInclude Include="src\core\context_guard.h" />
     <ClInclude Include="src\core\ui_app.h" />
+    <ClInclude Include="src\modules\ModuleManager.h" />
     <ClInclude Include="src\renderer\lighting.h" />
     <ClInclude Include="src\renderer\vertex.h" />
     <ClInclude Include="src\scene\camera.h" />
