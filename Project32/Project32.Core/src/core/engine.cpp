@@ -84,6 +84,7 @@ Engine::~Engine() {
 
 void Engine::Init() {
     try {
+		// This is for testing module loading
         ModuleManager mm;
 
         if (mm.TryLoadModule("Renderer", "Project32.Renderer.dll")) {

@@ -1,4 +1,4 @@
-#include "common.h" 
+#include "r_common.h" 
 
 extern "C" {
 	__declspec(dllexport) int Add(int x, int y) {

@@ -64,36 +64,6 @@
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level3</WarningLevel>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level3</WarningLevel>
     </ClCompile>
-    <ClCompile Include="src\BackEnd\backend.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="src\BackEnd\OpenGL\GL_backEnd.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../../common.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../common.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_shader.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../../../common.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../common.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_mesh.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../../../common.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../common.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_shadow.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../common.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../../common.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../../../common.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../common.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_textures.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../../../common.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../common.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_skybox.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../../../common.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../../common.h</PrecompiledHeaderFile>
-    </ClCompile>
     <ClCompile Include="src\core\context_guard.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -160,10 +130,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="src\BackEnd\types.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../common.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
-    </ClCompile>
     <ClCompile Include="src\scene\wall.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
@@ -187,16 +153,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\BackEnd\backend.h" />
-    <ClInclude Include="src\BackEnd\common.h" />
-    <ClInclude Include="src\BackEnd\OpenGL\GL_backEnd.h" />
-    <ClInclude Include="src\BackEnd\OpenGL\GL_common.h" />
-    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_shader.h" />
-    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_mesh.h" />
-    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_shadow.h" />
-    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_skybox.h" />
-    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_textures.h" />
-    <ClInclude Include="src\BackEnd\types.h" />
     <ClInclude Include="src\core\context_guard.h" />
     <ClInclude Include="src\core\ui_app.h" />
     <ClInclude Include="src\modules\ModuleManager.h" />
@@ -220,6 +176,11 @@
     <ClInclude Include="src\scene\wall.h" />
     <ClInclude Include="src\core\window.h" />
     <ClInclude Include="src\core\ui.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Project32.Renderer\Project32.Renderer.vcxproj">
+      <Project>{6f431430-fae9-4b2f-aa56-b7c8e25f5edd}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

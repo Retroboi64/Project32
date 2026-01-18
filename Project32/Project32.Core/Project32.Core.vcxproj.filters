@@ -75,28 +75,7 @@
     <ClCompile Include="src\common.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\BackEnd\OpenGL\GL_backEnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\BackEnd\backend.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_textures.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_skybox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\scene\model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\BackEnd\types.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\renderer\render_data.cpp">
@@ -109,9 +88,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\core\ui_app.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\BackEnd\OpenGL\Types\GL_shadow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\modules\ModuleManager.cpp">
@@ -161,34 +137,7 @@
     <ClInclude Include="src\types\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\BackEnd\OpenGL\GL_backEnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BackEnd\backend.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BackEnd\OpenGL\GL_common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_textures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BackEnd\common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_skybox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\scene\model.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BackEnd\types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\render_data.h">
@@ -207,9 +156,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\ui_app.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BackEnd\OpenGL\Types\GL_shadow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\lighting.h">
