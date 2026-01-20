@@ -1,14 +1,16 @@
-﻿#include "r_common.h"
-#include "OpenGL/GL_backEnd.h"
-#include "backend.h"
+﻿/*
+ * This file is part of Project32 - A compact yet powerful and flexible C++ Game Engine
+ * Copyright (c) 2025 Patrick Reese (Retroboi64)
+ *
+ * Licensed under MIT with Attribution Requirements
+ * See LICENSE file for full terms
+ * GitHub: https://github.com/Retroboi64/Project32
+ *
+ * This header must not be removed from any source file.
+ */
 
-/*
-  Renderer.dll          ← main interface / manager
-  RendererAPI/
-    RendererGL.dll        ← OpenGL backend
-    RendererVK.dll        ← Vulkan backend
-    RendererDX12.dll      ← optional future backend
-*/
+#include "r_common.h"
+#include "backend.h"
 
 std::unique_ptr<IGraphicsBackend> GraphicsBackend::s_instance = nullptr;
 BackendType GraphicsBackend::s_currentType = BackendType::UNDEFINED;
@@ -32,7 +34,7 @@ bool GraphicsBackend::Initialize(BackendType type) {
     try {
         switch (type) {
         case BackendType::OPENGL:
-            s_instance = std::make_unique<OpenGLBackend>();
+            // s_instance = std::make_unique<OpenGLBackend>();
             break;
 
         case BackendType::VULKAN:

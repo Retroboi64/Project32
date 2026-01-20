@@ -19,6 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Vendor\glad\src\glad.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Vendor\stb_image\stb_image.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\backend.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">r_common.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -29,27 +35,6 @@
     <ClCompile Include="src\main.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">r_common.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="src\OpenGL\GL_backEnd.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../r_common.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="src\OpenGL\GL_util.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../r_common.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="src\OpenGL\Types\GL_mesh.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../r_common.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="src\OpenGL\Types\GL_shader.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../r_common.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="src\OpenGL\Types\GL_shadow.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../r_common.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="src\OpenGL\Types\GL_skybox.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../r_common.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="src\OpenGL\Types\GL_textures.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../r_common.h</PrecompiledHeaderFile>
-    </ClCompile>
     <ClCompile Include="src\types.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">r_common.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -57,15 +42,6 @@
   <ItemGroup>
     <ClInclude Include="src\backend.h" />
     <ClInclude Include="src\r_common.h" />
-    <ClInclude Include="src\interface.h" />
-    <ClInclude Include="src\OpenGL\GL_backEnd.h" />
-    <ClInclude Include="src\OpenGL\GL_common.h" />
-    <ClInclude Include="src\OpenGL\GL_util.h" />
-    <ClInclude Include="src\OpenGL\Types\GL_mesh.h" />
-    <ClInclude Include="src\OpenGL\Types\GL_shader.h" />
-    <ClInclude Include="src\OpenGL\Types\GL_shadow.h" />
-    <ClInclude Include="src\OpenGL\Types\GL_skybox.h" />
-    <ClInclude Include="src\OpenGL\Types\GL_textures.h" />
     <ClInclude Include="src\types.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -184,7 +160,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\glad\include;$(SolutionDir)Vendor\GLFW\include;$(SolutionDir)Project32.Core\src;$(SolutionDir)Vendor\vulkan;$(SolutionDir)Vendor\spdlog\include;$(SolutionDir)Vendor\RBPak\include;$(SolutionDir)Vendor\imgui;$(SolutionDir)Vendor\Jolt\include;$(SolutionDir)Vendor\tiny_obj;$(SolutionDir)Vendor\stb_image;$(SolutionDir)Vendor\nlohmann;$(SolutionDir)Vendor;$(SolutionDir)Vendor\lua\include;$(SolutionDir)Vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\glad\include;$(SolutionDir)Project32.Core\src;$(SolutionDir)Vendor\vulkan;$(SolutionDir)Vendor\spdlog\include;$(SolutionDir)Vendor\RBPak\include;$(SolutionDir)Vendor\imgui;$(SolutionDir)Vendor\Jolt\include;$(SolutionDir)Vendor\tiny_obj;$(SolutionDir)Vendor\stb_image;$(SolutionDir)Vendor\nlohmann;$(SolutionDir)Vendor;$(SolutionDir)Vendor\lua\include;$(SolutionDir)Vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>

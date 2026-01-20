@@ -12,7 +12,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "../../r_common.h"
+#include "../GL_common.h"
 
 class Texture {
 private:

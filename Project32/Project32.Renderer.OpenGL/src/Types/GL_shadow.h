@@ -14,7 +14,7 @@
 #ifndef GL_SHADOW_H
 #define GL_SHADOW_H 
 
-#include "../../r_common.h"
+#include "../GL_common.h"
 
 class ShadowMap {
 private:

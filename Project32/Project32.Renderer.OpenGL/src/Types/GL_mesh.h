@@ -12,7 +12,7 @@
 #ifndef GL_MESH_H
 #define GL_MESH_H
 
-#include "../../r_common.h"
+#include "../GL_common.h"
 #include "GL_textures.h"
 
 struct Vertex;

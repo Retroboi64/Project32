@@ -12,8 +12,8 @@
 #ifndef GL_BACKEND_H
 #define GL_BACKEND_H
 
-#include "../r_common.h"
-#include "../backend.h"
+#include "GL_common.h"
+#include "backend.h"
 
 #include "Types/GL_shader.h"
 #include "Types/GL_shadow.h"

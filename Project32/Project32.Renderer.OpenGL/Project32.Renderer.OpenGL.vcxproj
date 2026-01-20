@@ -18,6 +18,39 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\GL_backEnd.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">GL_common.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="src\GL_util.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">GL_common.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="src\Types\GL_mesh.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../GL_common.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="src\Types\GL_shader.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../GL_common.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="src\Types\GL_shadow.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../GL_common.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="src\Types\GL_skybox.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../GL_common.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="src\Types\GL_textures.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../GL_common.h</PrecompiledHeaderFile>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\GL_backEnd.h" />
+    <ClInclude Include="src\GL_common.h" />
+    <ClInclude Include="src\GL_util.h" />
+    <ClInclude Include="src\Types\GL_mesh.h" />
+    <ClInclude Include="src\Types\GL_shader.h" />
+    <ClInclude Include="src\Types\GL_shadow.h" />
+    <ClInclude Include="src\Types\GL_skybox.h" />
+    <ClInclude Include="src\Types\GL_textures.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -70,6 +103,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Build\$(Platform)\$(Configuration)\RendererAPI</OutDir>
+    <IntDir>$(SolutionDir)Build-Int\$(Platform)\$(Configuration)\RendererAPI</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -127,6 +164,8 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\glm;$(SolutionDir)Vendor\glad\include;$(SolutionDir)Project32.Renderer\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

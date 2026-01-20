@@ -14,12 +14,12 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "../common.h"
 #include "../renderer/renderer.h"
 #include "ui.h"
 #include "input.h"
 
 struct ImGuiContext;
+struct GLFWwindow;
 class Renderer;
 class UIX;
 class Input;
@@ -135,20 +135,6 @@ public:
 
     ImGuiContext* GetImGuiContext() const { return _imguiContext; }
     bool IsImGuiInitialized() const { return _imguiInitialized; }
-
-    static constexpr int KEY_ESCAPE = GLFW_KEY_ESCAPE;
-    static constexpr int KEY_W = GLFW_KEY_W;
-    static constexpr int KEY_A = GLFW_KEY_A;
-    static constexpr int KEY_S = GLFW_KEY_S;
-    static constexpr int KEY_D = GLFW_KEY_D;
-    static constexpr int KEY_SPACE = GLFW_KEY_SPACE;
-    static constexpr int KEY_LEFT_SHIFT = GLFW_KEY_LEFT_SHIFT;
-    static constexpr int KEY_LEFT_CONTROL = GLFW_KEY_LEFT_CONTROL;
-    static constexpr int KEY_F11 = GLFW_KEY_F11;
-
-    static constexpr int MOUSE_BUTTON_LEFT = GLFW_MOUSE_BUTTON_LEFT;
-    static constexpr int MOUSE_BUTTON_RIGHT = GLFW_MOUSE_BUTTON_RIGHT;
-    static constexpr int MOUSE_BUTTON_MIDDLE = GLFW_MOUSE_BUTTON_MIDDLE;
 };
 
 class WindowManager {

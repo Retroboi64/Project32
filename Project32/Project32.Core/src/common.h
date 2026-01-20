@@ -11,7 +11,8 @@
 
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN             
+#define WIN32_LEAN_AND_MEAN    
+#define NOMINMAX
 #include <windows.h>
 
 #include "types/constants.h"
@@ -22,7 +23,9 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
+
+#include "common/glfw_fwd.h"
+#include "common/time.h"
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>

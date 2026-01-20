@@ -10,7 +10,7 @@
  */
 
 #pragma once
-#include "../../r_common.h"
+#include "../GL_common.h"
 
 class Shader {
 private:

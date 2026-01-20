@@ -3,6 +3,6 @@
 #ifndef GL_UTIL_H
 #define GL_UTIL_H
 
-#include "../r_common.h"
+#include "GL_common.h"
 
 #endif // GL_UTIL_H

@@ -16,6 +16,7 @@
 
 #include "../common.h"
 #include "../renderer/vertex.h"
+#include "../../../Project32.Renderer/src/types.h"
 
 namespace tinyobj {
     struct attrib_t;

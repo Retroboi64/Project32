@@ -67,13 +67,13 @@ private:
 
 public:
     FrameTimer() {
-        float currentTime = static_cast<float>(glfwGetTime());
+        float currentTime = static_cast<float>(EngineTime());
         _startTime = currentTime;
         _lastFrame = currentTime;
     }
 
     void Update() {
-        float currentFrame = static_cast<float>(glfwGetTime());
+        float currentFrame = static_cast<float>(EngineTime());
         _deltaTime = currentFrame - _lastFrame;
         _lastFrame = currentFrame;
 
@@ -97,10 +97,10 @@ public:
     float GetFPS() const { return _fps; }
     float GetMinDeltaTime() const { return _minDeltaTime; }
     float GetMaxDeltaTime() const { return _maxDeltaTime; }
-    float GetElapsedTime() const { return static_cast<float>(glfwGetTime()) - _startTime; }
+    float GetElapsedTime() const { return static_cast<float>(EngineTime()) - _startTime; }
 
     void Reset() {
-        float currentTime = static_cast<float>(glfwGetTime());
+        float currentTime = static_cast<float>(EngineTime());
         _startTime = currentTime;
         _lastFrame = currentTime;
         _deltaTime = 0.0f;

@@ -12,7 +12,7 @@
 #ifndef GL_SKYBOX_H
 #define GL_SKYBOX_H
 
-#include "../../r_common.h"
+#include "../GL_common.h"
 
 class Skybox {
 private:

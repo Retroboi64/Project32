@@ -9,7 +9,7 @@
  * This header must not be removed from any source file.
  */
 
-#include "../r_common.h"
+#include "GL_common.h"
 #include "GL_backEnd.h"
 
 OpenGLBackend::~OpenGLBackend() {

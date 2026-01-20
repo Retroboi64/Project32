@@ -64,6 +64,9 @@
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level3</WarningLevel>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level3</WarningLevel>
     </ClCompile>
+    <ClCompile Include="src\common\time.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\core\context_guard.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -153,9 +156,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\common\glfw_fwd.h" />
+    <ClInclude Include="src\common\time.h" />
     <ClInclude Include="src\core\context_guard.h" />
     <ClInclude Include="src\core\ui_app.h" />
     <ClInclude Include="src\modules\ModuleManager.h" />
+    <ClInclude Include="src\platform\glfw_config.h" />
     <ClInclude Include="src\renderer\lighting.h" />
     <ClInclude Include="src\renderer\vertex.h" />
     <ClInclude Include="src\scene\camera.h" />
