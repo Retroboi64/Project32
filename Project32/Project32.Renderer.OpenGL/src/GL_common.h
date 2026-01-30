@@ -3,6 +3,9 @@
 #ifndef GL_COMMON_H
 #define GL_COMMON_H
 
+#define GLM_FORCE_SILENT_WARNINGS
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <iostream>
 #include <unordered_map>
 

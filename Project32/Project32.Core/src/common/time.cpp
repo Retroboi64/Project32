@@ -1,9 +1,18 @@
-#pragma once
-
 #include "time.h"
-#include "../platform/glfw_config.h"
+#include "window.h"
 
-double EngineTime()
-{
-    return glfwGetTime();
+double EngineTime() {
+    return GetTime();
+}
+
+void SetEngineTime(double time) {
+    SetTime(time);
+}
+
+unsigned long long GetTimerValue() {
+    return ::GetTimerValue();
+}
+
+unsigned long long GetTimerFrequency() {
+    return ::GetTimerFrequency();
 }

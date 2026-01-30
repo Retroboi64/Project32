@@ -14,7 +14,7 @@
 #include "window.h"
 
 ContextGuard::ContextGuard(Window* window)
-    : _prevContext(glfwGetCurrentContext()), _window(window)
+    : _prevContext(GetGLFWwindowFromContext()), _window(window)
 {
     if (_window) {
         _window->MakeContextCurrent();
@@ -26,6 +26,6 @@ ContextGuard::ContextGuard(Window* window)
 
 ContextGuard::~ContextGuard() {
     if (_prevContext && _prevContext != (_window ? _window->GetGLFWwindow() : nullptr)) {
-        glfwMakeContextCurrent(_prevContext);
+        CreateContextCurrent(_prevContext);
     }
 }

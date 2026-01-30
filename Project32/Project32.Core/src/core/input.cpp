@@ -75,7 +75,7 @@ void Input::KeyCallback(GLFWwindow* window, int key, int scancode, int action, i
             }
             else if (key == GLFW_KEY_F1) {
                 input->_mouseLocked = !input->_mouseLocked;
-                glfwSetInputMode(window, GLFW_CURSOR,
+                SetInputMode(window, GLFW_CURSOR,
                     input->_mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
             }
         }
@@ -96,9 +96,9 @@ void Input::Init() {
         }
 
         g_windowInputMap[_glfwWindow] = this;
-        glfwSetCursorPosCallback(_glfwWindow, MouseCallback);
-        glfwSetKeyCallback(_glfwWindow, KeyCallback);
-        glfwSetInputMode(_glfwWindow, GLFW_CURSOR,
+        SetCursorPosCallback(_glfwWindow, MouseCallback);
+        SetKeyCallback(_glfwWindow, KeyCallback);
+        SetInputMode(_glfwWindow, GLFW_CURSOR,
             _mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 
 		spdlog::info("[Input::Init] Input system initialized for engine {}", _engine->GetID());
@@ -110,9 +110,9 @@ void Input::Init() {
         }
 
         g_windowInputMap[_glfwWindow] = this;
-        glfwSetCursorPosCallback(_glfwWindow, MouseCallback);
-        glfwSetKeyCallback(_glfwWindow, KeyCallback);
-        glfwSetInputMode(_glfwWindow, GLFW_CURSOR,
+        SetCursorPosCallback(_glfwWindow, MouseCallback);
+        SetKeyCallback(_glfwWindow, KeyCallback);
+        SetInputMode(_glfwWindow, GLFW_CURSOR,
             _mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 
         spdlog::info("[Input::Init] Input system initialized for window {}", _window->GetID());
@@ -126,7 +126,7 @@ void Input::Update() {
     if (!_glfwWindow) return;
 
     for (int i = 0; i < MAX_KEYS; i++) {
-        bool currentState = (glfwGetKey(_glfwWindow, i) == GLFW_PRESS);
+        bool currentState = (GetKey(_glfwWindow, i) == GLFW_PRESS);
         keyPressed[i] = (currentState && !keyDownLastFrame[i]);
         keyDown[i] = currentState;
         keyDownLastFrame[i] = currentState;
@@ -148,7 +148,7 @@ bool Input::IsMouseLocked() const {
 void Input::SetMouseLocked(bool locked) {
     _mouseLocked = locked;
     if (_glfwWindow) {
-        glfwSetInputMode(_glfwWindow, GLFW_CURSOR,
+        SetInputMode(_glfwWindow, GLFW_CURSOR,
             _mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
     }
 }
@@ -178,8 +178,8 @@ Input::~Input() {
     if (_glfwWindow) {
         g_windowInputMap.erase(_glfwWindow);
 
-        glfwSetCursorPosCallback(_glfwWindow, nullptr);
-        glfwSetKeyCallback(_glfwWindow, nullptr);
+        SetCursorPosCallback(_glfwWindow, nullptr);
+        SetKeyCallback(_glfwWindow, nullptr);
     }
 
     std::string contextInfo;

@@ -67,6 +67,9 @@
     <ClCompile Include="src\common\time.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\common\window.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\core\context_guard.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../common.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -156,8 +159,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\common\glfw_consts.h" />
     <ClInclude Include="src\common\glfw_fwd.h" />
     <ClInclude Include="src\common\time.h" />
+    <ClInclude Include="src\common\window.h" />
     <ClInclude Include="src\core\context_guard.h" />
     <ClInclude Include="src\core\ui_app.h" />
     <ClInclude Include="src\modules\ModuleManager.h" />

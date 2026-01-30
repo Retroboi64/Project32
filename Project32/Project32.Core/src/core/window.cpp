@@ -17,7 +17,7 @@
 int Window::_nextID = 0;
 
 static void StaticFramebufferSizeCallback(GLFWwindow* glfwWindow, int width, int height) {
-    Window* window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+    Window* window = static_cast<Window*>(GetWindowUserPointer(glfwWindow));
     if (window) {
         window->OnFramebufferResize(width, height);
     }
@@ -34,7 +34,7 @@ Window::Window(int width, int height, const std::string& title, GLFWwindow* shar
 
     static bool glfwInitialized = false;
     if (!glfwInitialized) {
-        if (!glfwInit()) {
+        if (!InitGLFW()) {
             spdlog::error("[Window {}] Failed to initialize GLFW", _ID);
             throw std::runtime_error("Failed to initialize GLFW");
         }
@@ -43,23 +43,24 @@ Window::Window(int width, int height, const std::string& title, GLFWwindow* shar
     }
 
     if (GraphicsBackend::GetCurrentType() == BackendType::OPENGL) {
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-        glfwWindowHint(GLFW_SAMPLES, 4);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        WindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        WindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+        WindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        WindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+        WindowHint(GLFW_SAMPLES, 4);
+        WindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     }
     else if (GraphicsBackend::GetCurrentType() == BackendType::UNDEFINED) {
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-        glfwWindowHint(GLFW_SAMPLES, 4);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        WindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        WindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+        WindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        WindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+        WindowHint(GLFW_SAMPLES, 4);
+        WindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     }
 
-    _window = glfwCreateWindow(width, height, title.c_str(), nullptr, shareContext);
+	// this going to need some work
+    _window = fwCreateWindow(width, height, title.c_str(), nullptr, shareContext);
     if (!_window) {
         spdlog::error("[Window {}] Failed to create GLFW window", _ID);
         throw std::runtime_error("Failed to create GLFW window");
@@ -67,11 +68,11 @@ Window::Window(int width, int height, const std::string& title, GLFWwindow* shar
 
     spdlog::info("[Window {}] GLFW window created at: {}", _ID, static_cast<void*>(_window));
 
-    glfwSetWindowUserPointer(_window, this);
-    glfwSetFramebufferSizeCallback(_window, StaticFramebufferSizeCallback);
+    SetWindowUserPointer(_window, this);
+    SetFramebufferSizeCallback(_window, StaticFramebufferSizeCallback);
 
     MakeContextCurrent();
-    glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    SetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     static bool gladInitialized = false;
     if (!gladInitialized) {
@@ -137,7 +138,7 @@ Window::~Window() {
     }
 
     if (_window) {
-        glfwDestroyWindow(_window);
+        DestroyWindow(_window);
         _window = nullptr;
     }
 
@@ -149,8 +150,9 @@ void Window::Init() {
 }
 
 void Window::InitGLAD() {
-    glfwMakeContextCurrent(_window);
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+	_window = GetCurrentContext();
+    CreateContextCurrent(_window);
+    if (!gladLoadGLLoader((GLADloadproc)GetGLFWProcAddress)) {
         throw std::runtime_error("Failed to initialize GLAD for Window " + std::to_string(_ID));
     }
     spdlog::info("[Window {}] GLAD initialized successfully", _ID);
@@ -180,7 +182,7 @@ void Window::Shutdown() {
     }
 
     if (_window) {
-        glfwDestroyWindow(_window);
+        DestroyWindow(_window);
         _window = nullptr;
     }
 
@@ -199,7 +201,7 @@ void Window::Render() {
 
 void Window::PollEvents() {
     if (_window) {
-        _isOpen = !glfwWindowShouldClose(_window);
+        _isOpen = !WindowShouldClose(_window);
     }
 
     if (_input) {
@@ -209,23 +211,23 @@ void Window::PollEvents() {
 
 void Window::SetMSAASamples(UINT count) {
     if (GraphicsBackend::GetCurrentType() == BackendType::OPENGL) {
-        glfwWindowHint(GLFW_SAMPLES, count);
+        WindowHint(GLFW_SAMPLES, count);
     }
 }
 
 void Window::SwapBuffers() {
     if (_window) {
-        glfwSwapBuffers(_window);
+        gSwapBuffers(_window);
     }
 }
 
 bool Window::IsOpen() const {
-    return _window && _isOpen && !glfwWindowShouldClose(_window);
+    return _window && _isOpen && !WindowShouldClose(_window);
 }
 
 void Window::SetShouldClose(bool value) {
     if (_window) {
-        glfwSetWindowShouldClose(_window, value);
+        SetWindowShouldClose(_window, value);
         if (value) {
             _isOpen = false;
         }
@@ -234,7 +236,7 @@ void Window::SetShouldClose(bool value) {
 
 void Window::GetSize(int& width, int& height) const {
     if (_window) {
-        glfwGetWindowSize(_window, &width, &height);
+        GetWindowSize(_window, &width, &height);
     }
     else {
         width = _width;
@@ -250,7 +252,7 @@ glm::ivec2 Window::GetSize() const {
 
 int Window::SetSize(int width, int height) {
     if (_window) {
-        glfwSetWindowSize(_window, width, height);
+        SetWindowSize(_window, width, height);
     }
     _width = width;
     _height = height;
@@ -259,7 +261,7 @@ int Window::SetSize(int width, int height) {
 
 void Window::GetPosition(int& x, int& y) const {
     if (_window) {
-        glfwGetWindowPos(_window, &x, &y);
+        GetWindowPos(_window, &x, &y);
     }
     else {
         x = y = 0;
@@ -274,7 +276,7 @@ glm::ivec2 Window::GetPosition() const {
 
 void Window::SetPosition(int x, int y) {
     if (_window) {
-        glfwSetWindowPos(_window, x, y);
+        SetWindowPos(_window, x, y);
     }
 }
 
@@ -282,7 +284,7 @@ void Window::SetVSync(bool enabled) {
     _vsync = enabled;
     if (_window) {
         ContextGuard guard(this);
-        glfwSwapInterval(enabled ? 1 : 0);
+        SwapInterval(enabled ? 1 : 0);
     }
 }
 
@@ -290,24 +292,24 @@ void Window::ToggleFullscreen() {
     if (!_window) return;
 
     if (_isFullscreen) {
-        glfwSetWindowMonitor(_window, nullptr, _windowedPos.x, _windowedPos.y,
+        SetWindowMonitor(_window, nullptr, _windowedPos.x, _windowedPos.y,
             _windowedSize.x, _windowedSize.y, 0);
     }
     else {
-        glfwGetWindowPos(_window, &_windowedPos.x, &_windowedPos.y);
-        glfwGetWindowSize(_window, &_windowedSize.x, &_windowedSize.y);
+        GetWindowPos(_window, &_windowedPos.x, &_windowedPos.y);
+        GetWindowSize(_window, &_windowedSize.x, &_windowedSize.y);
 
-        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-        glfwSetWindowMonitor(_window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+        GLFWmonitor* monitor = GetPrimaryMonitor();
+        auto [mode, dm] = GetVideoModeWithDisplayMode(monitor);
+        
+        SetWindowMonitor(_window, monitor, 0, 0, dm->width, dm->height, dm->refreshRate);
     }
-    _isFullscreen = !_isFullscreen;
 }
 
 void Window::SetTitle(const std::string& title) {
     _title = title;
     if (_window) {
-        glfwSetWindowTitle(_window, title.c_str());
+        SetWindowTitle(_window, title.c_str());
     }
 }
 
@@ -318,10 +320,10 @@ void Window::SetIcon(const std::string& iconPath) {
 void Window::MakeContextCurrent() {
     if (!_window) return;
 
-    GLFWwindow* currentContext = glfwGetCurrentContext();
+    GLFWwindow* currentContext = GetCurrentContext();
 
     if (currentContext != _window) {
-        glfwMakeContextCurrent(_window);
+        CreateContextCurrent(_window);
     }
 
     if (_ui && _ui->IsInitialized()) {
@@ -346,40 +348,40 @@ void Window::SetCursorMode(CursorMode mode) {
     default:
         glfwMode = GLFW_CURSOR_NORMAL;
     }
-    glfwSetInputMode(_window, GLFW_CURSOR, glfwMode);
+    SetInputMode(_window, GLFW_CURSOR, glfwMode);
     _cursorMode = mode;
 }
 
 bool Window::IsKeyPressed(int key) const {
-    return _window && glfwGetKey(_window, key) == GLFW_PRESS;
+    return _window && GetKey(_window, key) == GLFW_PRESS;
 }
 
 bool Window::IsMouseButtonPressed(int button) const {
-    return _window && glfwGetMouseButton(_window, button) == GLFW_PRESS;
+    return _window && GetMouseButton(_window, button) == GLFW_PRESS;
 }
 
 glm::vec2 Window::GetMousePosition() const {
     if (!_window) return glm::vec2(0.0f);
 
     double xpos, ypos;
-    glfwGetCursorPos(_window, &xpos, &ypos);
+    GetCursorPos(_window, &xpos, &ypos);
     return glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos));
 }
 
 void Window::SetMousePosition(float x, float y) {
     if (_window) {
-        glfwSetCursorPos(_window, x, y);
+        SetCursorPos(_window, x, y);
     }
 }
 
 void Window::MouseLocked(bool locked) {
     if (!_window) return;
     if (locked) {
-        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        SetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         _cursorMode = CursorMode::Disabled;
     }
     else {
-        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        SetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         _cursorMode = CursorMode::Normal;
     }
 }

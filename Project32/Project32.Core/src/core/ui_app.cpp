@@ -87,7 +87,7 @@ void EAUI::RunFrame() {
     _timer.Update();
     _deltaTime = _timer.GetDeltaTime();
 
-    glfwPollEvents();
+    PollEvents();
     _window->PollEvents();
 
     if (!_window->IsOpen()) {

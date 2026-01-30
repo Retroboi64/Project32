@@ -334,7 +334,7 @@ void Engine::Run() {
     StartUpdateThread();
 
     while (isRunning.load()) {
-        glfwPollEvents();
+        PollEvents();
         RenderFrame();
     }
 
@@ -440,7 +440,7 @@ void EngineManager::RunAllEngines() {
         timer.Update();
         float dt = timer.GetDeltaTime();
 
-        glfwPollEvents();
+        PollEvents();
 
         bool anyRunning = false;
 
@@ -467,7 +467,7 @@ void EngineManager::RunAllEngines() {
         }
     }
 
-    glfwTerminate();
+    Terminate();
 }
 
 bool EngineManager::DestroyEngine(int engineID) {

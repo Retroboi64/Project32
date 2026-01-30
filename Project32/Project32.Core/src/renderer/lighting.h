@@ -4,6 +4,9 @@
 #define LIGHTING_H
 
 #include "../common.h"
+#include "../../Project32.Renderer/src/backend.h"
+
+class IGraphicsBackend;
 
 enum class LightType {
     DIRECTIONAL,

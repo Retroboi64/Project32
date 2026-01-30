@@ -22,7 +22,7 @@ UIX::UIX(GLFWwindow* window)
     try {
         spdlog::info("[UIX] Initializing ImGui...");
 
-        glfwMakeContextCurrent(window);
+        CreateContextCurrent(window);
 
         IMGUI_CHECKVERSION();
         _imguiContext = ImGui::CreateContext();
@@ -42,9 +42,9 @@ UIX::UIX(GLFWwindow* window)
         ImGui::StyleColorsDark();
 
         float xscale = 1.0f, yscale = 1.0f;
-        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        GLFWmonitor* monitor = GetPrimaryMonitor();
         if (monitor) {
-            glfwGetMonitorContentScale(monitor, &xscale, &yscale);
+            GetMonitorContentScale(monitor, &xscale, &yscale);
         }
         float main_scale = (xscale + yscale) * 0.5f;
 
@@ -98,7 +98,7 @@ void UIX::Cleanup(GLFWwindow* window) {
         ImGui::SetCurrentContext(_imguiContext);
 
         if (window) {
-            glfwMakeContextCurrent(window);
+            CreateContextCurrent(window);
         }
 
         ImGui_ImplOpenGL3_Shutdown();

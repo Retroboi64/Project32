@@ -11,6 +11,7 @@
 #include "../core/window.h"
 #include "render_data.h"
 #include "lighting.h"
+#include "../../../Project32.Renderer.OpenGL/src/Types/GL_mesh.h"
 
 class Window;
 class Skybox;

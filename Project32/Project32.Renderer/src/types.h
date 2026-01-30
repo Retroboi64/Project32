@@ -21,6 +21,7 @@ class ShaderManager;
 class Texture;
 class TextureManager;
 class Skybox;
+class MeshCache;
 
 namespace GraphicsTypes {
     void Initialize();

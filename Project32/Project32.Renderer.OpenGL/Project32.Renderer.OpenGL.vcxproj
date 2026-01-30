@@ -25,6 +25,10 @@
     <ClCompile Include="src\GL_util.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">GL_common.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="src\GL_common.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">GL_common.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="src\Types\GL_mesh.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../GL_common.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -165,7 +169,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Vendor\glm;$(SolutionDir)Vendor\glad\include;$(SolutionDir)Project32.Renderer\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Project32.Core\src;$(SolutionDir)Vendor\glm;$(SolutionDir)Vendor\glad\include;$(SolutionDir)Project32.Renderer\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

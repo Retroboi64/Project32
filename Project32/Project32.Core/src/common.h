@@ -26,6 +26,7 @@
 
 #include "common/glfw_fwd.h"
 #include "common/time.h"
+#include "common/window.h"
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>

@@ -70,17 +70,19 @@ public:
 
 class GraphicsBackend {
 public:
+
+    GraphicsBackend() = default;
+    ~GraphicsBackend() = default;
+
+    GraphicsBackend(const GraphicsBackend&) = delete;
+    GraphicsBackend& operator=(const GraphicsBackend&) = delete;
+
     static BackendType GetCurrentType();
     static IGraphicsBackend* Get();
     static bool Initialize(BackendType type);
     static void Destroy();
 
 private:
-    GraphicsBackend() = default;
-    ~GraphicsBackend() = default;
-
-    GraphicsBackend(const GraphicsBackend&) = delete;
-    GraphicsBackend& operator=(const GraphicsBackend&) = delete;
 
     static std::unique_ptr<IGraphicsBackend> s_instance;
     static BackendType s_currentType;
