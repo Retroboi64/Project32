@@ -42,6 +42,12 @@
 ## ⚠️ UNDER CONSTRUCTION
 > **This project is currently under active development.** Many features are incomplete or subject to change. Use at your own risk for production applications.
 
+## 🦀 RUST REWRITE IN PROGRESS
+> **This project is being rewritten from the ground up in Rust.**
+> The original C++ codebase will remain here for reference, but all active development has moved to the Rust rewrite.
+> The new version preserves the same design intent and identity as the original — rebuilt layer by layer as independent libraries.
+> **Expect breaking changes, incomplete features, and significant structural differences from the C++ version.**
+
 ## 🚀 Features
 - **Multi-Engine Architecture**: Run multiple independent engine instances simultaneously
 - **Multi-Window Support**: Each engine can manage multiple windows with independent rendering contexts
@@ -159,4 +165,4 @@ If you find Project32 useful, please consider:
 - [📚 Wiki](https://github.com/Retroboi64/Project32/wiki)
 - [💬 Discussions](https://github.com/Retroboi64/Project32/discussions)
 ---
-*Made with ❤️ by [Retroboi64](https://github.com/Retroboi64)*
+*Made with 🖤 by [Retroboi64](https://github.com/Retroboi64)*
